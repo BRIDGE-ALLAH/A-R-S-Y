@@ -2,8 +2,8 @@
 ## First Working Deployment: Onboarding → SSH Server → Docker Compose → Operations
 
 **Status:** Ready for implementation  
-**Target repository:** \`BRIDGE-ALLAH/A-R-S-Y\`  
-**Plan file:** \`.plan/task-mvp-1.md\`  
+**Target repository:** `BRIDGE-ALLAH/A-R-S-Y`  
+**Plan file:** `.plan/task-mvp-1.md`  
 **Product direction:** Self-hosted application deployment and infrastructure control plane (Coolify alternative)  
 **Primary runtime:** Go; keep the control plane distributable as a standalone executable.
 
@@ -19,23 +19,23 @@ MVP-1 is complete when an administrator can:
 4. Verify the SSH host key and test the connection safely.
 5. Confirm that Docker Engine and the Docker Compose plugin are available on that server.
 6. Create a project and an application.
-7. submit a Docker Compose manifest that uses existing container images.
+7. Submit a Docker Compose manifest that uses existing container images.
 8. Deploy the application to the selected server.
 9. View deployment progress, deployment output, container status, and runtime logs.
 10. Stop, redeploy, and roll back to a previous Compose configuration.
 11. Restart A-R-S-Y without losing deployment records or interrupting already-running application containers.
 
-The first supported public access method is the application's explicitly published host port, for example \`http://SERVER_IP:8080\`. Domain routing, automatic HTTPS, Git-based builds, and automatic Docker installation are intentionally scheduled for later milestones. This keeps MVP-1 small enough to implement and test without pretending that the first release already replaces every Coolify feature.
+The first supported public access method is the application's explicitly published host port, for example `http://SERVER_IP:8080`. Domain routing, automatic HTTPS, Git-based builds, and automatic Docker installation are intentionally scheduled for later milestones. This keeps MVP-1 small enough to implement and test without pretending that the first release already replaces every Coolify feature.
 
 ## 2. Repository facts used by this plan
 
 The plan is based on the current repository structure inspected during planning:
 
 - The repository is a PocketBase source snapshot, not yet an A-R-S-Y-specific implementation.
-- The current executable entry point is \`examples/base/main.go\`.
-- The release configuration is \`.goreleaser.yaml\` and still identifies the product/binary as PocketBase.
+- The current executable entry point is `examples/base/main.go`.
+- The release configuration is `.goreleaser.yaml` and still identifies the product/binary as PocketBase.
 - The current example registers the PocketBase updater against the upstream PocketBase project.
-- The existing \`ui/\` directory is the PocketBase Superuser dashboard, built with Vite and embedded through \`ui/embed.go\`.
+- The existing `ui/` directory is the PocketBase Superuser dashboard, built with Vite and embedded through `ui/embed.go`.
 - PocketBase already provides authentication, collections, migrations, hooks, REST APIs, and an embedded SQLite database.
 
 **Do not replace the PocketBase Superuser UI.** Add a separate A-R-S-Y console and preserve the existing PocketBase admin UI at its existing route.
@@ -58,18 +58,18 @@ These decisions are fixed for MVP-1. A task agent must not reopen them unless th
 
 ### Boundaries
 
-- New A-R-S-Y Go code belongs under \`arsy/\` (or a clearly justified subpackage).
-- The A-R-S-Y HTTP API uses the \`/api/arsy/v1/\` prefix.
-- The A-R-S-Y web console uses the \`/arsy\` route.
+- New A-R-S-Y Go code belongs under `arsy/` (or a clearly justified subpackage).
+- The A-R-S-Y HTTP API uses the `/api/arsy/v1/` prefix.
+- The A-R-S-Y web console uses the `/arsy` route.
 - The existing PocketBase API and Superuser UI routes must keep working.
-- The existing PocketBase \`ui/\` folder is not the A-R-S-Y dashboard.
+- The existing PocketBase `ui/` folder is not the A-R-S-Y dashboard.
 - MVP-1 infrastructure management is restricted to authenticated PocketBase superusers. Organization-level RBAC is future work.
 - Use PocketBase migrations for A-R-S-Y collections. Never rewrite historical PocketBase migrations.
 - Keep server operations behind typed Go interfaces. Do not expose an unrestricted remote-shell endpoint.
 
 ### Security invariants
 
-- Never use \`ssh.InsecureIgnoreHostKey\`.
+- Never use `ssh.InsecureIgnoreHostKey`.
 - Never store private SSH keys or environment secrets as plaintext.
 - Never return decrypted credentials from an API response.
 - Never print credentials, private keys, passwords, tokens, or secret environment values in logs.
@@ -79,7 +79,7 @@ These decisions are fixed for MVP-1. A task agent must not reopen them unless th
 - Never interpolate user-supplied text into a shell command.
 - Do not run privileged, host-network, host-PID, device, or Docker-socket mounts by default. Reject them in MVP-1 with a useful validation error.
 - Do not execute deployment commands against a real production server in automated tests.
-- Never run destructive cleanup such as \`docker system prune\`, \`docker compose down -v\`, or broad container/volume deletion as an automatic recovery action.
+- Never run destructive cleanup such as `docker system prune`, `docker compose down -v`, or broad container/volume deletion as an automatic recovery action.
 
 ## 4. MVP-1 scope
 
@@ -139,7 +139,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - **Changed:** files or behavior changed.
 - **Verified:** exact commands/tests run and their result.
-- **Remaining:** any known limitation, or \`None\`.
+- **Remaining:** any known limitation, or `None`.
 
 ---
 
@@ -151,27 +151,27 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - [ ] **MVP1-001 — Capture the baseline build and test result**
   - Inspect the current Go version and existing Makefile targets.
-  - Run \`go test ./...\` and the existing build command for \`examples/base\`.
+  - Run `go test ./...` and the existing build command for `examples/base`.
   - Record failures that already exist; do not fix unrelated failures in this task.
   - **Done when:** baseline results are documented in the task completion note.
 
 - [ ] **MVP1-002 — Change the Go module identity to A-R-S-Y**
-  - Change the module path in \`go.mod\` to the repository's canonical A-R-S-Y Go import path.
+  - Change the module path in `go.mod` to `github.com/bridge-allah/a-r-s-y`.
   - Replace only repository-local imports that point to the old PocketBase application module.
-  - Do not rename external dependencies such as PocketBase's separately hosted \`dbx\`, validation, or other modules.
-  - Run formatting and \`go mod tidy\`.
-  - **Done when:** \`go list ./...\` and \`go test ./...\` resolve with no old local-module imports remaining.
+  - Do not rename external dependencies such as PocketBase's separately hosted `dbx`, validation, or other modules.
+  - Run formatting and `go mod tidy`.
+  - **Done when:** `go list ./...` and `go test ./...` resolve with no old local-module imports remaining.
 
 - [ ] **MVP1-003 — Rename the release project and executable**
-  - Update \`.goreleaser.yaml\` project name and binary name to \`arsy\`.
+  - Update `.goreleaser.yaml` project name and binary name to `arsy`.
   - Keep the current supported OS/architecture matrix unless a build target is proven broken.
-  - **Done when:** a local release build produces an executable named \`arsy\` (or \`arsy.exe\`).
+  - **Done when:** a local release build produces an executable named `arsy` (or `arsy.exe`).
 
 - [ ] **MVP1-004 — Make version output identify A-R-S-Y**
   - Keep the existing version injection mechanism.
   - Update user-visible product/version labels where they are directly tied to the executable.
   - Avoid mass-renaming internal PocketBase types and symbols.
-  - **Done when:** \`arsy version\` or the existing version command identifies the product as A-R-S-Y and displays the build version.
+  - **Done when:** `arsy version` or the existing version command identifies the product as A-R-S-Y and displays the build version.
 
 - [ ] **MVP1-005 — Disable the PocketBase upstream updater registration**
   - Remove the upstream PocketBase updater registration from the A-R-S-Y executable entry point.
@@ -188,7 +188,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - [ ] **MVP1-007 — Add a minimal Go CI workflow**
   - Add a GitHub Actions workflow that installs the required Go version.
-  - Run formatting checks, \`go test ./...\`, and a build of the A-R-S-Y executable.
+  - Run formatting checks, `go test ./...`, and a build of the A-R-S-Y executable.
   - Do not add frontend CI until the A-R-S-Y console exists.
   - **Done when:** the workflow runs successfully on a push and pull request.
 
@@ -197,8 +197,8 @@ For each completed task, append a short note to the task entry or its linked iss
 **Phase exit:** A-R-S-Y has its own package boundary, validated configuration, persistent data layout, and health/diagnostic commands.
 
 - [ ] **MVP1-008 — Create the A-R-S-Y package skeleton**
-  - Add the top-level \`arsy/\` package directory.
-  - Add only small domain package placeholders needed by later tasks: \`config\`, \`httpapi\`, \`servers\`, \`security\`, and \`deployments\`.
+  - Add the top-level `arsy/` package directory.
+  - Add only small domain package placeholders needed by later tasks: `config`, `httpapi`, `servers`, `security`, and `deployments`.
   - Do not move PocketBase source files.
   - **Done when:** the new packages compile and have a short package comment describing their responsibility.
 
@@ -209,7 +209,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** configuration defaults have unit tests.
 
 - [ ] **MVP1-010 — Load and validate A-R-S-Y environment configuration**
-  - Support documented \`ARSY_*\` environment variables for A-R-S-Y-specific settings.
+  - Support documented `ARSY_*` environment variables for A-R-S-Y-specific settings.
   - Reject malformed values with actionable error messages.
   - Do not change PocketBase's existing flags or environment variable semantics.
   - **Done when:** valid configuration loads and invalid configuration fails before the server starts.
@@ -221,19 +221,19 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** startup creates the expected directories and tests verify permissions on supported systems.
 
 - [ ] **MVP1-012 — Add an A-R-S-Y liveness endpoint**
-  - Register \`GET /api/arsy/v1/health\`.
+  - Register `GET /api/arsy/v1/health`.
   - Return only product name, version, and a simple alive status.
   - Do not include database credentials, environment values, filesystem paths, or secrets.
   - **Done when:** an HTTP test confirms the endpoint works and the response contains no sensitive configuration.
 
 - [ ] **MVP1-013 — Add an authenticated readiness endpoint**
-  - Register \`GET /api/arsy/v1/ready\`.
+  - Register `GET /api/arsy/v1/ready`.
   - Check only local control-plane readiness: database available, migrations applied, required configuration valid.
   - Require superuser authentication or restrict the response to a minimal non-sensitive status.
   - **Done when:** tests cover ready and not-ready responses.
 
 - [ ] **MVP1-014 — Add an A-R-S-Y diagnostics CLI command**
-  - Add a command such as \`arsy doctor\`.
+  - Add a command such as `arsy doctor`.
   - Report version, Go build/runtime information, data-directory accessibility, database readiness, and secret-key configuration status.
   - Never print secret values.
   - **Done when:** the command exits non-zero for a broken local setup and exits zero for a valid setup.
@@ -243,11 +243,11 @@ For each completed task, append a short note to the task entry or its linked iss
 **Phase exit:** An administrator can sign in to a dedicated A-R-S-Y console, see onboarding status, and follow a guided path to register the first server. The PocketBase Superuser UI remains intact.
 
 - [ ] **MVP1-015 — Create a separate A-R-S-Y console frontend**
-  - Create a new \`dashboard/\` directory.
+  - Create a new `dashboard/` directory.
   - Use a small Vite-based static frontend; vanilla JavaScript is acceptable.
   - Keep Node/npm as build-time tools only.
-  - Do not modify \`ui/src\` or replace the PocketBase Superuser dashboard.
-  - **Done when:** \`npm run build\` in \`dashboard/\` produces a static \`dist/\` directory.
+  - Do not modify `ui/src` or replace the PocketBase Superuser dashboard.
+  - **Done when:** `npm run build` in `dashboard/` produces a static `dist/` directory.
 
 - [ ] **MVP1-016 — Add a minimal A-R-S-Y console shell**
   - Create a simple layout with navigation for Overview, Servers, Projects, and Deployments.
@@ -256,19 +256,19 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** the built console renders all four navigation destinations without runtime errors.
 
 - [ ] **MVP1-017 — Embed the A-R-S-Y console assets into Go**
-  - Add a dedicated Go embed package for \`dashboard/dist\`.
-  - Do not reuse or overwrite \`ui/embed.go\`.
+  - Add a dedicated Go embed package for `dashboard/dist`.
+  - Do not reuse or overwrite `ui/embed.go`.
   - Add a build step that generates the frontend assets before compiling the executable.
   - **Done when:** the A-R-S-Y binary serves the console without requiring Node.js or a separate frontend server.
 
 - [ ] **MVP1-018 — Register the A-R-S-Y console route**
-  - Serve the console at \`/arsy\` and its static assets under a predictable asset path.
-  - Keep the existing PocketBase \`/_/\` route and all PocketBase API routes working.
+  - Serve the console at `/arsy` and its static assets under a predictable asset path.
+  - Keep the existing PocketBase `/_/` route and all PocketBase API routes working.
   - Add SPA fallback only within the A-R-S-Y console route.
   - **Done when:** HTTP tests confirm both the A-R-S-Y console route and PocketBase admin route remain reachable.
 
 - [ ] **MVP1-019 — Register the A-R-S-Y API route group**
-  - Create a shared router group under \`/api/arsy/v1\`.
+  - Create a shared router group under `/api/arsy/v1`.
   - Keep route registration separate from PocketBase's existing default API handlers.
   - Add a small test route or health route through this group.
   - **Done when:** route registration is centralized and existing collection APIs still pass tests.
@@ -282,7 +282,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - [ ] **MVP1-021 — Add a console login and logout flow**
   - Use the existing PocketBase Superuser authentication API.
-  - Keep the auth token in memory for MVP-1; do not persist it in \`localStorage\`.
+  - Keep the auth token in memory for MVP-1; do not persist it in `localStorage`.
   - Show clear expired-session and invalid-credential states.
   - **Done when:** a superuser can log in, access protected console pages, and log out.
 
@@ -293,7 +293,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - [ ] **MVP1-023 — Build the onboarding wizard**
   - Show a welcome screen and explain the A-R-S-Y control-plane/managed-server model.
-  - If no superuser exists, show the existing CLI command pattern \`arsy superuser create EMAIL PASSWORD\`; do not create an unauthenticated public password-creation endpoint.
+  - If no superuser exists, show the existing CLI command pattern `arsy superuser create EMAIL PASSWORD`; do not create an unauthenticated public password-creation endpoint.
   - After login, guide the administrator through secret-key readiness and first-server registration.
   - Allow the wizard to be resumed after refresh or restart.
   - **Done when:** a fresh-install user can follow the wizard without guessing the next step.
@@ -380,7 +380,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** tests cover first-seen, matching, mismatched, and changed host keys.
 
 - [ ] **MVP1-036 — Implement a reusable SSH client factory**
-  - Use \`golang.org/x/crypto/ssh\`.
+  - Use `golang.org/x/crypto/ssh`.
   - Support private-key authentication only in MVP-1.
   - Require strict host-key verification.
   - Apply connection timeout and context cancellation.
@@ -412,9 +412,9 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** tests distinguish Docker missing, daemon unavailable, permission denied, and ready.
 
 - [ ] **MVP1-041 — Detect Docker Compose plugin readiness**
-  - Check \`docker compose version\`.
+  - Check `docker compose version`.
   - Parse and store the version string.
-  - Do not assume the legacy standalone \`docker-compose\` binary is equivalent.
+  - Do not assume the legacy standalone `docker-compose` binary is equivalent.
   - **Done when:** tests cover installed, missing, and invalid version responses.
 
 - [ ] **MVP1-042 — Build a server readiness summary**
@@ -440,8 +440,8 @@ For each completed task, append a short note to the task entry or its linked iss
 **Phase exit:** A-R-S-Y can deploy a Compose manifest containing existing images to a ready server, persist the outcome, and display runtime state and logs.
 
 - [ ] **MVP1-045 — Define the supported Compose subset**
-  - Document supported MVP-1 keys: \`services\`, \`image\`, \`ports\`, \`environment\`, \`env_file\` only if safely supported, \`volumes\` for named volumes, \`networks\`, and \`restart\`.
-  - Explicitly reject \`build\` in MVP-1.
+  - Document supported MVP-1 keys: `services`, `image`, `ports`, `environment`, `env_file` only if safely supported, `volumes` for named volumes, `networks`, and `restart`.
+  - Explicitly reject `build` in MVP-1.
   - Reject privileged mode, host networking, host PID/IPC, device access, Docker socket mounts, and unsafe host-path mounts by default.
   - **Done when:** the supported/rejected subset is documented and represented in tests.
 
@@ -454,7 +454,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 - [ ] **MVP1-047 — Generate safe project and release paths**
   - Generate application slugs and deployment IDs internally.
-  - Use a fixed remote root such as \`/opt/arsy/apps/<app-slug>/releases/<deployment-id>\`.
+  - Use a fixed remote root such as `/opt/arsy/apps/<app-slug>/releases/<deployment-id>`.
   - Never accept a raw filesystem path from the web request.
   - **Done when:** path tests prove that traversal strings and invalid slugs are rejected.
 
@@ -466,7 +466,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** upload tests cover success, interrupted upload, and permission failure.
 
 - [ ] **MVP1-049 — Validate Compose on the target server**
-  - Run the fixed command \`docker compose -f <generated-file> config --quiet\` through the typed SSH executor.
+  - Run the fixed command `docker compose -f <generated-file> config --quiet` through the typed SSH executor.
   - Pass only generated, validated paths.
   - Return bounded and redacted validation output.
   - **Done when:** invalid Compose files fail before deployment begins.
@@ -493,8 +493,8 @@ For each completed task, append a short note to the task entry or its linked iss
 - [ ] **MVP1-053 — Implement Compose deployment execution**
   - Create the generated remote release directory.
   - Upload the validated Compose manifest.
-  - Execute \`docker compose -p <validated-slug> -f <generated-file> up -d\`.
-  - Do not execute \`down -v\` or delete persistent volumes.
+  - Execute `docker compose -p <validated-slug> -f <generated-file> up -d`.
+  - Do not execute `down -v` or delete persistent volumes.
   - **Done when:** a test deployment starts services on a test Docker host and records a successful deployment.
 
 - [ ] **MVP1-054 — Persist deployment output safely**
@@ -504,7 +504,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** output retrieval works and secret fixtures never appear in persisted logs.
 
 - [ ] **MVP1-055 — Add deployment status and container inspection**
-  - Query \`docker compose ps\` for the generated project.
+  - Query `docker compose ps` for the generated project.
   - Map container states to stable A-R-S-Y status values.
   - Return service name, image, state, health when available, and published ports.
   - **Done when:** parser tests cover running, exited, restarting, unhealthy, and missing containers.
@@ -516,7 +516,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** API tests cover pagination, access control, and log redaction.
 
 - [ ] **MVP1-057 — Add safe stop and redeploy operations**
-  - Implement stop with \`docker compose stop\`.
+  - Implement stop with `docker compose stop`.
   - Implement redeploy using the saved manifest and selected deployment options.
   - Require an explicit authenticated console action for each operation.
   - Do not delete named volumes during stop or redeploy.
@@ -595,7 +595,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** the integration profile can deploy, inspect, stop, and clean up its own test workload.
 
 - [ ] **MVP1-069 — Add frontend build verification**
-  - Run a clean dependency install and production Vite build for \`dashboard/\`.
+  - Run a clean dependency install and production Vite build for `dashboard/`.
   - Fail CI if the embedded dashboard output is missing or stale.
   - Do not require Node.js at runtime.
   - **Done when:** frontend build and Go embed build both pass from a clean checkout.
@@ -604,7 +604,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - Build the A-R-S-Y executable for the initial supported Linux target(s).
   - Verify the binary reports the expected A-R-S-Y name and version.
   - Verify the binary serves embedded console assets.
-  - **Done when:** release artifacts are named \`arsy\` and pass smoke tests.
+  - **Done when:** release artifacts are named `arsy` and pass smoke tests.
 
 - [ ] **MVP1-071 — Write MVP-1 installation and operation documentation**
   - Document prerequisites, standalone binary startup, first superuser creation, secrets-key setup, managed-server SSH requirements, Docker/Compose requirements, and first Compose deployment.
@@ -613,7 +613,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** a developer can follow the document from a clean test VPS without guessing commands.
 
 - [ ] **MVP1-072 — Run the complete MVP-1 acceptance checklist**
-  - Run \`gofmt\` checks and \`go test ./...\`.
+  - Run `gofmt` checks and `go test ./...`.
   - Build the A-R-S-Y executable and embedded dashboard from a clean checkout.
   - Verify PocketBase's existing Superuser UI and collection APIs still work.
   - Verify first-run onboarding and server registration.
