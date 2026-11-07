@@ -14,15 +14,25 @@ import (
 	"github.com/bridge-allah/a-r-s-y/tools/router"
 )
 
-func newTestMux(t *testing.T) (*tests.TestApp, http.Handler) {
+func newTestMux(t *testing.T, authenticated bool) (*tests.TestApp, http.Handler) {
 	t.Helper()
 	app, err := tests.NewTestApp()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	var auth *core.Record
+	if authenticated {
+		collection, err := app.FindCollectionByNameOrId(core.CollectionNameSuperusers)
+		if err != nil {
+			app.Cleanup()
+			t.Fatal(err)
+		}
+		auth = core.NewRecord(collection)
+	}
+
 	r := router.NewRouter[*core.RequestEvent](func(w http.ResponseWriter, req *http.Request) (*core.RequestEvent, router.EventCleanupFunc) {
-		event := &core.RequestEvent{App: app}
+		event := &core.RequestEvent{App: app, Auth: auth}
 		event.Request = req
 		event.Response = w
 		return event, nil
@@ -52,7 +62,7 @@ func newTestMux(t *testing.T) (*tests.TestApp, http.Handler) {
 }
 
 func TestHealthEndpointIsMinimal(t *testing.T) {
-	app, mux := newTestMux(t)
+	app, mux := newTestMux(t, false)
 	defer app.Cleanup()
 
 	rec := httptest.NewRecorder()
@@ -71,7 +81,7 @@ func TestHealthEndpointIsMinimal(t *testing.T) {
 }
 
 func TestReadinessEndpointRequiresSuperuser(t *testing.T) {
-	app, mux := newTestMux(t)
+	app, mux := newTestMux(t, false)
 	defer app.Cleanup()
 
 	rec := httptest.NewRecorder()
@@ -82,8 +92,31 @@ func TestReadinessEndpointRequiresSuperuser(t *testing.T) {
 	}
 }
 
+func TestReadinessEndpointReturnsReadyForSuperuser(t *testing.T) {
+	app, mux := newTestMux(t, true)
+	defer app.Cleanup()
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/arsy/v1/ready", nil))
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"status":"ready"`) {
+		t.Fatalf("unexpected readiness response: %d %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestReadinessEndpointReturnsNotReadyWhenAppIsNotBootstrapped(t *testing.T) {
+	app, mux := newTestMux(t, true)
+	defer app.Cleanup()
+	app.ClearBootstrap()
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/arsy/v1/ready", nil))
+	if rec.Code != http.StatusServiceUnavailable || !strings.Contains(rec.Body.String(), `"status":"not_ready"`) {
+		t.Fatalf("unexpected readiness response: %d %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestConsoleRouteServesEmbeddedDashboard(t *testing.T) {
-	app, mux := newTestMux(t)
+	app, mux := newTestMux(t, false)
 	defer app.Cleanup()
 
 	rec := httptest.NewRecorder()
