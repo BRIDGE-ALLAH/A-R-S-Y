@@ -53,7 +53,7 @@ func TestMVP1CollectionsAreCreatedWithPrivateRules(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	logDeployment, ok := logs.Fields.GetByName("deployment").(*core.RelationField)
+	logDeployment, ok := logs.Fields.AsMap()["deployment"].(*core.RelationField)
 	if !ok || logDeployment.CollectionId == "" {
 		t.Fatal("deployment logs must relate to deployments")
 	}
