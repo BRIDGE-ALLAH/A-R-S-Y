@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/bridge-allah/a-r-s-y/arsy/security"
-	"github.com/bridge-allah/a-r-s-y/core"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -127,4 +126,3 @@ func testAPIPrivateKey(t *testing.T) []byte {
 	return pem.EncodeToMemory(block)
 }
 
-var _ = core.CollectionNameSuperusers
