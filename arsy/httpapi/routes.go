@@ -45,8 +45,8 @@ func Register(app core.App, cfg config.Config, version string) {
 				return re.JSON(http.StatusOK, status)
 			})
 
-			registerDeploymentRoutes(e, api)
-			registerProjectAndAppRoutes(api)
+			registerDeploymentRoutes(e, api, cfg)
+			registerProjectAndAppRoutes(api, cfg)
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {
 				return re.Redirect(http.StatusPermanentRedirect, cfg.ConsolePath+"/")

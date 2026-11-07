@@ -5,11 +5,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bridge-allah/a-r-s-y/arsy/config"
+	"github.com/bridge-allah/a-r-s-y/arsy/deployments"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tools/router"
 )
 
-var slugPattern = regexp.MustCompile("^[a-z0-9]+(?:-[a-z0-9]+)*$")
+var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 type projectDTO struct {
 	ID          string `json:"id"`
@@ -134,57 +136,66 @@ func listApplications(e *core.RequestEvent) error {
 	return e.JSON(http.StatusOK, map[string]any{"items": items})
 }
 
-func createApplication(e *core.RequestEvent) error {
-	var req createApplicationRequest
-	if err := decodeServerRequest(e, &req); err != nil {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
-	}
-	req.Name = strings.TrimSpace(req.Name)
-	req.Slug = strings.TrimSpace(strings.ToLower(req.Slug))
-	if req.Name == "" || req.ProjectID == "" || req.ServerID == "" || req.ComposeManifest == "" {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "all fields are required"})
-	}
-	if req.Slug == "" {
-		req.Slug = generateSlug(req.Name)
-	}
-	if !slugPattern.MatchString(req.Slug) {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid slug"})
-	}
+func createApplication(cfg config.Config) func(e *core.RequestEvent) error {
+	return func(e *core.RequestEvent) error {
+		var req createApplicationRequest
+		if err := decodeServerRequest(e, &req); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+		}
+		req.Name = strings.TrimSpace(req.Name)
+		req.Slug = strings.TrimSpace(strings.ToLower(req.Slug))
+		if req.Name == "" || req.ProjectID == "" || req.ServerID == "" || req.ComposeManifest == "" {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "all fields are required"})
+		}
+		if req.Slug == "" {
+			req.Slug = generateSlug(req.Name)
+		}
+		if !slugPattern.MatchString(req.Slug) {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid slug"})
+		}
 
-	collection, err := e.App.FindCollectionByNameOrId("arsy_applications")
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		collection, err := e.App.FindCollectionByNameOrId("arsy_applications")
+		if err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+
+		record := core.NewRecord(collection)
+		record.Set("project", req.ProjectID)
+		record.Set("server", req.ServerID)
+		record.Set("name", req.Name)
+		record.Set("slug", req.Slug)
+		record.Set("lifecycle_state", "draft")
+
+		ciphertext, encErr := deployments.EncryptManifest(req.ComposeManifest, cfg.SecretKeyEnv)
+		if encErr == nil {
+			record.Set("manifest_ciphertext", ciphertext)
+			record.Set("compose_manifest", "")
+		} else {
+			record.Set("compose_manifest", req.ComposeManifest)
+		}
+
+		if err := e.App.Save(record); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+		}
+
+		return e.JSON(http.StatusCreated, applicationDTO{
+			ID:             record.Id,
+			ProjectID:      record.GetString("project"),
+			ServerID:       record.GetString("server"),
+			Name:           record.GetString("name"),
+			Slug:           record.GetString("slug"),
+			LifecycleState: record.GetString("lifecycle_state"),
+			Created:        record.GetDateTime("created").String(),
+			Updated:        record.GetDateTime("updated").String(),
+		})
 	}
-
-	record := core.NewRecord(collection)
-	record.Set("project", req.ProjectID)
-	record.Set("server", req.ServerID)
-	record.Set("name", req.Name)
-	record.Set("slug", req.Slug)
-	record.Set("compose_manifest", req.ComposeManifest)
-	record.Set("lifecycle_state", "draft")
-
-	if err := e.App.Save(record); err != nil {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
-	}
-
-	return e.JSON(http.StatusCreated, applicationDTO{
-		ID:             record.Id,
-		ProjectID:      record.GetString("project"),
-		ServerID:       record.GetString("server"),
-		Name:           record.GetString("name"),
-		Slug:           record.GetString("slug"),
-		LifecycleState: record.GetString("lifecycle_state"),
-		Created:        record.GetDateTime("created").String(),
-		Updated:        record.GetDateTime("updated").String(),
-	})
 }
 
-func registerProjectAndAppRoutes(api *router.RouterGroup[*core.RequestEvent]) {
+func registerProjectAndAppRoutes(api *router.RouterGroup[*core.RequestEvent], cfg config.Config) {
 	api.GET("/projects", requireSuperuser(listProjects))
 	api.POST("/projects", requireSuperuser(createProject))
 	api.GET("/applications", requireSuperuser(listApplications))
-	api.POST("/applications", requireSuperuser(createApplication))
+	api.POST("/applications", requireSuperuser(createApplication(cfg)))
 }
 
 func generateSlug(name string) string {

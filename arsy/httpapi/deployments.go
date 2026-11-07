@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bridge-allah/a-r-s-y/arsy/config"
 	"github.com/bridge-allah/a-r-s-y/arsy/deployments"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tools/router"
@@ -21,12 +22,10 @@ type deploymentRecord struct {
 }
 
 type createDeploymentRequest struct {
-	ApplicationID string `json:"application_id"`
+	ApplicationID  string `json:"application_id"`
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
-// deploymentProgressSteps maps every deployment record state to a stable
-// percent and human-readable step for the progress endpoint.
 var deploymentProgressSteps = map[string]struct {
 	Percent int
 	Step    string
@@ -42,97 +41,109 @@ var deploymentProgressSteps = map[string]struct {
 	string(deployments.StateCancelled):  {Percent: 0, Step: "Cancelled"},
 }
 
-func createDeployment(e *core.RequestEvent) error {
-	var req createDeploymentRequest
-	if err := decodeServerRequest(e, &req); err != nil {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
-	}
-	req.ApplicationID = strings.TrimSpace(req.ApplicationID)
-	req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
-	if req.ApplicationID == "" {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "application_id is required"})
-	}
-	if req.IdempotencyKey != "" {
-		existing, err := deployments.FindDeploymentByIdempotencyKey(e.App, req.IdempotencyKey)
+func createDeployment(cfg config.Config) func(e *core.RequestEvent) error {
+	return func(e *core.RequestEvent) error {
+		var req createDeploymentRequest
+		if err := decodeServerRequest(e, &req); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+		}
+		req.ApplicationID = strings.TrimSpace(req.ApplicationID)
+		req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
+		if req.ApplicationID == "" {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "application_id is required"})
+		}
+		if req.IdempotencyKey != "" {
+			existing, err := deployments.FindDeploymentByIdempotencyKey(e.App, req.IdempotencyKey)
+			if err != nil {
+				return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+			}
+			if existing != nil {
+				existingAppID := existing.GetString("application")
+				if existingAppID == req.ApplicationID {
+					response := map[string]any{
+						"deployment_id": existing.GetString("deployment_id"),
+						"status":        existing.GetString("status"),
+					}
+					if req.IdempotencyKey != "" {
+						response["idempotency_key"] = req.IdempotencyKey
+					}
+					if prevID := existing.GetString("previous_deployment_id"); prevID != "" {
+						response["previous_deployment_id"] = prevID
+					}
+					return e.JSON(http.StatusOK, response)
+				}
+			}
+		}
+		application, err := e.App.FindRecordById("arsy_applications", req.ApplicationID)
+		if err != nil {
+			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
+		}
+		active, err := deployments.HasActiveDeployment(e.App, req.ApplicationID)
 		if err != nil {
 			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
 		}
-		if existing != nil {
-			existingAppID := existing.GetString("application")
-			if existingAppID == req.ApplicationID {
-				response := map[string]any{
-					"deployment_id":  existing.GetString("deployment_id"),
-					"status":         existing.GetString("status"),
-				}
-				if req.IdempotencyKey != "" {
-					response["idempotency_key"] = req.IdempotencyKey
-				}
-				if prevID := existing.GetString("previous_deployment_id"); prevID != "" {
-					response["previous_deployment_id"] = prevID
-				}
-				return e.JSON(http.StatusOK, response)
-			}
+		if active {
+			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "deployment in progress for this application"})
 		}
+
+		manifestPlaintext := application.GetString("compose_manifest")
+		if ciphertext := application.GetString("manifest_ciphertext"); ciphertext != "" {
+			decrypted, decErr := deployments.DecryptManifest(ciphertext, cfg.SecretKeyEnv)
+			if decErr != nil {
+				return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "failed to decrypt application manifest"})
+			}
+			manifestPlaintext = decrypted
+		}
+		if _, err := deployments.ValidateCompose(manifestPlaintext); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "application Compose manifest is invalid"})
+		}
+
+		previousDeploymentID := ""
+		previous, err := e.App.FindRecordsByFilter(
+			"arsy_deployments",
+			"application = {:application} && status = 'succeeded'",
+			"-created",
+			1, 0,
+			map[string]any{"application": application.Id},
+		)
+		if err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+		if len(previous) > 0 {
+			previousDeploymentID = previous[0].GetString("deployment_id")
+		}
+		deploymentID, err := deployments.NewDeploymentID()
+		if err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+		collection, err := e.App.FindCollectionByNameOrId("arsy_deployments")
+		if err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+		record := core.NewRecord(collection)
+		record.Set("application", application.Id)
+		record.Set("deployment_id", deploymentID)
+		if req.IdempotencyKey != "" {
+			record.Set("idempotency_key", req.IdempotencyKey)
+		}
+		record.Set("status", string(deployments.StateQueued))
+		record.Set("previous_deployment_id", previousDeploymentID)
+		if err := e.App.Save(record); err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+		response := map[string]any{
+			"deployment_id":  deploymentID,
+			"application_id": application.Id,
+			"status":         string(deployments.StateQueued),
+		}
+		if req.IdempotencyKey != "" {
+			response["idempotency_key"] = req.IdempotencyKey
+		}
+		if previousDeploymentID != "" {
+			response["previous_deployment_id"] = previousDeploymentID
+		}
+		return e.JSON(http.StatusCreated, response)
 	}
-	application, err := e.App.FindRecordById("arsy_applications", req.ApplicationID)
-	if err != nil {
-		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
-	}
-	active, err := deployments.HasActiveDeployment(e.App, req.ApplicationID)
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
-	}
-	if active {
-		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "deployment in progress for this application"})
-	}
-	if _, err := deployments.ValidateCompose(application.GetString("compose_manifest")); err != nil {
-		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "application Compose manifest is invalid"})
-	}
-	previousDeploymentID := ""
-	previous, err := e.App.FindRecordsByFilter(
-		"arsy_deployments",
-		"application = {:application} && status = 'succeeded'",
-		"-created",
-		1, 0,
-		map[string]any{"application": application.Id},
-	)
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
-	}
-	if len(previous) > 0 {
-		previousDeploymentID = previous[0].GetString("deployment_id")
-	}
-	deploymentID, err := deployments.NewDeploymentID()
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
-	}
-	collection, err := e.App.FindCollectionByNameOrId("arsy_deployments")
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
-	}
-	record := core.NewRecord(collection)
-	record.Set("application", application.Id)
-	record.Set("deployment_id", deploymentID)
-	if req.IdempotencyKey != "" {
-		record.Set("idempotency_key", req.IdempotencyKey)
-	}
-	record.Set("status", string(deployments.StateQueued))
-	record.Set("previous_deployment_id", previousDeploymentID)
-	if err := e.App.Save(record); err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
-	}
-	response := map[string]any{
-		"deployment_id":  deploymentID,
-		"application_id": application.Id,
-		"status":         string(deployments.StateQueued),
-	}
-	if req.IdempotencyKey != "" {
-		response["idempotency_key"] = req.IdempotencyKey
-	}
-	if previousDeploymentID != "" {
-		response["previous_deployment_id"] = previousDeploymentID
-	}
-	return e.JSON(http.StatusCreated, response)
 }
 
 func getDeploymentProgress(e *core.RequestEvent) error {
@@ -346,8 +357,8 @@ func rollbackDeployment(e *core.RequestEvent) error {
 	})
 }
 
-func registerDeploymentRoutes(e *core.ServeEvent, api *router.RouterGroup[*core.RequestEvent]) {
-	api.POST("/deployments", requireSuperuser(createDeployment))
+func registerDeploymentRoutes(e *core.ServeEvent, api *router.RouterGroup[*core.RequestEvent], cfg config.Config) {
+	api.POST("/deployments", requireSuperuser(createDeployment(cfg)))
 	api.GET("/deployments", requireSuperuser(listDeployments))
 	api.GET("/deployments/{id}", requireSuperuser(getDeployment))
 	api.GET("/deployments/{id}/progress", requireSuperuser(getDeploymentProgress))
