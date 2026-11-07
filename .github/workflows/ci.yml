@@ -25,6 +25,13 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Set up Node for A-R-S-Y dashboard
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build A-R-S-Y dashboard assets
+        working-directory: dashboard
+        run: npm install --no-audit --no-fund && npm run build
       - name: Verify module graph
         run: go mod verify
       - name: Test

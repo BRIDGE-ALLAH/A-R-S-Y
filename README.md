@@ -18,25 +18,24 @@ A-R-S-Y is under active early-stage development. The MVP-1 plan defines the inte
 
 ## Build
 
-Build the standalone Go server:
+Build the A-R-S-Y console assets and standalone Go server:
 
 ```sh
-CGO_ENABLED=0 go build -o arsy ./examples/base
-```
-
-Build the frontend assets:
-
-```sh
-cd ui
-npm ci
+cd dashboard
+npm install
 npm run build
+cd ..
+mkdir -p .builds
+CGO_ENABLED=0 go build -o .builds/arsy ./examples/base
 ```
 
 Run the server:
 
 ```sh
-./arsy serve
+.builds/arsy serve
 ```
+
+The dashboard build is embedded into the Go executable. Node.js is not required at runtime. The separate `ui/` directory remains the PocketBase Superuser UI and is not replaced by the A-R-S-Y console.
 
 The server retains PocketBase's existing administrative interface and runtime capabilities. A-R-S-Y-specific console routes and deployment features are being introduced incrementally.
 
@@ -48,13 +47,15 @@ Run the Go test suite:
 go test ./...
 ```
 
-Run the frontend production build:
+Run the A-R-S-Y dashboard build:
 
 ```sh
-cd ui
-npm ci
+cd dashboard
+npm install
 npm run build
 ```
+
+To verify the existing PocketBase Superuser UI separately, run `npm ci && npm run build` in `ui/`.
 
 Continuous integration runs these checks on pushes and pull requests. See [GitHub Actions](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions).
 
