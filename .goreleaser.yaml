@@ -7,6 +7,8 @@ dist: .builds
 before:
   hooks:
     - go mod tidy
+    - npm --prefix dashboard install --no-audit --no-fund
+    - npm --prefix dashboard run build
 
 builds:
   - id: build_noncgo
