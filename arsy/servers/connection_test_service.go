@@ -14,10 +14,10 @@ import (
 var errHostKeyProbeComplete = errors.New("SSH host key probe complete")
 
 type ConnectionTestResult struct {
-	Fingerprint  string
+	Fingerprint   string
 	Authenticated bool
-	Code         string
-	Message      string
+	Code          string
+	Message       string
 }
 
 // ProbeHostKey obtains the SSH host key without authenticating or trusting it.
