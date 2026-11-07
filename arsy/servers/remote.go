@@ -16,8 +16,8 @@ import (
 type RemoteOperation string
 
 const (
-	RemoteOSFacts       RemoteOperation = "os_facts"
-	RemoteDockerVersion RemoteOperation = "docker_version"
+	RemoteOSFacts        RemoteOperation = "os_facts"
+	RemoteDockerVersion  RemoteOperation = "docker_version"
 	RemoteComposeVersion RemoteOperation = "compose_version"
 )
 
