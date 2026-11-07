@@ -4,9 +4,9 @@ import "testing"
 
 func TestParseLinuxFacts(t *testing.T) {
 	tests := []struct {
-		output string
-		os     string
-		arch   string
+		output  string
+		os      string
+		arch    string
 		wantErr bool
 	}{
 		{"Linux\nx86_64", "linux", "amd64", false},
@@ -25,10 +25,10 @@ func TestParseLinuxFacts(t *testing.T) {
 
 func TestDockerReadinessDistinguishesFailureModes(t *testing.T) {
 	tests := []struct {
-		name string
+		name   string
 		result CommandResult
-		code string
-		ready bool
+		code   string
+		ready  bool
 	}{
 		{"ready", CommandResult{Stdout: "27.1.1"}, "ready", true},
 		{"missing", CommandResult{ExitCode: 127, Stderr: "docker: command not found"}, "docker_missing", false},
