@@ -115,7 +115,7 @@ func (e Executor) executeCommand(ctx context.Context, client *ssh.Client, operat
 	return result, fmt.Errorf("execute fixed SSH operation %q: %w", operation, runErr)
 }
 
-var remoteManifestPathPattern = regexp.MustCompile("^/opt/arsy/apps/[a-z0-9]+(?:-[a-z0-9]+)*/releases/[a-f0-9]{32}/compose\\.yaml$")
+var remoteManifestPathPattern = regexp.MustCompile("^/opt/arsy/apps/[a-z0-9]+(-[a-z0-9]+)*/releases/[a-f0-9]{32}/compose\\.yaml$")
 
 func composeValidationCommand(manifestPath string) (string, error) {
 	if !remoteManifestPathPattern.MatchString(manifestPath) {
