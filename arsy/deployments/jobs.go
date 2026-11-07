@@ -19,7 +19,8 @@ var interruptedDeploymentStates = []State{
 	StateVerifying,
 }
 
-// HasActiveDeployment checks if the application has any non-terminal deployment.
+// HasActiveDeployment checks if the application has any non-terminal deployment,
+// including queued jobs. Used by the API to prevent duplicate enqueue (#149).
 func HasActiveDeployment(app core.App, applicationID string) (bool, error) {
 	if app == nil {
 		return false, errors.New("PocketBase app is required")
@@ -27,6 +28,26 @@ func HasActiveDeployment(app core.App, applicationID string) (bool, error) {
 	records, err := app.FindRecordsByFilter(
 		"arsy_deployments",
 		`application = {:appID} && (status = "queued" || status = "preparing" || status = "uploading" || status = "validating" || status = "deploying" || status = "verifying")`,
+		"",
+		1, 0,
+		map[string]any{"appID": applicationID},
+	)
+	if err != nil {
+		return false, err
+	}
+	return len(records) > 0, nil
+}
+
+// HasInProgressDeployment checks if the application has a deployment currently
+// executing (preparing through verifying). Queued jobs are excluded so the
+// worker can claim a queued deployment when nothing is in progress (#149).
+func HasInProgressDeployment(app core.App, applicationID string) (bool, error) {
+	if app == nil {
+		return false, errors.New("PocketBase app is required")
+	}
+	records, err := app.FindRecordsByFilter(
+		"arsy_deployments",
+		`application = {:appID} && (status = "preparing" || status = "uploading" || status = "validating" || status = "deploying" || status = "verifying")`,
 		"",
 		1, 0,
 		map[string]any{"appID": applicationID},
@@ -99,7 +120,7 @@ func ClaimNextQueuedDeployment(app core.App) (*core.Record, error) {
 		var record *core.Record
 		for _, candidate := range records {
 			appID := candidate.GetString("application")
-			active, err := HasActiveDeployment(txApp, appID)
+			active, err := HasInProgressDeployment(txApp, appID)
 			if err != nil {
 				return err
 			}
