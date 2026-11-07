@@ -22,7 +22,7 @@ func Register(app core.App, cfg config.Config, version string) {
 				return re.JSON(http.StatusOK, map[string]any{
 					"product": "A-R-S-Y",
 					"version": version,
-					"status": "alive",
+					"status":  "alive",
 				})
 			})
 			api.GET("/ready", requireSuperuser(func(re *core.RequestEvent) error {
