@@ -40,8 +40,8 @@ func ProbeHostKey(ctx context.Context, address string, timeout time.Duration) (s
 	defer stopCancellation()
 	var fingerprint string
 	config := &ssh.ClientConfig{
-		User:            "arsy-host-key-probe",
-		Timeout:         timeout,
+		User:    "arsy-host-key-probe",
+		Timeout: timeout,
 		HostKeyCallback: func(_ string, _ net.Addr, key ssh.PublicKey) error {
 			fingerprint, err = HostKeyFingerprint(key)
 			if err != nil {
