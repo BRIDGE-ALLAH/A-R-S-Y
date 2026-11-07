@@ -1,4 +1,4 @@
-module ganigeorgiev.com/pocketbase/pocketbase
+module github.com/bridge-allah/a-r-s-y
 
 go 1.27
 

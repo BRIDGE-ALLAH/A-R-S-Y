@@ -58,6 +58,19 @@ npm run build
 
 Continuous integration runs these checks on pushes and pull requests. See [GitHub Actions](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions).
 
+## Configuration
+
+A-R-S-Y-specific settings use these environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `ARSY_DATA_DIR` | `pb_data/arsy` | Private A-R-S-Y runtime data directory |
+| `ARSY_API_PREFIX` | `/api/arsy/v1` | Versioned A-R-S-Y API prefix |
+| `ARSY_CONSOLE_PATH` | `/arsy` | A-R-S-Y web console route |
+| `ARSY_SECRET_KEY_ENV` | `ARSY_SECRET_KEY` | Name of the environment variable that supplies the secret key |
+
+The secret key value is never printed by diagnostics. Keep it outside source control and provide it through the environment of the A-R-S-Y process.
+
 ## Architecture and scope
 
 The intended MVP is a single Go control-plane process backed by PocketBase/SQLite, with a separately built web console. Remote host operations are performed over SSH. The first deployment target is Docker Compose on Linux.

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
+	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
+	"github.com/bridge-allah/a-r-s-y/core"
 )
 
 // note: this migration will be deleted in future version

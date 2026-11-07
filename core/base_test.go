@@ -13,10 +13,10 @@ import (
 	_ "unsafe"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/logger"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/mailer"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/logger"
+	"github.com/bridge-allah/a-r-s-y/tools/mailer"
 )
 
 func TestNewBaseApp(t *testing.T) {
@@ -668,7 +668,7 @@ func TestBaseAppTriggerOnTerminate(t *testing.T) {
 	event.App = app
 
 	// trigger OnTerminate multiple times to ensure that it doesn't deadlock
-	// https://ganigeorgiev.com/pocketbase/pocketbase/pull/7305
+	// https://github.com/bridge-allah/a-r-s-y/pull/7305
 	app.OnTerminate().Trigger(event)
 	app.OnTerminate().Trigger(event)
 	app.OnTerminate().Trigger(event)

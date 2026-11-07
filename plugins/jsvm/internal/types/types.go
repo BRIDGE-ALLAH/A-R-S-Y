@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/plugins/jsvm"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/plugins/jsvm"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
 	"ganigeorgiev.com/pocketbase/tygoja"
 )
 
@@ -1291,14 +1291,14 @@ func main() {
 		Packages: map[string][]string{
 			"ganigeorgiev.com/pocketbase/ozzo-validation/v4":          {"Error"},
 			"ganigeorgiev.com/pocketbase/dbx":                         {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/tools/security":   {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem": {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/tools/template":   {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/mails":            {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/apis":             {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/core":             {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase/forms":            {"*"},
-			"ganigeorgiev.com/pocketbase/pocketbase":                  {"*"},
+			"github.com/bridge-allah/a-r-s-y/tools/security":   {"*"},
+			"github.com/bridge-allah/a-r-s-y/tools/filesystem": {"*"},
+			"github.com/bridge-allah/a-r-s-y/tools/template":   {"*"},
+			"github.com/bridge-allah/a-r-s-y/mails":            {"*"},
+			"github.com/bridge-allah/a-r-s-y/apis":             {"*"},
+			"github.com/bridge-allah/a-r-s-y/core":             {"*"},
+			"github.com/bridge-allah/a-r-s-y/forms":            {"*"},
+			"github.com/bridge-allah/a-r-s-y":                  {"*"},
 			"path/filepath":                                           {"*"},
 			"os":                                                      {"*"},
 			"os/exec":                                                 {"Command"},

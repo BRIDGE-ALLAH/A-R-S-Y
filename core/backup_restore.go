@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/archive"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/archive"
+	"github.com/bridge-allah/a-r-s-y/tools/osutils"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 )
 
 // RestoreBackup restores the backup with the specified name and restarts

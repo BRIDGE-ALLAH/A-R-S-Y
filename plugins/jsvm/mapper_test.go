@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/plugins/jsvm"
+	"github.com/bridge-allah/a-r-s-y/plugins/jsvm"
 )
 
 func TestFieldMapper(t *testing.T) {

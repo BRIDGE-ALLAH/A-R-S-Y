@@ -9,8 +9,8 @@ import (
 
 	"ganigeorgiev.com/fexpr"
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
 	"github.com/spf13/cast"
 )
 

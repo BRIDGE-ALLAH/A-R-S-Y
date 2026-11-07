@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
 )
 
 // Cron is a crontab-like struct for tasks/jobs scheduling.

@@ -3,8 +3,8 @@ package subscriptions
 import (
 	"fmt"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
 )
 
 // Broker defines a struct for managing subscriptions clients.

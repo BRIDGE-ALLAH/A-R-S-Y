@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
 	_ "modernc.org/sqlite"
 )
 

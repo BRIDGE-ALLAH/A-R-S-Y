@@ -3,9 +3,9 @@ package httpapi
 import (
 	"net/http"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/arsy/config"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/arsy/config"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
 
 // Register attaches the A-R-S-Y health and readiness endpoints to the

@@ -10,20 +10,20 @@ import (
 	"syscall"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/cmd"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/cmd"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/osutils"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
 	"github.com/spf13/cobra"
 
-	_ "ganigeorgiev.com/pocketbase/pocketbase/migrations"
+	_ "github.com/bridge-allah/a-r-s-y/migrations"
 )
 
 var _ core.App = (*PocketBase)(nil)
 
-// Version of PocketBase
+// Version of A-R-S-Y
 var Version = "(untracked)"
 
 // PocketBase defines a PocketBase app launcher.
@@ -101,8 +101,8 @@ func NewWithConfig(config Config) *PocketBase {
 	pb := &PocketBase{
 		RootCmd: &cobra.Command{
 			Use:     executableName,
-			Short:   executableName + " CLI",
-			Version: Version,
+			Short:   "A-R-S-Y control-plane CLI",
+			Version: "A-R-S-Y " + Version,
 			FParseErrWhitelist: cobra.FParseErrWhitelist{
 				UnknownFlags: true,
 			},

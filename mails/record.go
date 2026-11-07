@@ -6,9 +6,9 @@ import (
 	"net/mail"
 	"slices"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/mails/templates"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/mailer"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/mails/templates"
+	"github.com/bridge-allah/a-r-s-y/tools/mailer"
 )
 
 // SendRecordAuthAlert sends a new device login alert to the specified auth record.

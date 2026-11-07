@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
 
 func TestRouteBindFunc(t *testing.T) {

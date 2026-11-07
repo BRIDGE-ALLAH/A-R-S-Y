@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/core/validators"
+	"github.com/bridge-allah/a-r-s-y/core/validators"
 )
 
 func TestJoinValidationErrors(t *testing.T) {
