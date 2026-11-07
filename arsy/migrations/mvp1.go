@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	projectsCollectionName     = "arsy_projects"
-	serversCollectionName      = "arsy_servers"
-	applicationsCollectionName = "arsy_applications"
-	deploymentsCollectionName  = "arsy_deployments"
+	projectsCollectionName       = "arsy_projects"
+	serversCollectionName        = "arsy_servers"
+	applicationsCollectionName   = "arsy_applications"
+	deploymentsCollectionName    = "arsy_deployments"
+	deploymentLogsCollectionName = "arsy_deployment_logs"
 )
 
 func init() {
@@ -44,6 +45,7 @@ func up(app core.App) error {
 			&core.TextField{Name: "os_name", Max: 80},
 			&core.TextField{Name: "architecture", Max: 40},
 			&core.TextField{Name: "host_key_fingerprint", Max: 128},
+			&core.TextField{Name: "pending_host_key_fingerprint", Hidden: true, Max: 128},
 			&core.SelectField{Name: "readiness_state", Values: []string{"unknown", "pending", "ready", "not_ready", "error"}, MaxSelect: 1},
 			&core.TextField{Name: "credential_ciphertext", Hidden: true, Max: 10000},
 		)
@@ -73,9 +75,11 @@ func up(app core.App) error {
 		return err
 	}
 
-	_, err = ensureCollection(app, deploymentsCollectionName, func(c *core.Collection) {
+	deployments, err := ensureCollection(app, deploymentsCollectionName, func(c *core.Collection) {
 		c.Fields.Add(
 			&core.RelationField{Name: "application", CollectionId: applications.Id, Required: true, MaxSelect: 1},
+			&core.AutodateField{Name: "created", OnCreate: true},
+			&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true},
 			&core.TextField{Name: "deployment_id", Required: true, Max: 80},
 			&core.SelectField{Name: "status", Values: []string{"queued", "preparing", "uploading", "validating", "deploying", "verifying", "succeeded", "failed", "cancelled"}, Required: true, MaxSelect: 1},
 			&core.DateField{Name: "started_at"},
@@ -88,11 +92,27 @@ func up(app core.App) error {
 			"CREATE UNIQUE INDEX idx_arsy_deployments_id ON arsy_deployments (deployment_id)",
 		}
 	})
+	if err != nil {
+		return err
+	}
+	_, err = ensureCollection(app, deploymentLogsCollectionName, func(c *core.Collection) {
+		c.Fields.Add(
+			&core.RelationField{Name: "deployment", CollectionId: deployments.Id, Required: true, MaxSelect: 1},
+			&core.AutodateField{Name: "created", OnCreate: true},
+			&core.TextField{Name: "step", Required: true, Max: 80},
+			&core.SelectField{Name: "level", Values: []string{"info", "warning", "error"}, Required: true, MaxSelect: 1},
+			&core.TextField{Name: "message", Required: true, Max: 5000},
+		)
+		c.Indexes = types.JSONArray[string]{
+			"CREATE INDEX idx_arsy_deployment_logs_deployment_created ON arsy_deployment_logs (deployment, created)",
+		}
+	})
 	return err
 }
 
 func down(app core.App) error {
 	for _, name := range []string{
+		deploymentLogsCollectionName,
 		deploymentsCollectionName,
 		applicationsCollectionName,
 		serversCollectionName,

@@ -1,0 +1,506 @@
+[
+  {
+    "body": "## Goal\nPrevent concurrent deployment jobs from racing over one application's release directory and lifecycle state.\n\n## Scope\n- Add an application-scoped deployment lock or atomic active-operation claim.\n- Define behavior for a second deploy request while one is queued or running.\n- Make API retries safe with an idempotency key.\n- Release locks on success, failure, cancellation, and stale-job reconciliation.\n\n## Acceptance criteria\n- [ ] Two concurrent requests cannot deploy the same application simultaneously.\n- [ ] Duplicate idempotency keys return the original operation/result.\n- [ ] Different applications can deploy concurrently within configured worker limits.\n- [ ] Stale locks are recovered safely after process restart.\n- [ ] Race and restart tests prove there is no release-path or state corruption.\n\n## Dependencies\n- #53\n- #54\n- #55\n\n## Constraints\nDo not serialize all deployments globally; isolation is per application with a configurable global worker limit.",
+    "labels": [],
+    "number": 149,
+    "state": "OPEN",
+    "title": "[MVP1-075] Prevent overlapping deployments for the same application"
+  },
+  {
+    "body": "## Goal\nAllow an administrator to rotate a managed server's SSH credential and revoke trust without deleting deployment history.\n\n## Scope\n- Add an authenticated credential replacement action.\n- Require a fresh host-key verification when trust is revoked or the host identity changes.\n- Invalidate cached SSH sessions/clients after credential or fingerprint changes.\n- Preserve an auditable record of who changed trust and when.\n\n## Acceptance criteria\n- [ ] Private-key replacement is encrypted before persistence.\n- [ ] Old credentials are no longer used after successful rotation.\n- [ ] Host-key mismatch never silently updates the pinned fingerprint.\n- [ ] Revocation blocks future remote operations until explicit re-verification.\n- [ ] Tests cover rotation success/failure, stale sessions, mismatch, and authorization.\n\n## Dependencies\n- #035\n- #037\n- #043\n- #045\n\n## Constraints\nNever auto-accept a changed host key or expose private-key material in API responses.",
+    "labels": [],
+    "number": 143,
+    "state": "OPEN",
+    "title": "[MVP1-074] Add safe SSH credential rotation and server trust revocation"
+  },
+  {
+    "body": "## Goal\nPrevent application environment secrets embedded in Compose manifests from being stored or returned as plaintext.\n\n## Why this is needed\nThe current MVP-1 plan protects SSH private keys, but Compose manifests may contain environment values such as database passwords, API tokens, and signing keys. Encrypting SSH credentials alone does not protect these application secrets.\n\n## Scope\n- Separate non-secret Compose configuration from secret environment values where practical.\n- Encrypt secret values using the existing versioned AES-256-GCM helper.\n- Keep ciphertext out of normal API DTOs and console list/detail responses.\n- Decrypt only in the deployment execution path immediately before upload/use.\n- Redact secret values from validation errors, deployment logs, diagnostics, and audit metadata.\n\n## Acceptance criteria\n- [ ] Database inspection proves application secret values are not stored as plaintext.\n- [ ] API responses never include ciphertext or decrypted secret values.\n- [ ] Deployment receives the intended values without persisting plaintext in logs or artifacts.\n- [ ] Wrong/missing key and tampered ciphertext fail closed.\n- [ ] Tests cover secret redaction in errors and deployment output.\n\n## Dependencies\n- #029\n- #031\n- #048\n- #056\n\n## Constraints\nDo not silently change existing Compose semantics. Document migration behavior for any previously stored plaintext manifests and require a safe migration path.",
+    "labels": [],
+    "number": 142,
+    "state": "OPEN",
+    "title": "[MVP1-073] Encrypt application Compose manifests and environment secrets at rest"
+  },
+  {
+    "body": "## Goal\nProtect the control-plane database and metadata required to locate and operate tenant databases.\n\n## Scope\n- Define a consistent backup format for control-plane data.\n- Include tenant database catalog, placement references, migration metadata, and operation state without exporting plaintext secrets.\n- Verify checksums and restore into a new location before switching active control-plane state.\n- Document ordering with tenant database backups.\n\n## Acceptance criteria\n- [ ] Backup is consistent and integrity-checked.\n- [ ] Restore can target a new location without overwriting the active control plane.\n- [ ] Secret material is excluded or restored only through a separately managed secret reference.\n- [ ] Restore failure leaves the current control plane usable.\n- [ ] Tests cover corrupted backup, missing tenant database, and interrupted restore.\n\n## Dependencies\n- #080\n- #081\n- #093\n- #094\n\n## Constraints\nDo not claim point-in-time recovery or zero-downtime restore unless separately implemented and tested.",
+    "labels": [],
+    "number": 141,
+    "state": "OPEN",
+    "title": "[BAAS-024] Implement control-plane backup and restore"
+  },
+  {
+    "body": "## Goal\nMake provisioning, migration, backup, restore, and deletion recoverable across process restarts.\n\n## Scope\n- Persist operation intent, idempotency key, state, attempt count, and safe result summary.\n- Claim operations atomically.\n- Retry only retryable failures with bounded backoff.\n- Reconcile operations left in an in-progress state after restart.\n- Record audit events for state transitions.\n\n## Acceptance criteria\n- [ ] Duplicate requests with the same idempotency key do not execute twice.\n- [ ] Worker claims are concurrency-safe.\n- [ ] Restart recovery reconciles stale in-progress operations deterministically.\n- [ ] Retry policy distinguishes transient and permanent failures.\n- [ ] Logs and persisted summaries contain no DSNs, keys, or tenant business data.\n\n## Dependencies\n- #080\n- #088\n- #089\n- #090\n\n## Constraints\nNo distributed transactions. Use idempotent operations and explicit reconciliation.",
+    "labels": [],
+    "number": 140,
+    "state": "OPEN",
+    "title": "[BAAS-023] Add durable tenant operations outbox and reconciliation worker"
+  },
+  {
+    "body": "## Goal\nMake tenant datastore handles safe under concurrent requests and tenant lifecycle changes.\n\n## Scope\n- Cache handles by immutable tenant/database identity.\n- Prevent one tenant identity from reusing another tenant's handle.\n- Coordinate open, close, suspend, reassignment, and deletion with in-flight requests.\n- Bound idle handles and expose safe health state.\n\n## Acceptance criteria\n- [ ] Concurrent opens for one tenant do not create unsafe duplicate handles.\n- [ ] Different tenant identities never share a database handle.\n- [ ] Closing/suspending a tenant prevents new acquisitions and drains or cancels in-flight work safely.\n- [ ] Cache eviction and shutdown close resources deterministically.\n- [ ] Race tests cover open/close/suspend/reassign interleavings.\n\n## Dependencies\n- #082\n- #083\n- #085\n- #086\n- #090\n\n## Constraints\nDo not introduce distributed caching or shared-table tenancy.",
+    "labels": [],
+    "number": 139,
+    "state": "OPEN",
+    "title": "[BAAS-022] Implement concurrency-safe tenant database handle lifecycle"
+  },
+  {
+    "body": "## Goal\nExpose a protected control-plane API for tenant lifecycle and membership administration.\n\n## Scope\n- Create, list, view, rename, suspend, and resume tenant records.\n- Add, list, change role, deactivate, and remove tenant memberships.\n- Resolve tenant database placement only from server-side catalog data.\n- Return allow-listed DTOs without filesystem paths, DSNs, credentials, or secret references.\n\n## Acceptance criteria\n- [ ] Every endpoint requires authenticated control-plane authorization.\n- [ ] Tenant and membership CRUD have validation and pagination tests.\n- [ ] Tenant IDs supplied by clients are selectors only; membership and role checks are always server-side.\n- [ ] Suspended/deleting tenants fail closed.\n- [ ] API responses and errors never expose database paths or secrets.\n\n## Dependencies\n- #080\n- #081\n- #084\n- #085\n- #091\n\n## Constraints\nDo not implement tenant business CRUD until the isolation boundary and adversarial tests are proven.",
+    "labels": [],
+    "number": 138,
+    "state": "OPEN",
+    "title": "[BAAS-021] Implement tenant administration and membership APIs"
+  },
+  {
+    "body": "## Goal\nConnect the declarative UI contract in #117/#118 to registered models, fields, actions, and security metadata.\n\n## Scope\n- Validate menu, form, list, widget, and action references.\n- Reject references to unknown models, fields, or actions.\n- Ensure view metadata cannot grant permissions.\n- Produce a stable normalized view descriptor for a future frontend renderer.\n\n## Acceptance criteria\n- [ ] Valid sample company form/list descriptors pass validation.\n- [ ] Unknown model/field/action references fail with path-aware errors.\n- [ ] Access references can only narrow existing server-side permissions.\n- [ ] IDs and serialization are deterministic across runs.\n- [ ] Contract tests include valid and adversarial metadata fixtures.\n\n## Dependencies\n- #117\n- #118\n- #124\n- #125\n- #136\n\n## Constraints\nNo frontend rendering framework or arbitrary client-side code execution in this issue.",
+    "labels": [],
+    "number": 137,
+    "state": "OPEN",
+    "title": "[AENG-036] Validate add-on view and action metadata against runtime registry"
+  },
+  {
+    "body": "## Goal\nTurn the security metadata contract in #116 into server-side authorization enforcement.\n\n## Scope\n- Enforce model operation permissions and field-level visibility/editability.\n- Evaluate record rules using the validated query AST, never raw SQL.\n- Separate tenant isolation from company/business-unit scope.\n- Apply authorization consistently to ORM read/write/list/count operations.\n\n## Acceptance criteria\n- [ ] Deny-by-default behavior is enforced in the service layer.\n- [ ] Unauthorized fields are not returned or writable through API/ORM paths.\n- [ ] Record-rule filters are applied before read/list/count operations.\n- [ ] Tests prove direct service calls cannot bypass authorization.\n- [ ] Cross-tenant authorization remains owned by the BaaS tenant boundary.\n\n## Dependencies\n- #116\n- #127\n- #131\n- #132\n\n## Constraints\nFrontend visibility is never an authorization boundary. Do not conflate company scope with tenant isolation.",
+    "labels": [],
+    "number": 136,
+    "state": "OPEN",
+    "title": "[AENG-035] Enforce model and record security metadata at runtime"
+  },
+  {
+    "body": "## Goal\nExecute the seed-data contract defined in #115 safely during module installation and upgrades.\n\n## Scope\n- Load typed seed records with stable module-owned keys.\n- Separate system data, module master data, and opt-in demo data.\n- Track provenance and update policy.\n- Apply dependency ordering and locale-aware values where declared.\n\n## Acceptance criteria\n- [ ] Re-running a seed does not create duplicates.\n- [ ] User-edited records are not overwritten by default.\n- [ ] Demo data is opt-in and never mixed with required system data.\n- [ ] Seed failures are reported with module and record context without leaking secrets.\n- [ ] Tests cover repeated runs, partial failure, upgrade, and user-edited values.\n\n## Dependencies\n- #115\n- #134\n- #130\n\n## Constraints\nDo not bulk import national tax/accounting datasets or ISP-specific records into the generic core.",
+    "labels": [],
+    "number": 135,
+    "state": "OPEN",
+    "title": "[AENG-034] Implement idempotent module seed data runner"
+  },
+  {
+    "body": "## Goal\nMove beyond manifest parsing and dependency ordering to a safe, deterministic add-on lifecycle.\n\n## Scope\n- Register validated module descriptors.\n- Resolve dependencies before activation.\n- Track discovered, validated, installed, enabled, disabled, failed, and upgrade-pending states.\n- Define install/enable/disable/uninstall service boundaries and persist lifecycle state through an injected store.\n- Prevent duplicate or concurrent lifecycle operations.\n\n## Acceptance criteria\n- [ ] Valid modules can be registered and moved through allowed lifecycle transitions.\n- [ ] Missing dependencies, cycles, incompatible versions, and duplicate IDs fail clearly.\n- [ ] Repeated operations are idempotent or return a stable already-in-state result.\n- [ ] Lifecycle transitions are concurrency-safe and tested.\n- [ ] No arbitrary Go code execution or filesystem path escape is possible.\n\n## Dependencies\n- #112\n- #113\n- #114\n- #124\n\n## Constraints\nThis issue implements lifecycle orchestration only. Do not implement remote marketplace downloads or arbitrary plugin execution.",
+    "labels": [],
+    "number": 134,
+    "state": "OPEN",
+    "title": "[AENG-033] Implement add-on runtime registry and lifecycle"
+  },
+  {
+    "body": "## Goal\nTurn the migration format contract in #111 into a safe executor for application model schema changes.\n\n## Scope\n- Parse and validate ordered migration operations.\n- Support create model, add field, add index, add relation, and safe deprecation operations.\n- Track migration identity, checksum, status, and applied version.\n- Require explicit approval for destructive operations and provide deterministic failure/retry semantics.\n\n## Acceptance criteria\n- [ ] Fresh schema installation and sequential upgrades are deterministic.\n- [ ] Duplicate migration IDs and checksum drift are rejected.\n- [ ] Destructive operations cannot run without explicit opt-in.\n- [ ] Failed migrations record a safe failure state and can be retried according to documented rules.\n- [ ] Tests use isolated databases and prove existing PocketBase migrations remain untouched.\n\n## Dependencies\n- #111\n- #124\n- #125\n- #126\n- #102\n\n## Constraints\nDo not rewrite historical PocketBase migrations or perform automatic destructive data loss.",
+    "labels": [],
+    "number": 133,
+    "state": "OPEN",
+    "title": "[AENG-032] Implement versioned application schema migration executor"
+  },
+  {
+    "body": "## Goal\nTranslate the validated query AST into parameterized PocketBase/dbx queries.\n\n## Scope\n- Compile comparisons, boolean groups, sorting, pagination, and selected fields.\n- Resolve identifiers only from registered model/field metadata.\n- Bind all values as parameters.\n- Return typed unsupported-operation errors rather than falling back to raw SQL.\n\n## Acceptance criteria\n- [ ] Supported AST nodes compile into parameterized queries.\n- [ ] Unknown identifiers and unsupported operators fail closed.\n- [ ] No user-controlled SQL identifiers or fragments are interpolated.\n- [ ] Tests verify generated query behavior against an isolated SQLite/PocketBase database.\n- [ ] Query limits and complexity constraints from #026 are enforced.\n\n## Dependencies\n- #127\n- #124\n- #125\n- #101\n\n## Constraints\nNo PostgreSQL dialect implementation here; preserve a clean adapter boundary for future engines.",
+    "labels": [],
+    "number": 132,
+    "state": "OPEN",
+    "title": "[AENG-031] Implement safe query compiler for PocketBase and dbx"
+  },
+  {
+    "body": "## Goal\nProvide the first usable ORM persistence path for statically defined Go models without replacing PocketBase.\n\n## Scope\n- Map registered Go model fields to PocketBase records/dbx persistence through an explicit adapter.\n- Implement typed create, get, update, and delete operations.\n- Reuse the model registry, field metadata, validation, authorization hooks, and Unit of Work boundaries.\n- Keep persistence mapping explicit; avoid reflection magic that silently changes schemas.\n\n## Acceptance criteria\n- [ ] A sample static model can be created, fetched, updated, and deleted through the ORM service.\n- [ ] Field mapping and conversion errors are typed and field-addressable.\n- [ ] Missing records and duplicate/constraint errors are normalized.\n- [ ] Tests run against an isolated PocketBase app/database.\n- [ ] Existing PocketBase Record and Collection APIs continue to work unchanged.\n\n## Dependencies\n- #124\n- #125\n- #127\n- #130\n- #101\n- #102\n\n## Constraints\nDo not implement dynamic model schema creation or a PostgreSQL adapter in this issue.",
+    "labels": [],
+    "number": 131,
+    "state": "OPEN",
+    "title": "[AENG-030] Implement static Go model persistence mapper"
+  },
+  {
+    "body": "## Goal\nImplement the driver-neutral transaction contract defined in #110.\n\n## Scope\n- Provide begin/commit/rollback through a small Unit of Work API.\n- Propagate context cancellation and errors.\n- Define nested transaction behavior as rejected or explicitly supported.\n- Ensure model operations share one transaction boundary.\n\n## Acceptance criteria\n- [ ] Successful work commits exactly once.\n- [ ] Returned errors and panics trigger safe rollback behavior.\n- [ ] Context cancellation is handled without leaking transaction resources.\n- [ ] Nested transaction behavior is deterministic and documented.\n- [ ] Fake transaction tests cover commit, rollback, cancellation, and repeated completion.\n\n## Dependencies\n- #110\n- #101\n\n## Constraints\nNo distributed transactions or cross-tenant transaction support.",
+    "labels": [],
+    "number": 130,
+    "state": "OPEN",
+    "title": "[AENG-029] Implement application Unit of Work and transaction manager"
+  },
+  {
+    "body": "## Goal\nImplement the hook execution contract in #109 with predictable ordering and error handling.\n\n## Scope\n- Support before/after create, update, and delete hooks.\n- Define hook registration order and duplicate registration behavior.\n- Propagate hook failures and context cancellation.\n- Separate in-transaction hooks from after-commit side effects.\n- Guard recursive writes/re-entrancy.\n\n## Acceptance criteria\n- [ ] Hook order is deterministic and covered by tests.\n- [ ] A failing before-hook prevents persistence from proceeding.\n- [ ] After-commit hooks never run before a successful commit.\n- [ ] Cancellation and re-entrancy behavior are explicit and tested.\n- [ ] Hook errors cannot bypass validation or authorization.\n\n## Dependencies\n- #109\n- #110\n\n## Constraints\nDo not load arbitrary Go plugins or execute untrusted module code.",
+    "labels": [],
+    "number": 129,
+    "state": "OPEN",
+    "title": "[AENG-028] Implement transaction-aware model lifecycle hooks"
+  },
+  {
+    "body": "## Goal\nImplement the runtime pipeline specified in #108 for create and update operations.\n\n## Scope\n- Apply system defaults and field defaults in a documented deterministic order.\n- Validate required/type/length/range/enum constraints and custom validators.\n- Distinguish create from partial update so omitted update fields are not overwritten.\n- Protect system-managed fields from client input.\n\n## Acceptance criteria\n- [ ] Create and update validation have explicit, tested semantics.\n- [ ] Errors identify the model field and validation rule.\n- [ ] Defaults are deterministic and do not perform hidden database writes.\n- [ ] Client-supplied values cannot override protected fields.\n- [ ] Table-driven tests cover omitted, null, zero, empty, and invalid values.\n\n## Dependencies\n- #105\n- #108\n- #125\n\n## Constraints\nDo not add business-specific ERP rules or database persistence.",
+    "labels": [],
+    "number": 128,
+    "state": "OPEN",
+    "title": "[AENG-027] Implement model defaults and validation pipeline"
+  },
+  {
+    "body": "## Goal\nTurn the engine-neutral query contract in #107 into typed, executable validation code.\n\n## Scope\n- Implement comparison nodes, AND/OR groups, sort, limit, offset, and field selection.\n- Validate operators and values against registered model/field metadata.\n- Enforce configurable maximum limit, offset, nesting depth, and node count.\n- Produce deterministic serialization and typed validation errors.\n\n## Acceptance criteria\n- [ ] Valid ASTs serialize deterministically.\n- [ ] Unknown fields/operators, malformed groups, invalid values, and excessive complexity are rejected.\n- [ ] Values remain data values and cannot inject SQL fragments.\n- [ ] Tests cover nested boolean groups and all supported operators.\n- [ ] Query AST validation is independent of PocketBase/dbx.\n\n## Dependencies\n- #107\n- #124\n- #125\n\n## Constraints\nDo not implement SQL generation or expose raw SQL in public APIs.",
+    "labels": [],
+    "number": 127,
+    "state": "OPEN",
+    "title": "[AENG-026] Implement validated query filter AST"
+  },
+  {
+    "body": "## Goal\nPublish a short developer-facing map of the intended Application Engine boundaries.\n\n## Scope\nExplain storage, static models, metadata models, schema/migration, security, module registry, application runtime, and add-on lifecycle.\n\n## Acceptance criteria\n- [ ] Diagram shows dependency direction between layers.\n- [ ] PocketBase reuse versus A-R-S-Y-owned functionality is clear.\n- [ ] Tenant isolation is shown as a storage/security boundary.\n- [ ] Terms such as model, module, addon, tenant, company, and app are defined.\n- [ ] Link to BAAS architecture and AENG decision documents.\n- [ ] Clearly mark planned versus implemented components.\n\n## Constraints\nDocumentation only; do not describe planned features as shipped.\nParent context: #78, #97.",
+    "labels": [],
+    "number": 120,
+    "state": "OPEN",
+    "title": "[AENG-022] Add application engine architecture overview and glossary"
+  },
+  {
+    "body": "## Goal\nCreate a tiny, non-production fixture module to prove model, field, relation, and manifest contracts fit together.\n\n## Scope\nUse only a simple `base.company` model with name, code, and active fields.\n\n## Acceptance criteria\n- [ ] Fixture manifest validates.\n- [ ] Model and field identifiers validate.\n- [ ] Fixture includes a relation only if the relation contract supports it.\n- [ ] Tests prove deterministic registration.\n- [ ] Fixture does not seed real tenant databases.\n- [ ] No ERP business logic.\n\n## Dependencies\n- [ ] #104\n- [ ] #105\n- [ ] #112\n- [ ] #113\n\n## Constraints\nTest fixture only; do not claim a production Base module exists.",
+    "labels": [],
+    "number": 119,
+    "state": "OPEN",
+    "title": "[AENG-021] Add base module fixture for registry contract tests"
+  },
+  {
+    "body": "## Goal\nSpecify declarative UI metadata needed for add-ons to contribute menus, actions, forms, and lists.\n\n## Scope\nDefine menu, action, form view, list view, field widget hints, and access references.\n\n## Acceptance criteria\n- [ ] View metadata references registered models and fields.\n- [ ] Unknown fields and actions fail validation.\n- [ ] UI metadata cannot grant server-side permissions.\n- [ ] Stable identifiers support module upgrades.\n- [ ] Include one small example for a company form and list.\n- [ ] No frontend renderer implementation.\n\n## Constraints\nKeep the format framework-neutral; do not bind the schema to one frontend library.\nParent context: #78, #97.",
+    "labels": [],
+    "number": 118,
+    "state": "OPEN",
+    "title": "[AENG-020] Define metadata-driven view and action manifest"
+  },
+  {
+    "body": "## Goal\nSpecify the declarative UI metadata needed for add-ons to contribute menus, actions, forms, and lists.\n\n## Scope\nDefine menu, action, form view, list view, field widget hints, and access references.\n\n## Acceptance criteria\n- [ ] View metadata references registered models and fields.\n- [ ] Unknown fields and actions fail validation.\n- [ ] UI metadata cannot grant server-side permissions.\n- [ ] Stable identifiers support module upgrades.\n- [ ] Include one small example for a company form and list.\n- [ ] No frontend renderer implementation.\n\n## Constraints\nKeep the format framework-neutral; do not bind the schema to one frontend library.\nParent context: #78, #97.",
+    "labels": [],
+    "number": 117,
+    "state": "OPEN",
+    "title": "[AENG-020] Define metadata-driven view and action manifest"
+  },
+  {
+    "body": "## Goal\nSpecify module-declared model permissions and record-rule metadata without implementing the full authorization engine.\n\n## Scope\nDefine groups/roles, model operations, field visibility/editability, and record-rule expression boundaries.\n\n## Acceptance criteria\n- [ ] Deny-by-default behavior is documented.\n- [ ] Model-level permissions and record-level rules are distinguished.\n- [ ] Rule expressions use the validated query AST, not raw SQL.\n- [ ] Multi-company scope is distinct from tenant isolation.\n- [ ] Security metadata cannot grant permissions to unknown models/fields.\n- [ ] Include positive and negative examples.\n\n## Constraints\nDo not rely on frontend visibility as authorization.\nParent context: #84, #91, #92.",
+    "labels": [],
+    "number": 116,
+    "state": "OPEN",
+    "title": "[AENG-019] Define module security metadata contract"
+  },
+  {
+    "body": "## Goal\nSpecify how modules declare required master data and optional demo data safely.\n\n## Scope\nDefine stable record keys, update policy, ownership/provenance, locale support, and demo-data opt-in.\n\n## Acceptance criteria\n- [ ] System data, module master data, and demo data are distinct.\n- [ ] Re-running a seed does not duplicate records.\n- [ ] Module upgrades do not overwrite user-edited business data by default.\n- [ ] Seed ordering and dependency behavior are explicit.\n- [ ] Locale and effective-date considerations are documented.\n- [ ] Include sample currency, country, and sequence seed records.\n\n## Constraints\nDo not bulk-import national datasets or accounting/tax rules in this issue.\nParent context: #97.",
+    "labels": [],
+    "number": 115,
+    "state": "OPEN",
+    "title": "[AENG-018] Define idempotent module seed data format"
+  },
+  {
+    "body": "## Goal\nResolve a module's declared dependencies into a deterministic installation order.\n\n## Scope\nOperate on in-memory module descriptors only.\n\n## Acceptance criteria\n- [ ] Dependencies are ordered before dependents.\n- [ ] Missing dependencies return actionable errors.\n- [ ] Cycles return the involved module path.\n- [ ] Version incompatibility is detected.\n- [ ] Repeated runs produce identical output.\n- [ ] Unit tests cover empty, linear, branching, missing, cyclic, and incompatible graphs.\n\n## Dependencies\n- [ ] #112\n\n## Constraints\nNo network downloads, module installation, or code execution.\nParent context: #78.",
+    "labels": [],
+    "number": 114,
+    "state": "OPEN",
+    "title": "[AENG-017] Implement deterministic add-on dependency resolver"
+  },
+  {
+    "body": "## Goal\nImplement a small parser for the manifest format defined in #112.\n\n## Scope\n- Parse YAML or JSON using the repository's existing dependency policy.\n- Validate required fields and safe relative paths.\n- Return structured errors with field/path context.\n\n## Acceptance criteria\n- [ ] Valid fixture parses into typed Go structs.\n- [ ] Missing required fields are rejected.\n- [ ] Absolute paths and directory traversal are rejected.\n- [ ] Unsupported schema versions are rejected.\n- [ ] Tests cover malformed YAML, duplicate/invalid identifiers, and path traversal.\n- [ ] No filesystem writes and no module execution.\n\n## Dependencies\n- [ ] #112\n\n## Constraints\nDo not add a large dependency for a small parser without justification.\nParent context: #78.",
+    "labels": [],
+    "number": 113,
+    "state": "OPEN",
+    "title": "[AENG-016] Implement add-on manifest parser and validator"
+  },
+  {
+    "body": "## Goal\nCreate a minimal manifest format for installable A-R-S-Y application modules.\n\n## Scope\nDefine module name, version, compatibility range, dependencies, models, data, security, views, and migrations file references.\n\n## Acceptance criteria\n- [ ] Manifest has a schema version.\n- [ ] Module name and version are validated.\n- [ ] File paths must remain inside the module directory.\n- [ ] Unknown manifest keys fail or warn according to a documented policy.\n- [ ] Dependency declarations support version constraints.\n- [ ] Add valid and invalid fixture manifests.\n\n## Constraints\nNo module installer or execution of Go code in this issue.\nParent context: #78.",
+    "labels": [],
+    "number": 112,
+    "state": "OPEN",
+    "title": "[AENG-015] Define add-on manifest schema"
+  },
+  {
+    "body": "## Goal\nSpecify a versioned and reviewable schema change format for future add-on modules.\n\n## Scope\nCover create model, add field, add index, add relation, and safe deprecation operations.\n\n## Acceptance criteria\n- [ ] Migration format is versioned.\n- [ ] Operations are ordered and deterministic.\n- [ ] Destructive operations require explicit opt-in.\n- [ ] Migration identity and checksum rules are defined.\n- [ ] Failure and retry behavior is documented.\n- [ ] Include example initial and upgrade migration files.\n\n## Constraints\nDo not execute migrations or alter existing PocketBase migrations.\nParent context: #88.",
+    "labels": [],
+    "number": 111,
+    "state": "OPEN",
+    "title": "[AENG-014] Define schema migration plan format for application modules"
+  },
+  {
+    "body": "## Goal\nSpecify how a service can perform multiple model operations atomically without depending on a particular SQL driver.\n\n## Scope\nDefine transaction begin, commit, rollback, nested transaction policy, and context cancellation behavior.\n\n## Acceptance criteria\n- [ ] Transaction contract is small and driver-neutral.\n- [ ] Rollback behavior on returned errors is defined.\n- [ ] Context cancellation is covered.\n- [ ] Nested transaction behavior is explicit (supported or rejected).\n- [ ] Tests use a deterministic fake transaction implementation.\n- [ ] No database driver replacement.\n\n## Constraints\nDo not implement distributed transactions.\nParent context: #82.",
+    "labels": [],
+    "number": 110,
+    "state": "OPEN",
+    "title": "[AENG-013] Define application unit-of-work and transaction contract"
+  },
+  {
+    "body": "## Goal\nSpecify a minimal, predictable hook API for application model lifecycle events.\n\n## Scope\nCover before/after create, update, delete and transaction-aware behavior.\n\n## Acceptance criteria\n- [ ] Hook ordering and error propagation are documented.\n- [ ] Transaction boundaries are explicit.\n- [ ] Hooks cannot silently bypass authorization or validation.\n- [ ] Recursive writes and re-entrancy behavior are defined.\n- [ ] Side effects after commit are distinguished from in-transaction hooks.\n- [ ] Add contract tests if interfaces are introduced.\n\n## Constraints\nDo not implement arbitrary plugin code execution or Go's native plugin loader.\nParent context: #78.",
+    "labels": [],
+    "number": 109,
+    "state": "OPEN",
+    "title": "[AENG-012] Define model lifecycle hook contract"
+  },
+  {
+    "body": "## Goal\nDefine a deterministic lifecycle for applying defaults and validating records before persistence.\n\n## Scope\nDocument ordering for system defaults, field defaults, required checks, type checks, relation checks, and custom validators.\n\n## Acceptance criteria\n- [ ] Default application order is explicit and deterministic.\n- [ ] Client input cannot override protected/system-managed fields.\n- [ ] Required and type validation produce field-addressable errors.\n- [ ] Update behavior does not overwrite omitted fields with defaults.\n- [ ] Validation does not perform hidden database writes.\n- [ ] Include table-driven test cases or executable contract tests.\n\n## Constraints\nDo not implement workflow/business rules in the generic validation layer.\nParent context: #78.",
+    "labels": [],
+    "number": 108,
+    "state": "OPEN",
+    "title": "[AENG-011] Specify model validation and default value pipeline"
+  },
+  {
+    "body": "## Goal\nCreate a small, validated query representation that can later be translated to PocketBase/dbx and other supported stores.\n\n## Scope\nSupport comparison operators, AND/OR groups, sorting, limit, offset, and field selection.\n\n## Acceptance criteria\n- [ ] Operators are allowlisted.\n- [ ] Values are always parameterized; no raw user SQL fragments.\n- [ ] Empty and malformed groups are rejected.\n- [ ] Sort fields and selected fields can be validated against model metadata.\n- [ ] JSON serialization is deterministic.\n- [ ] Unit tests cover valid and invalid expressions.\n\n## Constraints\nDo not implement SQL generation or expose raw SQL in public APIs.\nParent context: #78, #82.",
+    "labels": [],
+    "number": 107,
+    "state": "OPEN",
+    "title": "[AENG-010] Define engine-neutral query filter AST"
+  },
+  {
+    "body": "## Goal\nSpecify safe, engine-neutral metadata for relations between application models.\n\n## Scope\nCover many-to-one, one-to-many, many-to-many, inverse field, delete behavior, and relation target validation.\n\n## Acceptance criteria\n- [ ] Relation cardinality is explicit.\n- [ ] Many-to-one requires a valid target model.\n- [ ] One-to-many requires a valid inverse many-to-one field.\n- [ ] Many-to-many defines join-table ownership and naming rules.\n- [ ] Delete behavior is explicit; cascading deletion is never implicit.\n- [ ] Table-driven tests cover malformed relation definitions if code is added.\n\n## Constraints\nMetadata and validation only; no query preloading implementation.\nParent context: #78.",
+    "labels": [],
+    "number": 106,
+    "state": "OPEN",
+    "title": "[AENG-009] Define model relation metadata contracts"
+  },
+  {
+    "body": "## Goal\nSpecify the metadata contract for fields used by static and dynamic application models.\n\n## Scope\nDefine field name, type, label, required, readonly, default, index, unique, relation target, and help text.\n\n## Acceptance criteria\n- [ ] Supported initial types are explicitly enumerated.\n- [ ] Unknown types fail validation.\n- [ ] Invalid field names and duplicate fields are rejected.\n- [ ] Relation metadata is validated separately from relation execution.\n- [ ] Schema has versioning and deterministic serialization.\n- [ ] Add table-driven unit tests if implementation types are introduced.\n\n## Constraints\nDo not create SQL tables or implement computed fields in this issue.\nParent context: #78.",
+    "labels": [],
+    "number": 105,
+    "state": "OPEN",
+    "title": "[AENG-008] Define field metadata schema and validation rules"
+  },
+  {
+    "body": "## Goal\nDefine minimal Go interfaces and metadata structures for registering application models without implementing persistence.\n\n## Scope\nDesign contracts for model identity, label, table/collection mapping, version, ownership module, and registration lifecycle.\n\n## Deliverable\nAdd a short design document and, only if approved by existing package conventions, minimal types under `arsy/engine/registry`.\n\n## Acceptance criteria\n- [ ] Model identifiers are stable and namespaced (example: `base.company`).\n- [ ] Duplicate registration behavior is defined.\n- [ ] Registration is deterministic and testable.\n- [ ] Static and metadata-defined models can share the same registry contract.\n- [ ] No database writes or schema changes.\n- [ ] Unit tests cover duplicate and invalid identifiers if code is added.\n\n## Constraints\nDo not implement a full ORM or global mutable singleton.\nParent context: #78.",
+    "labels": [],
+    "number": 104,
+    "state": "OPEN",
+    "title": "[AENG-007] Define application model registry contracts"
+  },
+  {
+    "body": "## Goal\nCompare reuse of PocketBase/dbx with a thin static ORM layer and a metadata-driven ORM layer.\n\n## Scope\nEvaluate:\n- PocketBase Record/Collection as dynamic persistence.\n- dbx as SQL/query foundation.\n- Static Go model mapping.\n- Dynamic metadata models.\n- Optional future PostgreSQL adapter.\n- Operational complexity and migration risk.\n\n## Deliverable\nAdd `.plan/aeng/orm-decision-matrix.md`.\n\n## Acceptance criteria\n- [ ] Compare at least three viable architecture options.\n- [ ] Evaluate type safety, dynamic models, relations, transactions, migrations, SQLite, PostgreSQL, and maintenance cost.\n- [ ] Clearly separate verified facts from assumptions.\n- [ ] Recommend a staged approach with explicit unresolved decisions.\n- [ ] Do not select GORM/Bun or add dependencies without evidence.\n\n## Constraints\nDocumentation-only.\nParent context: #78, #82.",
+    "labels": [],
+    "number": 103,
+    "state": "OPEN",
+    "title": "[AENG-006] Write ORM architecture decision matrix"
+  },
+  {
+    "body": "## Goal\nCreate small regression tests that establish the current app lifecycle behavior before tenant database work begins.\n\n## Scope\n- Reuse the repository's existing test setup.\n- Test temporary data directory startup.\n- Test migration registration/execution where practical.\n- Test clean app/database shutdown.\n\n## Acceptance criteria\n- [ ] Tests use temporary directories and do not touch developer data.\n- [ ] Tests are deterministic and do not require network access.\n- [ ] Cleanup runs on success and failure.\n- [ ] Tests pass with `go test ./...`.\n- [ ] No production behavior changes unless strictly required for testability.\n\n## Constraints\nKeep this issue test-only; do not implement multi-tenancy.\nParent context: #77.",
+    "labels": [],
+    "number": 102,
+    "state": "OPEN",
+    "title": "[AENG-005] Add isolated tests for PocketBase app startup and shutdown"
+  },
+  {
+    "body": "## Goal\nIdentify the smallest safe abstraction boundary for future SQLite and PostgreSQL support.\n\n## Scope\n- Inspect the pinned dbx implementation and its driver/dialect integration.\n- Map placeholders, transactions, migrations, JSON operations, indexes, pagination, and error handling.\n- Identify which APIs are PocketBase-specific.\n\n## Deliverable\nAdd `.plan/aeng/dbx-dialect-seams.md`.\n\n## Acceptance criteria\n- [ ] Include exact source paths and API names.\n- [ ] Identify dialect-dependent behavior versus database-independent behavior.\n- [ ] List SQLite/PostgreSQL incompatibilities that must not be hidden.\n- [ ] Recommend no library replacement; provide evidence and options only.\n- [ ] No production code changes.\n\n## Constraints\nDo not add a PostgreSQL dependency in this issue.\nParent context: #78, #82, #96.",
+    "labels": [],
+    "number": 101,
+    "state": "OPEN",
+    "title": "[AENG-004] Map dbx query and SQL dialect extension points"
+  },
+  {
+    "body": "## Goal\nBuild a verified compatibility matrix between PocketBase fields and the field types needed by a general-purpose business application engine.\n\n## Scope\nInspect supported field types, required/default behavior, uniqueness, indexes, relations, JSON, file fields, and validation behavior.\n\n## Deliverable\nAdd `.plan/aeng/field-type-compatibility.md`.\n\n## Acceptance criteria\n- [ ] Matrix covers char/text, integer, number/decimal, bool, date/time, JSON, file, email/URL, select, and relation.\n- [ ] Distinguish native support from behavior requiring A-R-S-Y code.\n- [ ] Record SQLite-specific limitations that affect correctness.\n- [ ] Include at least five focused examples or source references.\n- [ ] No schema or runtime changes.\n\n## Constraints\nKeep the document under 250 lines where practical.\nParent context: #77, #78.",
+    "labels": [],
+    "number": 100,
+    "state": "OPEN",
+    "title": "[AENG-003] Document PocketBase schema and field type limitations"
+  },
+  {
+    "body": "## Goal\nDocument how the current application constructs, owns, opens, and closes its PocketBase app and database connections.\n\n## Scope\n- Trace startup from `examples/base` into app initialization.\n- Identify migration registration and execution order.\n- Identify shutdown and resource cleanup paths.\n- Identify whether multiple independent app instances are technically feasible.\n\n## Deliverable\nAdd a lifecycle sequence diagram and source map to `.plan/aeng/pocketbase-lifecycle.md`.\n\n## Acceptance criteria\n- [ ] Startup sequence is documented in execution order.\n- [ ] Database ownership and close behavior are identified.\n- [ ] Existing A-R-S-Y migration registration is mapped.\n- [ ] Multi-instance risks and unknowns are explicitly listed.\n- [ ] No production code changes.\n\n## Constraints\nDocumentation-only; do not propose unsafe concurrent app instances as a solution.\nParent context: #77.",
+    "labels": [],
+    "number": 99,
+    "state": "OPEN",
+    "title": "[AENG-002] Map PocketBase app lifecycle and database ownership"
+  },
+  {
+    "body": "## Goal\nCreate a concise, source-linked inventory of PocketBase capabilities that A-R-S-Y can reuse before designing its own ORM.\n\n## Scope\n- Inspect the current PocketBase version pinned in `go.mod`.\n- Inspect collection, field, record, query, relation, validation, hook, and migration APIs.\n- Record exact source paths and public APIs.\n- Do not modify production code.\n\n## Deliverable\nAdd `.plan/aeng/pocketbase-capability-inventory.md`.\n\n## Acceptance criteria\n- [ ] Each capability is marked reusable, extendable, or unsuitable.\n- [ ] Each claim links to an exact repository source path or upstream API.\n- [ ] Include at least one small example for record CRUD and relation querying.\n- [ ] Explicitly list gaps for a general-purpose application engine.\n- [ ] Document only facts verified against the pinned dependency.\n\n## Constraints\n- Documentation-only change.\n- One focused PR.\n- Parent context: #77, #78.",
+    "labels": [],
+    "number": 98,
+    "state": "OPEN",
+    "title": "[AENG-001] Inventory PocketBase record and collection capabilities"
+  },
+  {
+    "body": "## Goal\nDocument how to develop, deploy and operate the general-purpose BaaS foundation.\n\n## Scope\n- Tenant lifecycle and provisioning.\n- Database engine policy and hybrid boundary.\n- Tenant membership/roles and API usage.\n- Backup/restore, migration, troubleshooting and security model.\n- Local development with SQLite-only default and optional PostgreSQL profile.\n\n## Acceptance criteria\n- [ ] Docs match implemented behavior and include runnable examples.\n- [ ] Explicitly distinguish dedicated database from dedicated compute.\n- [ ] No credentials or production paths in examples.\n- [ ] Fresh developer can run tests and provision two local tenants.\n\n## Dependencies\n- [ ] BAAS-012\n- [ ] BAAS-014\n- [ ] BAAS-015\n- [ ] BAAS-017\n- [ ] BAAS-018",
+    "labels": [],
+    "number": 97,
+    "state": "OPEN",
+    "title": "[BAAS-020] Publish BaaS developer and operator documentation"
+  },
+  {
+    "body": "## Goal\nValidate the PostgreSQL side of the hybrid strategy without making it a mandatory runtime dependency.\n\n## Scope\n- Select driver and define supported Postgres version/connection policy.\n- Implement a small adapter behind the datastore contract for a representative workload.\n- Document transaction, migration, pooling and backup differences.\n- Keep AAA/RADIUS as a candidate consumer, not a dependency of generic BaaS core.\n\n## Acceptance criteria\n- [ ] SQLite-only default build and deployment require no PostgreSQL service.\n- [ ] Optional integration tests run against a disposable PostgreSQL service in CI/profile.\n- [ ] Adapter contract tests pass for supported operations.\n- [ ] Engine-selection criteria and limitations documented.\n\n## Dependencies\n- [ ] BAAS-006\n- [ ] BAAS-011",
+    "labels": [],
+    "number": 96,
+    "state": "OPEN",
+    "title": "[BAAS-019] Add optional PostgreSQL datastore adapter spike"
+  },
+  {
+    "body": "## Goal\nExpose safe health and capacity signals for control-plane operations.\n\n## Scope\n- Per-tenant database ping, schema version, file size/usage and connection health.\n- Aggregate control-plane health without exposing tenant data or secret references.\n- Add structured logs with tenant ID correlation and secret redaction.\n\n## Acceptance criteria\n- [ ] Health endpoint returns no path, DSN or credential.\n- [ ] Failed tenant DB is isolated and does not crash all tenant routing.\n- [ ] Metrics/log fields are documented and bounded.\n- [ ] Tests prove secret redaction and tenant-safe correlation.\n\n## Dependencies\n- [ ] BAAS-010\n- [ ] BAAS-011",
+    "labels": [],
+    "number": 95,
+    "state": "OPEN",
+    "title": "[BAAS-018] Add tenant database health and operational observability"
+  },
+  {
+    "body": "## Goal\nRestore a tenant backup to a new database location and switch assignment only after validation.\n\n## Scope\n- Restore to temporary target, verify checksum/integrity/schema, then atomically update catalog assignment.\n- Preserve old database until explicit retention expiry.\n- Ensure rollback path if switch fails.\n\n## Acceptance criteria\n- [ ] Restore never overwrites another tenant database.\n- [ ] Invalid/corrupt backup is rejected with no assignment change.\n- [ ] Successful restore preserves tenant identity and records operation/audit metadata.\n- [ ] Failure injection tests cover each transition.\n\n## Dependencies\n- [ ] BAAS-005\n- [ ] BAAS-013\n- [ ] BAAS-016",
+    "labels": [],
+    "number": 94,
+    "state": "OPEN",
+    "title": "[BAAS-017] Implement safe tenant restore and database reassignment"
+  },
+  {
+    "body": "## Goal\nCreate isolated, verifiable tenant backups without copying another tenant's data.\n\n## Scope\n- Use SQLite-consistent backup mechanism; include metadata, schema version and checksum.\n- Store backups outside tenant DB directory with restrictive permissions.\n- Avoid leaking tenant paths in public API responses.\n\n## Acceptance criteria\n- [ ] Backup of one tenant contains only that tenant's DB.\n- [ ] Checksum and SQLite integrity verification pass.\n- [ ] Concurrent writes produce a consistent backup.\n- [ ] Backup operation is idempotent and audited.\n\n## Dependencies\n- [ ] BAAS-010\n- [ ] BAAS-011",
+    "labels": [],
+    "number": 93,
+    "state": "OPEN",
+    "title": "[BAAS-016] Implement consistent per-tenant backup and integrity verification"
+  },
+  {
+    "body": "## Goal\nProve dedicated tenant isolation across all supported access paths.\n\n## Scope\n- Create at least two real tenant databases and users with different memberships.\n- Test read/write/list/count/query, relation/expand, export, backup and restore boundaries as features become available.\n- Add fuzz/property tests for tenant selector and path handling where useful.\n\n## Acceptance criteria\n- [ ] Tenant A cannot observe or mutate Tenant B records or metadata.\n- [ ] Forged tenant IDs, slug collisions, stale cache and suspended tenant scenarios are covered.\n- [ ] Tests run in normal CI without external services.\n- [ ] Security invariants from `.plan/baas-architecture.md` are linked in test names/docs.\n\n## Dependencies\n- [ ] BAAS-010\n- [ ] BAAS-014",
+    "labels": [],
+    "number": 92,
+    "state": "OPEN",
+    "title": "[BAAS-015] Add adversarial cross-tenant isolation test suite"
+  },
+  {
+    "body": "## Goal\nExpose a minimal general-purpose tenant API only after tenant isolation is enforced.\n\n## Scope\n- Add versioned tenant-scoped health/metadata endpoint and a minimal CRUD resource for integration testing.\n- Apply authenticated tenant context and role policy to every handler.\n- Define consistent 401/403/404/409 responses.\n\n## Acceptance criteria\n- [ ] No tenant API route can bypass resolver middleware.\n- [ ] Tenant ID selector is checked against principal membership.\n- [ ] Contract tests cover role permissions and inactive tenant states.\n- [ ] Existing `/api/arsy/v1` routes remain backward compatible.\n\n## Dependencies\n- [ ] BAAS-009\n- [ ] BAAS-010",
+    "labels": [],
+    "number": 91,
+    "state": "OPEN",
+    "title": "[BAAS-014] Add tenant-scoped API foundation and authorization tests"
+  },
+  {
+    "body": "## Goal\nProvide safe tenant lifecycle transitions with access revocation before data removal.\n\n## Scope\n- Implement suspend/resume and staged deletion.\n- Deletion sequence: deny access, close handles, retention/backup window, explicit purge.\n- Prevent accidental deletion of another tenant's database.\n\n## Acceptance criteria\n- [ ] State machine rejects invalid transitions.\n- [ ] Suspended/deleting tenant requests fail closed immediately.\n- [ ] Purge requires explicit authorized operation and is idempotent.\n- [ ] Audit trail records actor, target and outcome without sensitive metadata.\n\n## Dependencies\n- [ ] BAAS-009\n- [ ] BAAS-010\n- [ ] BAAS-012",
+    "labels": [],
+    "number": 90,
+    "state": "OPEN",
+    "title": "[BAAS-013] Implement tenant suspension and deletion lifecycle"
+  },
+  {
+    "body": "## Goal\nProvision a tenant from registry creation through database creation and initial schema migration.\n\n## Scope\n- Add operation registry with idempotency key and explicit states.\n- Make retries safe after process restart.\n- Do not expose partially provisioned tenant as active.\n\n## Acceptance criteria\n- [ ] Repeated request with same idempotency key does not create duplicate tenant/database.\n- [ ] Crash/restart tests resume or safely fail the operation.\n- [ ] Tenant becomes active only after datastore health and migrations succeed.\n- [ ] Safe operation summaries and audit events are recorded.\n\n## Dependencies\n- [ ] BAAS-005\n- [ ] BAAS-007\n- [ ] BAAS-011",
+    "labels": [],
+    "number": 89,
+    "state": "OPEN",
+    "title": "[BAAS-012] Implement idempotent tenant provisioning workflow"
+  },
+  {
+    "body": "## Goal\nManage tenant schema versions independently from control-plane and historical PocketBase migrations.\n\n## Scope\n- Add tenant-local metadata table for schema version/checksum.\n- Implement ordered migrations, locking, transaction policy, retry and drift detection.\n- Keep control-plane migrations under `arsy/migrations`.\n\n## Acceptance criteria\n- [ ] Fresh tenant DB reaches current schema version.\n- [ ] Existing tenant DB upgrades exactly once and records checksum.\n- [ ] Concurrent migration attempts serialize safely.\n- [ ] Failed migration leaves a recoverable state and never marks version successful.\n\n## Dependencies\n- [ ] BAAS-006\n- [ ] BAAS-007",
+    "labels": [],
+    "number": 88,
+    "state": "OPEN",
+    "title": "[BAAS-011] Add tenant-local schema migration runner and version registry"
+  },
+  {
+    "body": "## Goal\nConnect validated tenant context to the correct isolated datastore.\n\n## Scope\n- Resolve database assignment from control plane, then open via datastore provider.\n- Cache handles by immutable tenant/database identity with bounded invalidation.\n- Close or evict handles on suspension, reassignment and shutdown.\n\n## Acceptance criteria\n- [ ] A request for Tenant A can never receive Tenant B store.\n- [ ] Cache invalidation and concurrent access tests pass.\n- [ ] Unknown, inactive or unavailable database assignments fail closed.\n- [ ] No client-supplied path or DSN accepted.\n\n## Dependencies\n- [ ] BAAS-005\n- [ ] BAAS-006\n- [ ] BAAS-007\n- [ ] BAAS-009",
+    "labels": [],
+    "number": 86,
+    "state": "OPEN",
+    "title": "[BAAS-010] Implement tenant-aware datastore routing"
+  },
+  {
+    "body": "## Goal\nResolve tenant context from authenticated identity, tenant selector and active membership before opening tenant storage.\n\n## Scope\n- Reuse existing A-R-S-Y auth and centralized API route middleware.\n- Treat path/header tenant IDs only as selectors.\n- Check tenant active state and membership; inject immutable typed context.\n\n## Acceptance criteria\n- [ ] Anonymous, non-member, suspended and deleting tenant requests fail closed.\n- [ ] Tenant context cannot be forged by request body or arbitrary headers.\n- [ ] Tests cover valid member and role combinations.\n- [ ] Existing superuser-only MVP-1 routes retain current behavior.\n\n## Dependencies\n- [ ] BAAS-004\n- [ ] BAAS-008",
+    "labels": [],
+    "number": 85,
+    "state": "OPEN",
+    "title": "[BAAS-009] Implement authenticated tenant context resolver"
+  },
+  {
+    "body": "## Goal\nRepresent which authenticated principals may access each tenant.\n\n## Scope\n- Add `baas_tenant_memberships` with tenant, principal/user, role and status.\n- Define initial roles: owner, admin, developer, viewer (permissions documented centrally).\n- Enforce unique tenant+principal membership and safe membership lifecycle.\n\n## Acceptance criteria\n- [ ] Migrations and validation tests pass.\n- [ ] Role-to-permission matrix is documented and unit tested.\n- [ ] Membership changes are auditable.\n- [ ] No authorization decision trusts tenant ID alone.\n\n## Dependencies\n- [ ] BAAS-004",
+    "labels": [],
+    "number": 84,
+    "state": "OPEN",
+    "title": "[BAAS-008] Add tenant membership and role registry"
+  },
+  {
+    "body": "## Goal\nCreate one independent SQLite database per tenant using the approved datastore contract.\n\n## Scope\n- Use server-generated immutable tenant ID to derive database location under the private tenant root.\n- Configure SQLite connection limits, busy timeout, foreign keys and journal mode deliberately.\n- Prevent accidental sharing of handles across tenants; provide bounded handle lifecycle.\n\n## Acceptance criteria\n- [ ] Two tenant IDs create different database files and independent data.\n- [ ] Path traversal and symlink attacks are rejected.\n- [ ] Concurrent open/close and startup recovery tests pass.\n- [ ] Database file permissions are restrictive; secrets never logged.\n\n## Dependencies\n- [ ] BAAS-003\n- [ ] BAAS-006",
+    "labels": [],
+    "number": 83,
+    "state": "OPEN",
+    "title": "[BAAS-007] Implement dedicated SQLite tenant database factory"
+  },
+  {
+    "body": "## Goal\nIntroduce a narrow contract between BaaS services and tenant databases.\n\n## Scope\n- Define provider/store interfaces based on real operations identified in BAAS-001.\n- Include open/close, ping/health, migration version and transaction/query capabilities only where needed.\n- Add typed errors for unknown tenant, unavailable store, unsupported engine and closed store.\n\n## Acceptance criteria\n- [ ] Interface does not leak PocketBase-specific types into generic tenancy services unless documented as an adapter boundary.\n- [ ] Fake provider supports deterministic unit tests.\n- [ ] Contract tests define lifecycle and error behavior.\n- [ ] No PostgreSQL driver required by default build.\n\n## Dependencies\n- [ ] BAAS-001\n- [ ] BAAS-002",
+    "labels": [],
+    "number": 82,
+    "state": "OPEN",
+    "title": "[BAAS-006] Define engine-neutral tenant datastore interfaces"
+  },
+  {
+    "body": "## Goal\nTrack the physical database assigned to each tenant without exposing credentials or filesystem paths.\n\n## Scope\n- Add `baas_tenant_databases` with tenant relation, engine, placement key, opaque database identifier, schema version, state and secret reference.\n- Support SQLite as the initial default engine; reserve PostgreSQL as an optional engine.\n- Enforce one active primary database assignment per tenant.\n\n## Acceptance criteria\n- [ ] Migration and validation tests cover unique assignment and supported engine values.\n- [ ] No plaintext DSN, password, absolute filesystem path or encryption key stored in API-visible fields.\n- [ ] DTOs redact internal placement and secret metadata.\n\n## Dependencies\n- [ ] BAAS-004",
+    "labels": [],
+    "number": 81,
+    "state": "OPEN",
+    "title": "[BAAS-005] Add tenant database catalog and safe secret references"
+  },
+  {
+    "body": "## Goal\nCreate A-R-S-Y-owned control-plane schema for tenant identity and lifecycle.\n\n## Scope\n- Add `baas_tenants` with immutable ID, unique slug, display name, status, plan and timestamps.\n- Add validation for lifecycle states: provisioning, active, suspended, deleting, failed.\n- Use existing `arsy/migrations` registration pattern; do not edit historical PocketBase migrations.\n\n## Acceptance criteria\n- [ ] Fresh and upgraded DB migration tests pass.\n- [ ] Slug uniqueness and state validation are tested.\n- [ ] No tenant business records stored in control plane.\n- [ ] Existing MVP-1 migration tests remain green.\n\n## Dependencies\n- [ ] BAAS-001\n- [ ] BAAS-002",
+    "labels": [],
+    "number": 80,
+    "state": "OPEN",
+    "title": "[BAAS-004] Create control-plane tenant registry migrations"
+  },
+  {
+    "body": "## Goal\nAdd validated server-side configuration for tenant database storage without changing existing `ARSY_DATA_DIR` semantics.\n\n## Scope\n- Add a tenant data root beneath the private A-R-S-Y data directory (or a separately configurable private path).\n- Validate absolute/canonical paths, permissions and startup errors.\n- Ensure path generation uses immutable server-side tenant IDs only.\n\n## Acceptance criteria\n- [ ] Config has safe defaults and explicit validation.\n- [ ] Tenant data root is private and created with restrictive permissions.\n- [ ] Traversal, symlink escape and unsafe path tests pass.\n- [ ] Existing config tests and deployments remain compatible.\n\n## Dependencies\n- [ ] BAAS-001\n- [ ] BAAS-002",
+    "labels": [],
+    "number": 79,
+    "state": "OPEN",
+    "title": "[BAAS-003] Add BaaS configuration and private tenant data directory"
+  },
+  {
+    "body": "## Goal\nTranslate the approved hybrid database, dedicated tenant and general-purpose BaaS strategy into implementable ADRs and package contracts.\n\n## Scope\n- Record control-plane vs tenant data-plane boundary.\n- Define what dedicated means for initial SQLite file-per-tenant deployment and what it does not mean (dedicated compute).\n- Define optional PostgreSQL use and explicit non-goals.\n- Specify tenant/store/provider interfaces and typed errors after BAAS-001 audit.\n\n## Acceptance criteria\n- [ ] ADRs committed under `.plan/` and linked from the main BaaS plan.\n- [ ] Interface contracts include lifecycle, health, close, migration and transaction semantics needed by callers.\n- [ ] No generic ORM or PocketBase fork proposed.\n- [ ] ADRs reviewed against existing code paths.\n\n## Dependencies\n- [ ] BAAS-001",
+    "labels": [],
+    "number": 78,
+    "state": "OPEN",
+    "title": "[BAAS-002] Add BaaS architecture decision records and package contracts"
+  },
+  {
+    "body": "## Goal\nAudit the current Go/PocketBase application before introducing tenancy. Map app construction, DB ownership, startup hooks, A-R-S-Y migrations, auth middleware, route registration, data directory and test patterns.\n\n## Scope\n- Inspect `core.App`, `examples/base`, `arsy/httpapi`, `arsy/config`, `arsy/migrations`.\n- Identify safe extension points without modifying upstream PocketBase internals.\n- Record current CI/test baseline and compatibility constraints.\n- Propose concrete package/API boundaries for `arsy/tenancy` and `arsy/datastore`.\n\n## Acceptance criteria\n- [ ] Architecture audit committed under `.plan/` with exact source paths and lifecycle sequence.\n- [ ] Identify how multiple PocketBase app instances/SQLite connections can be safely created and closed, or document why a lower-level tenant store is required.\n- [ ] Existing MVP-1 collections and routes remain unchanged.\n- [ ] Baseline `go test ./...` and build results recorded.\n\n## Dependencies\nNone. Start here.\n\n## Reference\n`.plan/baas-architecture.md`.",
+    "labels": [],
+    "number": 77,
+    "state": "OPEN",
+    "title": "[BAAS-001] Audit current PocketBase lifecycle and define BaaS integration seams"
+  },
+  {
+    "body": "## Goal\nRequire explicit local Docker enablement; use disposable project/temp volumes; clean only owned resources.\n\n## Acceptance criteria\n- [ ] Profile deploys, inspects, stops and cleans its own workload; no broad prune.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-053\n- [ ] MVP1-055\n- [ ] MVP1-057\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-068.",
+    "labels": [],
+    "number": 70,
+    "state": "OPEN",
+    "title": "[MVP1-068] Add opt-in Docker integration profile"
+  },
+  {
+    "body": "## Goal\nUse fixture manifests and fake executor; cover success/failure/timeout/duplicate claim/recovery.\n\n## Acceptance criteria\n- [ ] Deployment tests run network-independent.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-046\n- [ ] MVP1-050\n- [ ] MVP1-051\n- [ ] MVP1-052\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-067.",
+    "labels": [],
+    "number": 69,
+    "state": "OPEN",
+    "title": "[MVP1-067] Add deterministic Compose and worker tests"
+  },
+  {
+    "body": "## Goal\nUse deterministic fixtures and test keys; cover host-key, auth, timeout, output limits; no real VPS.\n\n## Acceptance criteria\n- [ ] Tests pass without external SSH access.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-035\n- [ ] MVP1-036\n- [ ] MVP1-037\n- [ ] MVP1-038\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-066.",
+    "labels": [],
+    "number": 68,
+    "state": "OPEN",
+    "title": "[MVP1-066] Add local SSH test-server suite"
+  },
+  {
+    "body": "## Goal\nStart deployment; display state changes using bounded polling/subscription; show sanitized output.\n\n## Acceptance criteria\n- [ ] UI accurately shows queued through success/failure.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-052\n- [ ] MVP1-054\n- [ ] MVP1-056\n- [ ] MVP1-061\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-062.",
+    "labels": [],
+    "number": 64,
+    "state": "OPEN",
+    "title": "[MVP1-062] Build Deploy action and progress view"
+  },
+  {
+    "body": "## Goal\nQuery compose ps; map states; return service, image, health, ports.\n\n## Acceptance criteria\n- [ ] Parser tests cover running, exited, restarting, unhealthy, missing.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-053\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-055.",
+    "labels": [],
+    "number": 57,
+    "state": "OPEN",
+    "title": "[MVP1-055] Inspect deployment and container status"
+  },
+  {
+    "body": "## Goal\nCapture stage timings/exit status/bounded output; redact secrets; use bounded chunks or file artifact references.\n\n## Acceptance criteria\n- [ ] Retrieval works and secret fixtures absent from persisted logs.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-052\n- [ ] MVP1-053\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-054.",
+    "labels": [],
+    "number": 56,
+    "state": "OPEN",
+    "title": "[MVP1-054] Persist bounded sanitized deployment output"
+  },
+  {
+    "body": "## Goal\nCreate generated release directory, upload validated manifest, run compose up -d; never down -v/delete volumes.\n\n## Acceptance criteria\n- [ ] Test deployment on disposable Docker host starts services and records success.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-047\n- [ ] MVP1-048\n- [ ] MVP1-049\n- [ ] MVP1-052\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-053.",
+    "labels": [],
+    "number": 55,
+    "state": "OPEN",
+    "title": "[MVP1-053] Execute Docker Compose deployments"
+  },
+  {
+    "body": "## Goal\nProcess queued jobs with context deadlines; persist transitions and sanitized errors.\n\n## Acceptance criteria\n- [ ] Tests cover success, failure, cancellation, and restart recovery.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-050\n- [ ] MVP1-051\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-052.",
+    "labels": [],
+    "number": 54,
+    "state": "OPEN",
+    "title": "[MVP1-052] Implement background deployment worker lifecycle"
+  },
+  {
+    "body": "## Goal\nUse PB DB to claim each deployment once; define in-progress recovery timeout/reconciliation.\n\n## Acceptance criteria\n- [ ] Concurrency tests prove no duplicate worker claims; restart recovery is tested.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-028\n- [ ] MVP1-050\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-051.",
+    "labels": [],
+    "number": 53,
+    "state": "OPEN",
+    "title": "[MVP1-051] Implement persistent deployment job claiming"
+  },
+  {
+    "body": "## Goal\nRun fixed `docker compose ... config --quiet` via typed executor with generated path; bound/redact output.\n\n## Acceptance criteria\n- [ ] Invalid manifests fail before deployment starts.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-046\n- [ ] MVP1-048\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-049.",
+    "labels": [],
+    "number": 51,
+    "state": "OPEN",
+    "title": "[MVP1-049] Validate Compose on target host"
+  },
+  {
+    "body": "## Goal\nSelect maintained SFTP dependency; upload to generated release path via temp file + atomic rename and restrictive perms.\n\n## Acceptance criteria\n- [ ] Tests cover success, interruption, and permission failure.\n- [ ] Add or update focused tests.\n- [ ] Run relevant verification commands and record exact results.\n\n## Dependencies\n- [ ] MVP1-036\n- [ ] MVP1-047\n\n## Completion note\n- **Changed:**\n- **Verified:**\n- **Remaining:**\n\nSource: `.plan/task-mvp-1.md` — MVP1-048.",
+    "labels": [],
+    "number": 50,
+    "state": "OPEN",
+    "title": "[MVP1-048] Implement secure SFTP manifest upload"
+  }
+]

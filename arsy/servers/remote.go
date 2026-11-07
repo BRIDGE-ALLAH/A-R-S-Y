@@ -21,6 +21,9 @@ const (
 	RemoteDockerVersion   RemoteOperation = "docker_version"
 	RemoteComposeVersion  RemoteOperation = "compose_version"
 	RemoteComposeValidate RemoteOperation = "compose_validate"
+	RemoteComposeDeploy   RemoteOperation = "compose_deploy"
+	RemoteComposeInspect  RemoteOperation = "compose_inspect"
+	RemoteComposeStop     RemoteOperation = "compose_stop"
 )
 
 type CommandResult struct {
@@ -53,11 +56,35 @@ func (e Executor) Execute(ctx context.Context, client *ssh.Client, operation Rem
 }
 
 func (e Executor) ValidateComposeManifest(ctx context.Context, client *ssh.Client, manifestPath string) (CommandResult, error) {
-	command, err := composeValidationCommand(manifestPath)
+	command, err := composeManifestCommand(manifestPath, "config --quiet")
 	if err != nil {
 		return CommandResult{}, err
 	}
 	return e.executeCommand(ctx, client, RemoteComposeValidate, command)
+}
+
+func (e Executor) DeployComposeManifest(ctx context.Context, client *ssh.Client, manifestPath string) (CommandResult, error) {
+	command, err := composeManifestCommand(manifestPath, "up -d")
+	if err != nil {
+		return CommandResult{}, err
+	}
+	return e.executeCommand(ctx, client, RemoteComposeDeploy, command)
+}
+
+func (e Executor) InspectComposeManifest(ctx context.Context, client *ssh.Client, manifestPath string) (CommandResult, error) {
+	command, err := composeManifestCommand(manifestPath, "ps --format json")
+	if err != nil {
+		return CommandResult{}, err
+	}
+	return e.executeCommand(ctx, client, RemoteComposeInspect, command)
+}
+
+func (e Executor) StopComposeManifest(ctx context.Context, client *ssh.Client, manifestPath string) (CommandResult, error) {
+	command, err := composeManifestCommand(manifestPath, "down")
+	if err != nil {
+		return CommandResult{}, err
+	}
+	return e.executeCommand(ctx, client, RemoteComposeStop, command)
 }
 
 func (e Executor) executeCommand(ctx context.Context, client *ssh.Client, operation RemoteOperation, command string, secrets ...string) (CommandResult, error) {
@@ -115,13 +142,23 @@ func (e Executor) executeCommand(ctx context.Context, client *ssh.Client, operat
 	return result, fmt.Errorf("execute fixed SSH operation %q: %w", operation, runErr)
 }
 
-var remoteManifestPathPattern = regexp.MustCompile("^/opt/arsy/apps/[a-z0-9]+(-[a-z0-9]+)*/releases/[a-f0-9]{32}/compose\\.yaml$")
+var remoteManifestPathPattern = regexp.MustCompile("^/opt/arsy/apps/([a-z0-9]+(-[a-z0-9]+)*)/releases/[a-f0-9]{32}/compose\\.yaml$")
 
-func composeValidationCommand(manifestPath string) (string, error) {
-	if !remoteManifestPathPattern.MatchString(manifestPath) {
+func composeManifestCommand(manifestPath, action string) (string, error) {
+	matches := remoteManifestPathPattern.FindStringSubmatch(manifestPath)
+	if len(matches) < 2 || len(matches[1]) > 64 {
 		return "", errors.New("remote Compose manifest path is not an A-R-S-Y release path")
 	}
-	return "docker compose -f " + shellQuote(manifestPath) + " config --quiet", nil
+	switch action {
+	case "config --quiet", "up -d", "ps --format json", "down":
+	default:
+		return "", errors.New("remote Compose action is not allow-listed")
+	}
+	return "docker compose --project-name " + shellQuote(matches[1]) + " -f " + shellQuote(manifestPath) + " " + action, nil
+}
+
+func composeValidationCommand(manifestPath string) (string, error) {
+	return composeManifestCommand(manifestPath, "config --quiet")
 }
 
 func commandForOperation(operation RemoteOperation) (string, error) {
@@ -132,7 +169,7 @@ func commandForOperation(operation RemoteOperation) (string, error) {
 		return "docker version --format '{{.Server.Version}}'", nil
 	case RemoteComposeVersion:
 		return "docker compose version --short", nil
-	case RemoteComposeValidate:
+	case RemoteComposeValidate, RemoteComposeDeploy, RemoteComposeInspect, RemoteComposeStop:
 		return "", fmt.Errorf("operation %q requires a generated deployment manifest path", operation)
 	default:
 		return "", fmt.Errorf("unsupported remote operation %q", operation)

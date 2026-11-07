@@ -149,13 +149,17 @@ func createDeploymentFixture(t *testing.T, app core.App, slug string, state Stat
 		t.Fatal(err)
 	}
 
+	deploymentID, err := NewDeploymentID()
+	if err != nil {
+		t.Fatal(err)
+	}
 	deploymentCollection, err := app.FindCachedCollectionByNameOrId("arsy_deployments")
 	if err != nil {
 		t.Fatal(err)
 	}
 	deployment := core.NewRecord(deploymentCollection)
 	deployment.Set("application", application.Id)
-	deployment.Set("deployment_id", "0123456789abcdef0123456789abcdef"+slug)
+	deployment.Set("deployment_id", deploymentID)
 	deployment.Set("status", string(state))
 	if err := app.Save(deployment); err != nil {
 		t.Fatal(err)
