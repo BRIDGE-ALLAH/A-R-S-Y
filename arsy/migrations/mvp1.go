@@ -14,6 +14,7 @@ const (
 	serversCollectionName      = "arsy_servers"
 	applicationsCollectionName = "arsy_applications"
 	deploymentsCollectionName  = "arsy_deployments"
+	deploymentLogsCollectionName = "arsy_deployment_logs"
 )
 
 func init() {
@@ -73,7 +74,7 @@ func up(app core.App) error {
 		return err
 	}
 
-	_, err = ensureCollection(app, deploymentsCollectionName, func(c *core.Collection) {
+	deployments, err := ensureCollection(app, deploymentsCollectionName, func(c *core.Collection) {
 		c.Fields.Add(
 			&core.RelationField{Name: "application", CollectionId: applications.Id, Required: true, MaxSelect: 1},
 			&core.TextField{Name: "deployment_id", Required: true, Max: 80},
@@ -88,11 +89,26 @@ func up(app core.App) error {
 			"CREATE UNIQUE INDEX idx_arsy_deployments_id ON arsy_deployments (deployment_id)",
 		}
 	})
+	if err != nil {
+		return err
+	}
+	_, err = ensureCollection(app, deploymentLogsCollectionName, func(c *core.Collection) {
+		c.Fields.Add(
+			&core.RelationField{Name: "deployment", CollectionId: deployments.Id, Required: true, MaxSelect: 1},
+			&core.TextField{Name: "step", Required: true, Max: 80},
+			&core.SelectField{Name: "level", Values: []string{"info", "warning", "error"}, Required: true, MaxSelect: 1},
+			&core.TextField{Name: "message", Required: true, Max: 5000},
+		)
+		c.Indexes = types.JSONArray[string]{
+			"CREATE INDEX idx_arsy_deployment_logs_deployment_created ON arsy_deployment_logs (deployment, created)",
+		}
+	})
 	return err
 }
 
 func down(app core.App) error {
 	for _, name := range []string{
+		deploymentLogsCollectionName,
 		deploymentsCollectionName,
 		applicationsCollectionName,
 		serversCollectionName,
