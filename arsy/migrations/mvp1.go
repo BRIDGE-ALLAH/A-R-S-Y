@@ -77,7 +77,7 @@ func up(app core.App) error {
 		c.Fields.Add(
 			&core.RelationField{Name: "application", CollectionId: applications.Id, Required: true, MaxSelect: 1},
 			&core.TextField{Name: "deployment_id", Required: true, Max: 80},
-			&core.SelectField{Name: "status", Values: []string{"queued", "running", "succeeded", "failed", "cancelled"}, Required: true, MaxSelect: 1},
+			&core.SelectField{Name: "status", Values: []string{"queued", "preparing", "uploading", "validating", "deploying", "verifying", "succeeded", "failed", "cancelled"}, Required: true, MaxSelect: 1},
 			&core.DateField{Name: "started_at"},
 			&core.DateField{Name: "finished_at"},
 			&core.TextField{Name: "manifest_checksum", Max: 128},
