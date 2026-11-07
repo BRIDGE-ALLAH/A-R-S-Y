@@ -15,6 +15,7 @@ import (
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
 	"github.com/bridge-allah/a-r-s-y/arsy/servers"
 	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
 )
 
 const maxServerRequestBytes = 64 * 1024
@@ -76,7 +77,6 @@ func createServer(cfg config.Config) func(*core.RequestEvent) error {
 			Username:   body.SSHUsername,
 			PrivateKey: []byte(body.PrivateKey),
 		})
-		body.PrivateKey = ""
 		if err != nil {
 			return e.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 		}
@@ -90,7 +90,8 @@ func createServer(cfg config.Config) func(*core.RequestEvent) error {
 		record.Set("ssh_port", input.Port)
 		record.Set("ssh_username", input.Username)
 		record.Set("readiness_state", "unknown")
-		privateKey := []byte(body.PrivateKey)
+		privateKey := input.PrivateKey
+		body.PrivateKey = ""
 		defer clear(privateKey)
 		if err := servers.StorePrivateKey(record, privateKey, cfg.SecretKeyEnv); err != nil {
 			return e.JSON(http.StatusBadRequest, map[string]string{"error": "unable to encrypt SSH credential; verify the secret key and private key"})
