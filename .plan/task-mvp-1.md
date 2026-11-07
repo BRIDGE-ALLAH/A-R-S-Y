@@ -319,11 +319,14 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** `TestConsoleRouteServesEmbeddedDashboard` passed in GitHub Actions run `42336003844`.
   - **Remaining:** Full HTTP integration test against the complete PocketBase router remains useful before release.
 
-- [ ] **MVP1-019 — Register the A-R-S-Y API route group**
+- [x] **MVP1-019 — Register the A-R-S-Y API route group**
   - Create a shared router group under `/api/arsy/v1`.
   - Keep route registration separate from PocketBase's existing default API handlers.
   - Add a small test route or health route through this group.
   - **Done when:** route registration is centralized and existing collection APIs still pass tests.
+  - **Changed:** centralized the versioned A-R-S-Y endpoints under a shared router group at the configured API prefix.
+  - **Verified:** health/readiness route tests and the full Go CI suite passed in run `42336729656`.
+  - **Remaining:** None.
 
 - [ ] **MVP1-020 — Add superuser-only authorization middleware**
   - Reuse PocketBase's existing superuser authentication.
@@ -354,34 +357,49 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** Projects, servers, applications, and deployments have persistent schemas; all management data is protected; credentials are encrypted and never exposed.
 
-- [ ] **MVP1-024 — Add an A-R-S-Y-owned migration registration package**
+- [x] **MVP1-024 — Add an A-R-S-Y-owned migration registration package**
   - Follow the repository's existing PocketBase system migration registration pattern.
   - Keep A-R-S-Y migrations separate from historical upstream migrations.
   - Register the new package from the A-R-S-Y executable.
   - **Done when:** a clean database applies the A-R-S-Y migration package and existing migrations still pass.
+  - **Changed:** added an A-R-S-Y-owned system migration package and registered it from the standalone executable.
+  - **Verified:** clean test-app migration applied successfully; `go test ./arsy/migrations` passed in GitHub Actions run `42336729656`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-025 — Create the projects collection**
+- [x] **MVP1-025 — Create the projects collection**
   - Add project name, validated slug, description, and timestamps.
   - Add unique slug validation.
   - Keep list/view/create/update/delete superuser-only.
   - **Done when:** migration and collection tests pass.
+  - **Changed:** added the private `arsy_projects` collection with required name, slug pattern, description, and unique slug index.
+  - **Verified:** migration tests confirmed collection creation and superuser-only rules in run `42336729656`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-026 — Create the servers collection**
+- [x] **MVP1-026 — Create the servers collection**
   - Add server name, host, SSH port, SSH username, operating-system metadata, pinned host-key fingerprint, readiness state, and timestamps.
   - Keep credentials in a separate encrypted field or related protected record.
   - Do not expose private-key ciphertext in standard API responses.
   - **Done when:** schema tests verify required fields, validation, and private collection rules.
+  - **Changed:** added the private `arsy_servers` collection with host, SSH port/user, OS/architecture, pinned fingerprint, readiness state, and hidden credential ciphertext field.
+  - **Verified:** migration tests confirmed the collection and hidden credential field; full CI passed in run `42336729656`.
+  - **Remaining:** SSH credentials are schema-only until encryption and SSH services are implemented.
 
-- [ ] **MVP1-027 — Create the applications collection**
+- [x] **MVP1-027 — Create the applications collection**
   - Add project relation, server relation, application name, validated slug, Compose manifest, and lifecycle state.
   - Support one application mapped to one server in MVP-1.
   - Do not add Git repository fields or buildpack configuration yet.
   - **Done when:** application records can be created and validated through tests.
+  - **Changed:** added the private `arsy_applications` collection with project/server relations, validated slug, Compose manifest, and lifecycle state.
+  - **Verified:** migration tests confirmed project/server relation targets and private rules in run `42336729656`.
+  - **Remaining:** Record-level application service validation is still to be implemented.
 
-- [ ] **MVP1-028 — Create the deployments collection**
+- [x] **MVP1-028 — Create the deployments collection**
   - Store application relation, deployment identifier, status, start/end times, manifest checksum, safe summary, and previous deployment reference.
   - Do not store unredacted command output or secrets in summary fields.
   - **Done when:** deployment records can represent queued, running, succeeded, failed, and cancelled states.
+  - **Changed:** added the private `arsy_deployments` collection with application relation, unique deployment ID, lifecycle status, timestamps, manifest checksum, safe summary, and previous deployment ID.
+  - **Verified:** clean migration and collection tests passed in run `42336729656`.
+  - **Remaining:** Deployment state transitions and log storage are tracked in later tasks.
 
 - [ ] **MVP1-029 — Add a central AES-GCM secret encryption helper**
   - Use Go standard-library cryptography.
