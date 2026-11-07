@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -16,9 +17,9 @@ import (
 type RemoteOperation string
 
 const (
-	RemoteOSFacts        RemoteOperation = "os_facts"
-	RemoteDockerVersion  RemoteOperation = "docker_version"
-	RemoteComposeVersion RemoteOperation = "compose_version"
+	RemoteOSFacts         RemoteOperation = "os_facts"
+	RemoteDockerVersion   RemoteOperation = "docker_version"
+	RemoteComposeVersion  RemoteOperation = "compose_version"
 	RemoteComposeValidate RemoteOperation = "compose_validate"
 )
 
