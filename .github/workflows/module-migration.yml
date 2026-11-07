@@ -79,12 +79,12 @@ jobs:
           test -z "$(git grep -n "$old" -- '*.go' || true)"
           go list ./...
           go test ./...
-          CGO_ENABLED=0 go build -o arsy ./examples/base
-          version_output="$(./arsy --version)"
+          CGO_ENABLED=0 go build -o /tmp/arsy-bin ./examples/base
+          version_output="$(/tmp/arsy-bin --version)"
           printf '%s\n' "$version_output"
           grep -q 'A-R-S-Y' <<< "$version_output"
-          ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY='ci-only-diagnostic-key' ./arsy doctor
-          rm -f arsy
+          ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY='ci-only-diagnostic-key' /tmp/arsy-bin doctor
+          rm -f /tmp/arsy-bin
       - name: Commit verified migration
         run: |
           set -euo pipefail
