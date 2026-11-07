@@ -33,10 +33,10 @@ func TestComposeValidationCommandUsesOnlyGeneratedReleasePaths(t *testing.T) {
 		t.Fatalf("composeValidationCommand() = %q, %v; want %q", got, err, want)
 	}
 	for action, want := range map[string]string{
-		"config --quiet": "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' config --quiet",
-		"up -d":           "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' up -d",
+		"config --quiet":  "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' config --quiet",
+		"up -d":            "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' up -d",
 		"ps --format json": "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' ps --format json",
-		"down":            "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' down",
+		"down":             "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' down",
 	} {
 		got, err := composeManifestCommand(manifestPath, action)
 		if err != nil || got != want {
