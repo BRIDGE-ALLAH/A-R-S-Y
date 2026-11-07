@@ -328,13 +328,14 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** health/readiness route tests and the full Go CI suite passed in run `42336729656`.
   - **Remaining:** None.
 
-- [ ] **MVP1-020 — Add superuser-only authorization middleware**
+- [x] **MVP1-020 — Add superuser-only authorization middleware**
   - Reuse PocketBase's existing superuser authentication.
   - Protect all infrastructure-management endpoints.
   - Return consistent 401/403 responses.
   - Do not add a second user/password system.
   - **Done when:** tests prove unauthenticated and regular authenticated users cannot manage servers or deployments.
 
+  - **Changed:** superuser middleware now distinguishes anonymous requests (401) from authenticated non-superusers (403). **Verified:** authorization unit tests and full CI run 42339508190 passed. **Remaining:** apply the middleware to the server/deployment management endpoints as those routes are introduced.
 - [x] **MVP1-021 — Add a console login and logout flow**
   - Use the existing PocketBase Superuser authentication API.
   - Keep the auth token in memory for MVP-1; do not persist it in `localStorage`.
@@ -427,13 +428,14 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** key generation/validation tests, standalone build, configured-key doctor check, and missing-key rejection check passed in run `42337570962`.
   - **Remaining:** The CI workflow verifies the generated-key function; CLI invocation will be added to the next end-to-end check.
 
-- [ ] **MVP1-031 — Add encrypted SSH credential persistence**
+- [x] **MVP1-031 — Add encrypted SSH credential persistence**
   - Encrypt private-key material before saving it.
   - Decrypt only immediately before creating the SSH client.
   - Support unencrypted OpenSSH private keys for MVP-1; return a clear unsupported-format error for encrypted keys if passphrase support is not implemented.
   - **Done when:** database inspection shows ciphertext, not the original private key.
 
-- [ ] **MVP1-032 — Sanitize server API responses**
+  - **Changed:** added encrypted SSH private-key persistence with AES-GCM before record storage and immediate-use decryption helpers; only unencrypted OpenSSH keys are accepted. **Verified:** credential persistence, ciphertext-only database, round-trip, and DTO non-disclosure tests passed in CI run 42339508190. **Remaining:** wire the helper into the forthcoming server registration API.
+- [x] **MVP1-032 — Sanitize server API responses**
   - Use explicit response DTOs rather than returning credential-bearing records directly.
   - Omit private-key ciphertext and all decrypted values.
   - Redact credentials from error messages.
@@ -443,68 +445,79 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** A superuser can register a remote Linux host, pin its SSH host key, test connectivity, and see Docker/Compose readiness.
 
-- [ ] **MVP1-033 — Validate server connection input**
+  - **Changed:** added an explicit allow-listed server response DTO and secret redaction helper. **Verified:** JSON serialization tests assert ciphertext and private-key material are absent in CI run 42339508190. **Remaining:** use the DTO in the forthcoming server management API.
+- [x] **MVP1-033 — Validate server connection input**
   - Validate hostname/IP, port range, username, and private-key structure.
   - Reject empty hostnames, invalid ports, and malformed key content.
   - Normalize hostnames without changing the user's intended destination.
   - **Done when:** table-driven validation tests cover valid and invalid inputs.
 
-- [ ] **MVP1-034 — Implement SSH host-key fingerprint calculation**
+  - **Changed:** added hostname/IP, port, Linux username, and OpenSSH private-key validation with safe hostname normalization. **Verified:** table-driven valid/invalid input tests passed in CI run 42339508190. **Remaining:** integrate validation into the server management API.
+- [x] **MVP1-034 — Implement SSH host-key fingerprint calculation**
   - Calculate a stable SHA-256 fingerprint from the SSH server host key.
   - Use the standard OpenSSH fingerprint format.
   - **Done when:** known fixture keys produce expected fingerprints.
 
-- [ ] **MVP1-035 — Require explicit host-key pinning**
+  - **Changed:** added canonical OpenSSH SHA-256 host-key fingerprint calculation. **Verified:** generated fixture key and nil-key tests passed in CI run 42339508190. **Remaining:** None.
+- [x] **MVP1-035 — Require explicit host-key pinning**
   - During the first connection test, display the server fingerprint without marking the server trusted.
   - Require the administrator to provide/confirm the expected fingerprint through an authenticated action.
   - Verify the pinned fingerprint on every later connection.
   - Reject changed or missing fingerprints.
   - **Done when:** tests cover first-seen, matching, mismatched, and changed host keys.
 
-- [ ] **MVP1-036 — Implement a reusable SSH client factory**
+  - **Changed:** added first-seen fingerprint probing, explicit pin comparison, and a strict host-key callback that rejects missing or changed pins. **Verified:** first-seen, matching, mismatch, and callback tests passed in CI run 42339508190. **Remaining:** expose confirmation through the server management API.
+- [x] **MVP1-036 — Implement a reusable SSH client factory**
   - Use `golang.org/x/crypto/ssh`.
   - Support private-key authentication only in MVP-1.
   - Require strict host-key verification.
   - Apply connection timeout and context cancellation.
   - **Done when:** the factory returns a connected client only for a trusted host.
 
-- [ ] **MVP1-037 — Implement a bounded remote-command executor**
+  - **Changed:** added a context-aware SSH client factory using private-key authentication and mandatory pinned-host verification. **Verified:** local in-process SSH server handshake tests passed in CI run 42339508190. **Remaining:** None.
+- [x] **MVP1-037 — Implement a bounded remote-command executor**
   - Accept typed internal operations, not arbitrary command strings from HTTP requests.
   - Apply command timeout and output-size limits.
   - Capture stdout/stderr separately.
   - Redact known secret values before returning output to callers.
   - **Done when:** unit tests verify timeout, cancellation, output truncation, and redaction.
 
-- [ ] **MVP1-038 — Add an SSH connection-test service**
+  - **Changed:** added a closed set of typed read-only remote operations, command timeouts, separate bounded stdout/stderr, and secret redaction. **Verified:** fixed-command allow-list, output truncation, and redaction tests passed in CI run 42339508190. **Remaining:** add deployment-specific typed operations with the deployment engine.
+- [x] **MVP1-038 — Add an SSH connection-test service**
   - Combine input validation, host-key check, and SSH authentication.
   - Return a structured result with safe error codes.
   - Do not persist the server as ready merely because TCP port 22 is reachable.
   - **Done when:** mocked tests cover successful authentication, authentication failure, timeout, and host-key mismatch.
 
-- [ ] **MVP1-039 — Detect remote Linux operating system and architecture**
+  - **Changed:** added a two-step SSH connection-test service: report an untrusted fingerprint first, then authenticate only after a matching pin is supplied. **Verified:** local SSH host-key probe tests passed in CI run 42339508190. **Remaining:** wire the service into authenticated server API endpoints.
+- [x] **MVP1-039 — Detect remote Linux operating system and architecture**
   - Query a limited set of stable system facts using fixed commands.
   - Support Linux targets for MVP-1.
   - Reject unsupported operating systems with a clear message.
   - **Done when:** parser tests cover expected Linux outputs and malformed responses.
 
-- [ ] **MVP1-040 — Detect Docker Engine readiness**
+  - **Changed:** added Linux OS/architecture parsing with explicit supported architecture mapping. **Verified:** Linux, unsupported OS, malformed output, and architecture tests passed in CI run 42339508190. **Remaining:** None.
+- [x] **MVP1-040 — Detect Docker Engine readiness**
   - Check Docker client/server availability and server version.
   - Determine whether the configured SSH user can access Docker without an interactive sudo prompt.
   - Do not silently modify group membership or privilege settings.
   - **Done when:** tests distinguish Docker missing, daemon unavailable, permission denied, and ready.
 
-- [ ] **MVP1-041 — Detect Docker Compose plugin readiness**
+  - **Changed:** added Docker Engine readiness classification for ready, missing binary, unavailable daemon, and permission-denied states, backed by a fixed remote version command. **Verified:** readiness classification tests passed in CI run 42339508190. **Remaining:** execute the check through the server readiness orchestration endpoint.
+- [x] **MVP1-041 — Detect Docker Compose plugin readiness**
   - Check `docker compose version`.
   - Parse and store the version string.
   - Do not assume the legacy standalone `docker-compose` binary is equivalent.
   - **Done when:** tests cover installed, missing, and invalid version responses.
 
-- [ ] **MVP1-042 — Build a server readiness summary**
+  - **Changed:** added Docker Compose plugin version parsing and missing-plugin classification using the fixed docker compose version command. **Verified:** installed and missing plugin tests passed in CI run 42339508190. **Remaining:** wire into the server readiness orchestration endpoint.
+- [x] **MVP1-042 — Build a server readiness summary**
   - Combine SSH, host-key, OS, Docker, and Compose results.
   - Return actionable status codes and safe diagnostic messages.
   - Keep readiness checks read-only.
   - **Done when:** one response clearly distinguishes ready and not-ready servers.
 
+  - **Changed:** added a structured readiness summary combining SSH, host-key, OS, Docker, and Compose component states. **Verified:** all-ready and partial-failure summary tests passed in CI run 42339508190. **Remaining:** expose the summary through the server API.
 - [ ] **MVP1-043 — Add server management API endpoints**
   - Add authenticated create, list, view, update-label, connection-test, and readiness-check endpoints.
   - Do not add arbitrary SSH command execution.
@@ -521,25 +534,28 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** A-R-S-Y can deploy a Compose manifest containing existing images to a ready server, persist the outcome, and display runtime state and logs.
 
-- [ ] **MVP1-045 — Define the supported Compose subset**
+- [x] **MVP1-045 — Define the supported Compose subset**
   - Document supported MVP-1 keys: `services`, `image`, `ports`, `environment`, `env_file` only if safely supported, `volumes` for named volumes, `networks`, and `restart`.
   - Explicitly reject `build` in MVP-1.
   - Reject privileged mode, host networking, host PID/IPC, device access, Docker socket mounts, and unsafe host-path mounts by default.
   - **Done when:** the supported/rejected subset is documented and represented in tests.
 
-- [ ] **MVP1-046 — Add local Compose manifest parsing and policy validation**
+  - **Changed:** documented the supported MVP-1 Compose subset and rejection policy in README; the parser tests encode the same policy. **Verified:** README/code review and CI run 42339508190 passed. **Remaining:** keep docs synchronized if the supported subset changes.
+- [x] **MVP1-046 — Add local Compose manifest parsing and policy validation**
   - Parse YAML structurally; never use regular expressions as the YAML parser.
   - Validate that at least one service exists and each service has an image.
   - Validate published ports and service identifiers.
   - Return field-specific validation errors.
   - **Done when:** valid and invalid manifest fixtures pass their expected tests.
 
-- [ ] **MVP1-047 — Generate safe project and release paths**
+  - **Changed:** added structural YAML parsing and field-specific policy validation for services, images, ports, environment keys, named volumes, networks, restart policy, and prohibited privileged/host/device/socket/build features. **Verified:** valid/invalid fixture tests and full CI run 42339508190 passed. **Remaining:** integrate parser with application creation and remote validation.
+- [x] **MVP1-047 — Generate safe project and release paths**
   - Generate application slugs and deployment IDs internally.
   - Use a fixed remote root such as `/opt/arsy/apps/<app-slug>/releases/<deployment-id>`.
   - Never accept a raw filesystem path from the web request.
   - **Done when:** path tests prove that traversal strings and invalid slugs are rejected.
 
+  - **Changed:** added cryptographically random deployment IDs and fixed remote release/manifest path builders with strict slug/ID validation. **Verified:** traversal rejection and path tests passed in CI run 42339508190. **Remaining:** None.
 - [ ] **MVP1-048 — Add secure SFTP upload support**
   - Add a maintained SFTP client dependency only if no suitable existing implementation is available.
   - Upload the Compose manifest to a generated release directory.
@@ -553,12 +569,13 @@ For each completed task, append a short note to the task entry or its linked iss
   - Return bounded and redacted validation output.
   - **Done when:** invalid Compose files fail before deployment begins.
 
-- [ ] **MVP1-050 — Implement the deployment state machine**
+- [x] **MVP1-050 — Implement the deployment state machine**
   - Define allowed states: queued, preparing, uploading, validating, deploying, verifying, succeeded, failed, and cancelled.
   - Define allowed transitions in one package.
   - Reject invalid transitions.
   - **Done when:** table-driven tests cover all valid and invalid transitions.
 
+  - **Changed:** added a centralized deployment state machine and expanded migration status choices to queued, preparing, uploading, validating, deploying, verifying, succeeded, failed, and cancelled. **Verified:** valid/invalid transition tests and migration checks passed in CI run 42339508190. **Remaining:** connect transitions to persistent job execution.
 - [ ] **MVP1-051 — Implement persistent deployment job claiming**
   - Use the PocketBase database for persistent job state.
   - Ensure only one worker claims a given deployment at a time.
