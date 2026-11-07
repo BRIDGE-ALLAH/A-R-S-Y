@@ -1,4 +1,4 @@
-import "./style.css";
+﻿import "./style.css";
 import { apiFetch, currentUser, isAuthenticated, login, logout, verifySession } from "./auth.js";
 
 const pages = {
@@ -360,6 +360,25 @@ function escapeHTML(value) {
   })[character]);
 }
 
+
+const ACTIVE_STATES = new Set(["queued", "preparing", "uploading", "validating", "deploying", "verifying"]);
+
+async function pollDeploymentProgress(deploymentId, progressEl) {
+  const MAX_POLLS = 200; // 200 * 3s = 10 minutes max
+  let polls = 0;
+  while (polls++ < MAX_POLLS) {
+    try {
+      const prog = await apiFetch("/api/arsy/v1/deployments/" + encodeURIComponent(deploymentId) + "/progress");
+      const pct = typeof prog.percent === "number" ? prog.percent : 0;
+      const step = escapeHTML(prog.step || prog.state || "Running");
+      if (progressEl) {
+        progressEl.innerHTML = `<div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div><p class="progress-step">${step} (${pct}%)</p>`;
+      }
+      if (!ACTIVE_STATES.has(prog.state)) break; // terminal state
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 3000)); // bounded 3s poll
+  }
+}
 async function renderProjectManager() {
   const root = document.querySelector("#project-manager");
   if (!root) return;
@@ -436,8 +455,12 @@ async function renderProjectManager() {
                   <div class="app-card" style="margin-top:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                       <div><strong>${escapeHTML(a.name)}</strong> · <small>${escapeHTML(a.slug)}</small></div>
-                      <span class="deploy-status-tag ${escapeHTML(a.lifecycle_state)}">${escapeHTML(a.lifecycle_state)}</span>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="deploy-status-tag ${escapeHTML(a.lifecycle_state)}">${escapeHTML(a.lifecycle_state)}</span>
+                        <button class="deploy-btn quiet-button" data-action="deploy-app" data-app-id="${escapeHTML(a.id)}" data-app-name="${escapeHTML(a.name)}">Deploy</button>
+                      </div>
                     </div>
+                    <div id="deploy-progress-${escapeHTML(a.id)}" class="deploy-progress" style="display:none;"></div>
                   </div>
                 `).join("")}
               </div>
@@ -497,6 +520,31 @@ async function renderProjectManager() {
     }
   });
 
+
+  list.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action='deploy-app']");
+    if (!btn) return;
+    const appId = btn.dataset.appId;
+    const appName = btn.dataset.appName;
+    btn.disabled = true;
+    feedback.textContent = "";
+    const progressEl = document.getElementById("deploy-progress-" + appId);
+    if (progressEl) { progressEl.style.display = "block"; progressEl.innerHTML = '<div class="progress-bar-wrap"><div class="progress-bar" style="width:0%"></div></div><p class="progress-step">Queuing deployment…</p>'; }
+    try {
+      const result = await apiFetch("/api/arsy/v1/deployments", {
+        method: "POST",
+        body: JSON.stringify({ application_id: appId })
+      });
+      const deployId = result.deployment_id;
+      feedback.textContent = appName + " deployment queued (" + deployId.slice(0, 8) + "…)";
+      await pollDeploymentProgress(deployId, progressEl);
+    } catch (err) {
+      feedback.textContent = err.message || "Deployment failed.";
+      if (progressEl) { progressEl.innerHTML = '<p class="progress-error">' + escapeHTML(err.message || "Failed") + '</p>'; }
+    } finally {
+      btn.disabled = false;
+    }
+  });
   void loadSelectOptions();
   void refreshProjects();
 }
@@ -529,6 +577,7 @@ async function renderDeploymentManager() {
             <span class="deploy-status-tag ${escapeHTML(d.state)}">${escapeHTML(d.state)}</span>
           </div>
           <div class="card-meta">
+          ${ACTIVE_STATES.has(d.state) ? `<div class="progress-bar-wrap" style="margin:8px 0;"><div class="progress-bar progress-bar-active"></div></div><p class="progress-step">In progress…</p>` : ""}
             ${d.started_at ? `<span>Started: ${escapeHTML(d.started_at)}</span>` : ""}
             ${d.finished_at ? `<span>Finished: ${escapeHTML(d.finished_at)}</span>` : ""}
           </div>

@@ -126,3 +126,15 @@ h2 { margin: 22px 0 8px; font-size: 18px; color: #f3f4f6; }
 .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 11px 12px; border: 1px solid #3b4a60; border-radius: 8px; background: #0b1322; color: #f8fafc; outline: none; font: inherit; font-size: 12px; }
 .form-card textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; resize: vertical; }
 .form-card input:focus, .form-card select:focus, .form-card textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px #8b5cf633; }
+
+/* Progress bar — Step 4 (#64) */
+.deploy-progress { margin-top: 10px; }
+.progress-bar-wrap { height: 6px; background: #1e293b; border-radius: 999px; overflow: hidden; margin-bottom: 6px; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #6d28d9, #a78bfa); border-radius: 999px; transition: width 0.4s ease; }
+@keyframes slide { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.progress-bar-active { width: 100%; animation: slide 1.4s linear infinite; background: linear-gradient(90deg, #1e293b 0%, #6d28d9 40%, #a78bfa 60%, #1e293b 100%); background-size: 200% 100%; }
+.progress-step { font-size: 11px; color: #94a3b8; margin: 0; }
+.progress-error { font-size: 11px; color: #fca5a5; margin: 0; }
+.deploy-btn { padding: 4px 12px; font-size: 11px; border: 1px solid #6d28d9; border-radius: 8px; background: #2d1b6933; color: #c4b5fd; cursor: pointer; transition: background 0.15s; }
+.deploy-btn:hover:not(:disabled) { background: #6d28d966; }
+.deploy-btn:disabled { opacity: 0.5; cursor: not-allowed; }

@@ -55,7 +55,7 @@
     <h1>${t[0]}</h1>
     <p class="subtitle">${t[1]}</p>
     ${n}
-  `,e===`servers`&&v(),e===`projects`&&C(),e===`deployments`&&w()}async function _(){l?l.unavailable?(document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>A-R-S-Y is starting</h1><p class="subtitle">${l.message}</p><button id="retry" class="primary-button">Retry</button></section></main>`,document.querySelector(`#retry`).addEventListener(`click`,f)):l.superuser_configured?i()?!d&&(d=!0,!await o())?(u=`Your session expired. Please sign in again.`,m()):h():m():p():document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>Loading A-R-S-Y…</h1></section></main>`}window.addEventListener(`hashchange`,g),f();function v(){let e=document.querySelector(`#server-manager`);if(!e)return;e.innerHTML=`
+  `,e===`servers`&&v(),e===`projects`&&T(),e===`deployments`&&E()}async function _(){l?l.unavailable?(document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>A-R-S-Y is starting</h1><p class="subtitle">${l.message}</p><button id="retry" class="primary-button">Retry</button></section></main>`,document.querySelector(`#retry`).addEventListener(`click`,f)):l.superuser_configured?i()?!d&&(d=!0,!await o())?(u=`Your session expired. Please sign in again.`,m()):h():m():p():document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>Loading A-R-S-Y…</h1></section></main>`}window.addEventListener(`hashchange`,g),f();function v(){let e=document.querySelector(`#server-manager`);if(!e)return;e.innerHTML=`
     <section class="server-form-card">
       <h2>Register a Linux server</h2>
       <p>Use an unencrypted OpenSSH private key. The key is encrypted before it is stored and is never returned by the API.</p>
@@ -102,7 +102,7 @@
         ${[`ssh`,`host_key`,`os`,`docker`,`compose`].map(e=>{let n=t[e]||{};return`<div><strong>${S(e.replace(`_`,` `))}</strong><span>${S(n.code||`unknown`)}</span><p>${S(n.message||``)}${n.version?` · `+S(n.version):``}</p></div>`}).join(``)}
       </div>
     </article>
-  `}function S(e){return String(e??``).replace(/[&<>"']/g,e=>({"&":`&amp;`,"<":`&lt;`,">":`&gt;`,'"':`&quot;`,"'":`&#39;`})[e])}async function C(){let e=document.querySelector(`#project-manager`);if(!e)return;e.innerHTML=`
+  `}function S(e){return String(e??``).replace(/[&<>"']/g,e=>({"&":`&amp;`,"<":`&lt;`,">":`&gt;`,'"':`&quot;`,"'":`&#39;`})[e])}var C=new Set([`queued`,`preparing`,`uploading`,`validating`,`deploying`,`verifying`]);async function w(e,t){let n=0;for(;n++<200;){try{let n=await s(`/api/arsy/v1/deployments/`+encodeURIComponent(e)+`/progress`),r=typeof n.percent==`number`?n.percent:0,i=S(n.step||n.state||`Running`);if(t&&(t.innerHTML=`<div class="progress-bar-wrap"><div class="progress-bar" style="width:${r}%"></div></div><p class="progress-step">${i} (${r}%)</p>`),!C.has(n.state))break}catch{}await new Promise(e=>setTimeout(e,3e3))}}async function T(){let e=document.querySelector(`#project-manager`);if(!e)return;e.innerHTML=`
     <section class="form-card">
       <h2>Create a project</h2>
       <form id="project-create-form">
@@ -145,14 +145,18 @@
                   <div class="app-card" style="margin-top:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                       <div><strong>${S(e.name)}</strong> · <small>${S(e.slug)}</small></div>
-                      <span class="deploy-status-tag ${S(e.lifecycle_state)}">${S(e.lifecycle_state)}</span>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="deploy-status-tag ${S(e.lifecycle_state)}">${S(e.lifecycle_state)}</span>
+                        <button class="deploy-btn quiet-button" data-action="deploy-app" data-app-id="${S(e.id)}" data-app-name="${S(e.name)}">Deploy</button>
+                      </div>
                     </div>
+                    <div id="deploy-progress-${S(e.id)}" class="deploy-progress" style="display:none;"></div>
                   </div>
                 `).join(``)}
               </div>
             `:``}
           </article>
-        `}).join(``)}catch(e){i.innerHTML=`<article class="notice-card"><p>${S(e.message)}</p></article>`}}t.addEventListener(`submit`,async e=>{e.preventDefault();let n=t.querySelector(`button`);n.disabled=!0,r.textContent=``;let i=new FormData(t);try{await s(`/api/arsy/v1/projects`,{method:`POST`,body:JSON.stringify({name:i.get(`name`),description:i.get(`description`)})}),t.reset(),r.textContent=`Project created successfully.`,await Promise.all([o(),a()])}catch(e){r.textContent=e.message||`Failed to create project.`}finally{n.disabled=!1}}),n.addEventListener(`submit`,async e=>{e.preventDefault();let t=n.querySelector(`button`);t.disabled=!0,r.textContent=``;let i=new FormData(n);try{await s(`/api/arsy/v1/applications`,{method:`POST`,body:JSON.stringify({project_id:i.get(`project_id`),server_id:i.get(`server_id`),name:i.get(`name`),compose_manifest:i.get(`compose_manifest`)})}),n.reset(),r.textContent=`Application created successfully.`,await o()}catch(e){r.textContent=e.message||`Failed to create application.`}finally{t.disabled=!1}}),a(),o()}async function w(){let e=document.querySelector(`#deployment-manager`);if(!e)return;e.innerHTML=`
+        `}).join(``)}catch(e){i.innerHTML=`<article class="notice-card"><p>${S(e.message)}</p></article>`}}t.addEventListener(`submit`,async e=>{e.preventDefault();let n=t.querySelector(`button`);n.disabled=!0,r.textContent=``;let i=new FormData(t);try{await s(`/api/arsy/v1/projects`,{method:`POST`,body:JSON.stringify({name:i.get(`name`),description:i.get(`description`)})}),t.reset(),r.textContent=`Project created successfully.`,await Promise.all([o(),a()])}catch(e){r.textContent=e.message||`Failed to create project.`}finally{n.disabled=!1}}),n.addEventListener(`submit`,async e=>{e.preventDefault();let t=n.querySelector(`button`);t.disabled=!0,r.textContent=``;let i=new FormData(n);try{await s(`/api/arsy/v1/applications`,{method:`POST`,body:JSON.stringify({project_id:i.get(`project_id`),server_id:i.get(`server_id`),name:i.get(`name`),compose_manifest:i.get(`compose_manifest`)})}),n.reset(),r.textContent=`Application created successfully.`,await o()}catch(e){r.textContent=e.message||`Failed to create application.`}finally{t.disabled=!1}}),i.addEventListener(`click`,async e=>{let t=e.target.closest(`button[data-action='deploy-app']`);if(!t)return;let n=t.dataset.appId,i=t.dataset.appName;t.disabled=!0,r.textContent=``;let a=document.getElementById(`deploy-progress-`+n);a&&(a.style.display=`block`,a.innerHTML=`<div class="progress-bar-wrap"><div class="progress-bar" style="width:0%"></div></div><p class="progress-step">Queuing deployment…</p>`);try{let e=(await s(`/api/arsy/v1/deployments`,{method:`POST`,body:JSON.stringify({application_id:n})})).deployment_id;r.textContent=i+` deployment queued (`+e.slice(0,8)+`…)`,await w(e,a)}catch(e){r.textContent=e.message||`Deployment failed.`,a&&(a.innerHTML=`<p class="progress-error">`+S(e.message||`Failed`)+`</p>`)}finally{t.disabled=!1}}),a(),o()}async function E(){let e=document.querySelector(`#deployment-manager`);if(!e)return;e.innerHTML=`
     <div id="deployment-feedback" class="server-feedback" role="status"></div>
     <div id="deployment-list" class="server-list"><article class="empty-card"><p>Loading deployments…</p></article></div>
   `;let t=e.querySelector(`#deployment-list`),n=e.querySelector(`#deployment-feedback`);async function r(){try{let e=await s(`/api/arsy/v1/deployments`);if(!e||!e.length){t.innerHTML=`<article class="empty-card"><h2>No deployments yet</h2><p>Deployments will appear here once applications are deployed.</p></article>`;return}t.innerHTML=e.map(e=>`
@@ -165,6 +169,7 @@
             <span class="deploy-status-tag ${S(e.state)}">${S(e.state)}</span>
           </div>
           <div class="card-meta">
+          ${C.has(e.state)?`<div class="progress-bar-wrap" style="margin:8px 0;"><div class="progress-bar progress-bar-active"></div></div><p class="progress-step">In progress…</p>`:``}
             ${e.started_at?`<span>Started: ${S(e.started_at)}</span>`:``}
             ${e.finished_at?`<span>Finished: ${S(e.finished_at)}</span>`:``}
           </div>
