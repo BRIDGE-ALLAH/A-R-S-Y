@@ -407,19 +407,25 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** clean migration and collection tests passed in run `42336729656`.
   - **Remaining:** Deployment state transitions and log storage are tracked in later tasks.
 
-- [ ] **MVP1-029 — Add a central AES-GCM secret encryption helper**
+- [x] **MVP1-029 — Add a central AES-GCM secret encryption helper**
   - Use Go standard-library cryptography.
   - Require a 32-byte key supplied outside the database through documented A-R-S-Y configuration.
   - Store ciphertext with a format/version marker and a random nonce.
   - Return errors for missing, malformed, or incorrect keys.
   - **Done when:** encrypt/decrypt round-trip and tamper-detection tests pass.
+  - **Changed:** added versioned `arsy:v1` AES-256-GCM encryption with random nonces, authenticated additional data, and strict 32-byte base64 key loading.
+  - **Verified:** round-trip, wrong-key, tamper-detection, malformed-key, and missing-key tests passed in GitHub Actions run `42337570962`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-030 — Add secret-key generation and validation**
+- [x] **MVP1-030 — Add secret-key generation and validation**
   - Add a CLI helper to generate a cryptographically random secret key.
   - Print the key once to stdout only when explicitly requested.
   - Never automatically write the key into source control or log it.
   - Document secure storage with restrictive file permissions or a secret manager.
   - **Done when:** generated keys pass validation and invalid keys prevent credential storage.
+  - **Changed:** added explicit `arsy secret-key generate` command, base64 32-byte key validation, and secure-storage guidance in README; diagnostics reject missing or invalid keys.
+  - **Verified:** key generation/validation tests, standalone build, configured-key doctor check, and missing-key rejection check passed in run `42337570962`.
+  - **Remaining:** The CI workflow verifies the generated-key function; CLI invocation will be added to the next end-to-end check.
 
 - [ ] **MVP1-031 — Add encrypted SSH credential persistence**
   - Encrypt private-key material before saving it.
