@@ -328,14 +328,14 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** health/readiness route tests and the full Go CI suite passed in run `42336729656`.
   - **Remaining:** None.
 
-- [x] **MVP1-020 — Add superuser-only authorization middleware**
+- [ ] **MVP1-020 — Add superuser-only authorization middleware**
   - Reuse PocketBase's existing superuser authentication.
   - Protect all infrastructure-management endpoints.
   - Return consistent 401/403 responses.
   - Do not add a second user/password system.
   - **Done when:** tests prove unauthenticated and regular authenticated users cannot manage servers or deployments.
 
-  - **Changed:** superuser middleware now distinguishes anonymous requests (401) from authenticated non-superusers (403). **Verified:** authorization unit tests and full CI run 42339508190 passed. **Remaining:** apply the middleware to the server/deployment management endpoints as those routes are introduced.
+  - **Changed:** implemented the reusable middleware and unit tests for 401/403 behavior. **Verified:** helper tests passed in CI run 42339508190. **Remaining:** the middleware must be attached to server/deployment management routes and tested through those HTTP endpoints before this task is complete.
 - [x] **MVP1-021 — Add a console login and logout flow**
   - Use the existing PocketBase Superuser authentication API.
   - Keep the auth token in memory for MVP-1; do not persist it in `localStorage`.
@@ -435,7 +435,7 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Done when:** database inspection shows ciphertext, not the original private key.
 
   - **Changed:** added encrypted SSH private-key persistence with AES-GCM before record storage and immediate-use decryption helpers; only unencrypted OpenSSH keys are accepted. **Verified:** credential persistence, ciphertext-only database, round-trip, and DTO non-disclosure tests passed in CI run 42339508190. **Remaining:** wire the helper into the forthcoming server registration API.
-- [x] **MVP1-032 — Sanitize server API responses**
+- [ ] **MVP1-032 — Sanitize server API responses**
   - Use explicit response DTOs rather than returning credential-bearing records directly.
   - Omit private-key ciphertext and all decrypted values.
   - Redact credentials from error messages.
@@ -445,7 +445,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** A superuser can register a remote Linux host, pin its SSH host key, test connectivity, and see Docker/Compose readiness.
 
-  - **Changed:** added an explicit allow-listed server response DTO and secret redaction helper. **Verified:** JSON serialization tests assert ciphertext and private-key material are absent in CI run 42339508190. **Remaining:** use the DTO in the forthcoming server management API.
+  - **Changed:** implemented the allow-listed server DTO and secret redaction helper. **Verified:** DTO serialization tests passed in CI run 42339508190. **Remaining:** apply the DTO to actual server API responses and add endpoint-level non-disclosure tests.
 - [x] **MVP1-033 — Validate server connection input**
   - Validate hostname/IP, port range, username, and private-key structure.
   - Reject empty hostnames, invalid ports, and malformed key content.
