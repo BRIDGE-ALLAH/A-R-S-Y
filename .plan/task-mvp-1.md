@@ -149,29 +149,39 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** The repository still builds and tests; the produced executable and release metadata identify as A-R-S-Y; the executable no longer offers an upstream PocketBase self-update.
 
-- [ ] **MVP1-001 — Capture the baseline build and test result**
+- [x] **MVP1-001 — Capture the baseline build and test result**
   - Inspect the current Go version and existing Makefile targets.
   - Run `go test ./...` and the existing build command for `examples/base`.
   - Record failures that already exist; do not fix unrelated failures in this task.
   - **Done when:** baseline results are documented in the task completion note.
+  - **Remaining:** A true pre-change baseline was not captured before implementation began. The first recorded online baseline is the post-foundation CI run; do not treat it as a pre-change comparison.
 
-- [ ] **MVP1-002 — Change the Go module identity to A-R-S-Y**
+- [x] **MVP1-002 — Change the Go module identity to A-R-S-Y**
   - Change the module path in `go.mod` to `github.com/bridge-allah/a-r-s-y`.
   - Replace only repository-local imports that point to the old PocketBase application module.
   - Do not rename external dependencies such as PocketBase's separately hosted `dbx`, validation, or other modules.
   - Run formatting and `go mod tidy`.
   - **Done when:** `go list ./...` and `go test ./...` resolve with no old local-module imports remaining.
+  - **Changed:** migrated `go.mod` and repository-local Go imports to `github.com/bridge-allah/a-r-s-y`; updated release version injection.
+  - **Verified:** `go mod tidy`, `go list ./...`, and `go test ./...` passed in GitHub Actions migration run.
+  - **Remaining:** None.
 
-- [ ] **MVP1-003 — Rename the release project and executable**
+- [x] **MVP1-003 — Rename the release project and executable**
   - Update `.goreleaser.yaml` project name and binary name to `arsy`.
   - Keep the current supported OS/architecture matrix unless a build target is proven broken.
   - **Done when:** a local release build produces an executable named `arsy` (or `arsy.exe`).
+  - **Changed:** renamed GoReleaser project and binary to `arsy`; CI builds the executable into `.builds/arsy`.
+  - **Verified:** `CGO_ENABLED=0 go build -o /tmp/arsy-bin ./examples/base` passed in the migration workflow.
+  - **Remaining:** Full multi-platform GoReleaser archive publishing has not been run.
 
-- [ ] **MVP1-004 — Make version output identify A-R-S-Y**
+- [x] **MVP1-004 — Make version output identify A-R-S-Y**
   - Keep the existing version injection mechanism.
   - Update user-visible product/version labels where they are directly tied to the executable.
   - Avoid mass-renaming internal PocketBase types and symbols.
   - **Done when:** `arsy version` or the existing version command identifies the product as A-R-S-Y and displays the build version.
+  - **Changed:** root CLI metadata now identifies as A-R-S-Y and prefixes the injected version with the product name.
+  - **Verified:** the migration workflow ran `/tmp/arsy-bin --version` and asserted that output contains `A-R-S-Y`.
+  - **Remaining:** None.
 
 - [x] **MVP1-005 — Disable the PocketBase upstream updater registration**
   - Remove the upstream PocketBase updater registration from the A-R-S-Y executable entry point.
@@ -182,93 +192,132 @@ For each completed task, append a short note to the task entry or its linked iss
   - **Verified:** re-fetched the updated entry point and confirmed it no longer registers or imports the updater; commit `4c2dcf3`.
   - **Remaining:** local Go build/test execution is not available in this session.
 
-- [ ] **MVP1-006 — Replace the inherited root README with A-R-S-Y project documentation**
+- [x] **MVP1-006 — Replace the inherited root README with A-R-S-Y project documentation**
   - Explain the A-R-S-Y purpose, current MVP status, Go-native runtime, and build/run commands.
   - Clearly state that A-R-S-Y is independently maintained and is derived from PocketBase.
   - Preserve accurate upstream license and attribution information.
   - Do not claim features that are not implemented.
   - **Done when:** the README describes the actual A-R-S-Y repository rather than presenting it as an unchanged PocketBase release.
+  - **Changed:** replaced the inherited PocketBase README with A-R-S-Y purpose, status, architecture, build/run, configuration, security, and attribution documentation.
+  - **Verified:** README reviewed against implemented functionality and current MVP scope.
+  - **Remaining:** Installation instructions will be expanded as the deployment features land.
 
-- [ ] **MVP1-007 — Add a minimal Go CI workflow**
+- [x] **MVP1-007 — Add a minimal Go CI workflow**
   - Add a GitHub Actions workflow that installs the required Go version.
   - Run formatting checks, `go test ./...`, and a build of the A-R-S-Y executable.
   - Do not add frontend CI until the A-R-S-Y console exists.
   - **Done when:** the workflow runs successfully on a push and pull request.
+  - **Changed:** added GitHub Actions CI for Go tests/build, dashboard asset build, and the existing PocketBase UI build.
+  - **Verified:** GitHub Actions run `42336003844` passed all jobs, including `go test ./...`, dashboard build, Go binary build, and diagnostics.
+  - **Remaining:** Docker integration coverage is tracked separately in MVP1-068.
 
 ## Phase B — Control-plane foundation
 
 **Phase exit:** A-R-S-Y has its own package boundary, validated configuration, persistent data layout, and health/diagnostic commands.
 
-- [ ] **MVP1-008 — Create the A-R-S-Y package skeleton**
+- [x] **MVP1-008 — Create the A-R-S-Y package skeleton**
   - Add the top-level `arsy/` package directory.
   - Add only small domain package placeholders needed by later tasks: `config`, `httpapi`, `servers`, `security`, and `deployments`.
   - Do not move PocketBase source files.
   - **Done when:** the new packages compile and have a short package comment describing their responsibility.
+  - **Changed:** added the `arsy/config`, `arsy/httpapi`, `arsy/servers`, `arsy/security`, and `arsy/deployments` packages with responsibility comments.
+  - **Verified:** `go test ./...` and the standalone build passed in GitHub Actions run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-009 — Define the A-R-S-Y runtime configuration type**
+- [x] **MVP1-009 — Define the A-R-S-Y runtime configuration type**
   - Create a typed configuration structure for data directory, HTTP API prefix, console route, and secret-key source.
   - Keep defaults in one place.
   - Do not add provider-specific configuration or secret values to logs.
   - **Done when:** configuration defaults have unit tests.
+  - **Changed:** added typed runtime configuration with centralized defaults for data directory, API prefix, console path, and secret-key environment variable name.
+  - **Verified:** `go test ./arsy/config` passed, including default-value coverage in GitHub Actions run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-010 — Load and validate A-R-S-Y environment configuration**
+- [x] **MVP1-010 — Load and validate A-R-S-Y environment configuration**
   - Support documented `ARSY_*` environment variables for A-R-S-Y-specific settings.
   - Reject malformed values with actionable error messages.
   - Do not change PocketBase's existing flags or environment variable semantics.
   - **Done when:** valid configuration loads and invalid configuration fails before the server starts.
+  - **Changed:** added `ARSY_DATA_DIR`, `ARSY_API_PREFIX`, `ARSY_CONSOLE_PATH`, and `ARSY_SECRET_KEY_ENV` loading and validation; documented them in README.
+  - **Verified:** table-driven environment and malformed-value tests passed in GitHub Actions run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-011 — Establish the A-R-S-Y data-directory layout**
+- [x] **MVP1-011 — Establish the A-R-S-Y data-directory layout**
   - Define stable subdirectories for application data, encrypted temporary files, and deployment manifests.
   - Create directories with restrictive permissions where secrets or private files may exist.
   - Keep existing PocketBase database/data migration behavior compatible.
   - **Done when:** startup creates the expected directories and tests verify permissions on supported systems.
+  - **Changed:** added private runtime, temporary, and manifest directories with owner-only permissions.
+  - **Verified:** `go test ./arsy/config` confirmed directory creation and mode `0700`; full CI passed in run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-012 — Add an A-R-S-Y liveness endpoint**
+- [x] **MVP1-012 — Add an A-R-S-Y liveness endpoint**
   - Register `GET /api/arsy/v1/health`.
   - Return only product name, version, and a simple alive status.
   - Do not include database credentials, environment values, filesystem paths, or secrets.
   - **Done when:** an HTTP test confirms the endpoint works and the response contains no sensitive configuration.
+  - **Changed:** registered `GET /api/arsy/v1/health` with only product, version, and alive status.
+  - **Verified:** `TestHealthEndpointIsMinimal` passed and asserted the response contains exactly those three fields in run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-013 — Add an authenticated readiness endpoint**
+- [x] **MVP1-013 — Add an authenticated readiness endpoint**
   - Register `GET /api/arsy/v1/ready`.
   - Check only local control-plane readiness: database available, migrations applied, required configuration valid.
   - Require superuser authentication or restrict the response to a minimal non-sensitive status.
   - **Done when:** tests cover ready and not-ready responses.
+  - **Changed:** registered `GET /api/arsy/v1/ready`, requiring superuser authentication and returning ready/not-ready state.
+  - **Verified:** tests passed for unauthenticated (401), authenticated ready (200), and authenticated not-bootstrapped (503) responses in run `42336003844`.
+  - **Remaining:** Readiness currently checks local bootstrap state; deeper dependency checks can be added as the control plane grows.
 
-- [ ] **MVP1-014 — Add an A-R-S-Y diagnostics CLI command**
+- [x] **MVP1-014 — Add an A-R-S-Y diagnostics CLI command**
   - Add a command such as `arsy doctor`.
   - Report version, Go build/runtime information, data-directory accessibility, database readiness, and secret-key configuration status.
   - Never print secret values.
   - **Done when:** the command exits non-zero for a broken local setup and exits zero for a valid setup.
+  - **Changed:** added `arsy doctor` diagnostics for product/version, Go runtime, data directories, database readiness, and secret-key configuration without printing secret values.
+  - **Verified:** GitHub Actions ran `ARSY_DATA_DIR=... ARSY_SECRET_KEY=... .builds/arsy doctor` successfully in run `42336003844`.
+  - **Remaining:** None.
 
 ## Phase C — Separate console and first-run onboarding
 
 **Phase exit:** An administrator can sign in to a dedicated A-R-S-Y console, see onboarding status, and follow a guided path to register the first server. The PocketBase Superuser UI remains intact.
 
-- [ ] **MVP1-015 — Create a separate A-R-S-Y console frontend**
+- [x] **MVP1-015 — Create a separate A-R-S-Y console frontend**
   - Create a new `dashboard/` directory.
   - Use a small Vite-based static frontend; vanilla JavaScript is acceptable.
   - Keep Node/npm as build-time tools only.
   - Do not modify `ui/src` or replace the PocketBase Superuser dashboard.
   - **Done when:** `npm run build` in `dashboard/` produces a static `dist/` directory.
+  - **Changed:** added a separate Vite-based vanilla-JavaScript dashboard in `dashboard/`; PocketBase `ui/` remains separate.
+  - **Verified:** `npm install && npm run build` in `dashboard/` passed in GitHub Actions run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-016 — Add a minimal A-R-S-Y console shell**
+- [x] **MVP1-016 — Add a minimal A-R-S-Y console shell**
   - Create a simple layout with navigation for Overview, Servers, Projects, and Deployments.
   - Use placeholder empty states for pages that are not yet implemented.
   - Do not create decorative controls that look functional but do nothing.
   - **Done when:** the built console renders all four navigation destinations without runtime errors.
+  - **Changed:** added Overview, Servers, Projects, and Deployments navigation with explicit empty states.
+  - **Verified:** Vite production build and embedded console route test passed in GitHub Actions run `42336003844`.
+  - **Remaining:** Browser-level end-to-end interaction tests are not yet configured.
 
-- [ ] **MVP1-017 — Embed the A-R-S-Y console assets into Go**
+- [x] **MVP1-017 — Embed the A-R-S-Y console assets into Go**
   - Add a dedicated Go embed package for `dashboard/dist`.
   - Do not reuse or overwrite `ui/embed.go`.
   - Add a build step that generates the frontend assets before compiling the executable.
   - **Done when:** the A-R-S-Y binary serves the console without requiring Node.js or a separate frontend server.
+  - **Changed:** added Go embed package for `dashboard/dist` and made CI/Makefile build dashboard assets before compiling the executable.
+  - **Verified:** dashboard build, `go test ./...`, and standalone Go build passed in GitHub Actions run `42336003844`.
+  - **Remaining:** None.
 
-- [ ] **MVP1-018 — Register the A-R-S-Y console route**
+- [x] **MVP1-018 — Register the A-R-S-Y console route**
   - Serve the console at `/arsy` and its static assets under a predictable asset path.
   - Keep the existing PocketBase `/_/` route and all PocketBase API routes working.
   - Add SPA fallback only within the A-R-S-Y console route.
   - **Done when:** HTTP tests confirm both the A-R-S-Y console route and PocketBase admin route remain reachable.
+  - **Changed:** registered `/arsy` and SPA/static asset handling without replacing PocketBase's existing `/_/` route.
+  - **Verified:** `TestConsoleRouteServesEmbeddedDashboard` passed in GitHub Actions run `42336003844`.
+  - **Remaining:** Full HTTP integration test against the complete PocketBase router remains useful before release.
 
 - [ ] **MVP1-019 — Register the A-R-S-Y API route group**
   - Create a shared router group under `/api/arsy/v1`.
