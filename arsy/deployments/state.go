@@ -5,23 +5,23 @@ import "fmt"
 type State string
 
 const (
-	StateQueued    State = "queued"
-	StatePreparing State = "preparing"
-	StateUploading State = "uploading"
+	StateQueued     State = "queued"
+	StatePreparing  State = "preparing"
+	StateUploading  State = "uploading"
 	StateValidating State = "validating"
-	StateDeploying State = "deploying"
-	StateVerifying State = "verifying"
-	StateSucceeded State = "succeeded"
-	StateFailed    State = "failed"
-	StateCancelled State = "cancelled"
+	StateDeploying  State = "deploying"
+	StateVerifying  State = "verifying"
+	StateSucceeded  State = "succeeded"
+	StateFailed     State = "failed"
+	StateCancelled  State = "cancelled"
 )
 
 var allowedTransitions = map[State]map[State]struct{}{
-	StateQueued:    {StatePreparing: {}, StateFailed: {}, StateCancelled: {}},
-	StatePreparing: {StateUploading: {}, StateFailed: {}, StateCancelled: {}},
+	StateQueued:     {StatePreparing:  {}, StateFailed: {}, StateCancelled: {}},
+	StatePreparing: {StateUploading:  {}, StateFailed: {}, StateCancelled: {}},
 	StateUploading: {StateValidating: {}, StateFailed: {}, StateCancelled: {}},
-	StateValidating: {StateDeploying: {}, StateFailed: {}, StateCancelled: {}},
-	StateDeploying: {StateVerifying: {}, StateFailed: {}, StateCancelled: {}},
+	StateValidating: {StateDeploying:  {}, StateFailed: {}, StateCancelled: {}},
+	StateDeploying: {StateVerifying:  {}, StateFailed: {}, StateCancelled: {}},
 	StateVerifying: {StateSucceeded: {}, StateFailed: {}, StateCancelled: {}},
 }
 
