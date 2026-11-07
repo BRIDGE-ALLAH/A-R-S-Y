@@ -14,6 +14,10 @@ var (
 	ErrOperator     = errors.New("query: operator not allowlisted")
 	ErrMalformed    = errors.New("query: malformed expression")
 	ErrUnknownField = errors.New("query: unknown field")
+	ErrLimit        = errors.New("query: limit exceeds configured maximum")
+	ErrOffset       = errors.New("query: offset exceeds configured maximum")
+	ErrDepth        = errors.New("query: nesting depth exceeds configured maximum")
+	ErrNodeCount    = errors.New("query: node count exceeds configured maximum")
 )
 
 // Operator allowlist.
@@ -69,15 +73,60 @@ type Sort struct {
 	Desc  bool   `json:"desc,omitempty"`
 }
 
-// Validate checks operator allowlist, expression shape, and schema fields.
+// ValidateOptions configures query complexity constraints (#127).
+// Zero values use package defaults.
+type ValidateOptions struct {
+	MaxLimit     int
+	MaxOffset    int
+	MaxDepth     int
+	MaxNodeCount int
+}
+
+const (
+	DefaultMaxLimit     = 1000
+	DefaultMaxOffset    = 10000
+	DefaultMaxDepth     = 20
+	DefaultMaxNodeCount = 1000
+)
+
+func (o ValidateOptions) withDefaults() ValidateOptions {
+	if o.MaxLimit <= 0 {
+		o.MaxLimit = DefaultMaxLimit
+	}
+	if o.MaxOffset <= 0 {
+		o.MaxOffset = DefaultMaxOffset
+	}
+	if o.MaxDepth <= 0 {
+		o.MaxDepth = DefaultMaxDepth
+	}
+	if o.MaxNodeCount <= 0 {
+		o.MaxNodeCount = DefaultMaxNodeCount
+	}
+	return o
+}
+
+// Validate checks operator allowlist, expression shape, schema fields, and default complexity constraints.
 func (q *Query) Validate(s Schema) error {
+	return q.ValidateWithOptions(s, ValidateOptions{})
+}
+
+// ValidateWithOptions checks operator allowlist, expression shape, schema fields, and configurable complexity constraints.
+func (q *Query) ValidateWithOptions(s Schema, opts ValidateOptions) error {
+	o := opts.withDefaults()
 	if q == nil {
 		return fmt.Errorf("%w: nil query", ErrMalformed)
 	}
 	if q.Limit < 0 || q.Offset < 0 {
 		return fmt.Errorf("%w: negative limit/offset", ErrMalformed)
 	}
-	if err := q.Filter.Validate(s); err != nil {
+	if q.Limit > o.MaxLimit {
+		return fmt.Errorf("%w: %d > %d", ErrLimit, q.Limit, o.MaxLimit)
+	}
+	if q.Offset > o.MaxOffset {
+		return fmt.Errorf("%w: %d > %d", ErrOffset, q.Offset, o.MaxOffset)
+	}
+	nodes := 0
+	if err := q.Filter.validate(s, o, 0, &nodes); err != nil {
 		return err
 	}
 	for _, so := range q.Sort {
@@ -93,9 +142,22 @@ func (q *Query) Validate(s Schema) error {
 	return nil
 }
 
+// Validate checks operator allowlist, expression shape, schema fields, and default complexity constraints.
 func (e *Expr) Validate(s Schema) error {
+	nodes := 0
+	return e.validate(s, ValidateOptions{}.withDefaults(), 0, &nodes)
+}
+
+func (e *Expr) validate(s Schema, o ValidateOptions, depth int, nodes *int) error {
 	if e == nil {
 		return nil
+	}
+	if depth > o.MaxDepth {
+		return fmt.Errorf("%w: %d > %d", ErrDepth, depth, o.MaxDepth)
+	}
+	*nodes++
+	if *nodes > o.MaxNodeCount {
+		return fmt.Errorf("%w: %d > %d", ErrNodeCount, *nodes, o.MaxNodeCount)
 	}
 	count := 0
 	if len(e.And) > 0 {
@@ -104,7 +166,7 @@ func (e *Expr) Validate(s Schema) error {
 			if c == nil {
 				return fmt.Errorf("%w: nil AND child", ErrMalformed)
 			}
-			if err := c.Validate(s); err != nil {
+			if err := c.validate(s, o, depth+1, nodes); err != nil {
 				return err
 			}
 		}
@@ -115,14 +177,14 @@ func (e *Expr) Validate(s Schema) error {
 			if c == nil {
 				return fmt.Errorf("%w: nil OR child", ErrMalformed)
 			}
-			if err := c.Validate(s); err != nil {
+			if err := c.validate(s, o, depth+1, nodes); err != nil {
 				return err
 			}
 		}
 	}
 	if e.Not != nil {
 		count++
-		if err := e.Not.Validate(s); err != nil {
+		if err := e.Not.validate(s, o, depth+1, nodes); err != nil {
 			return err
 		}
 	}
@@ -134,7 +196,7 @@ func (e *Expr) Validate(s Schema) error {
 		if e.Cmp.Field == "" || (s != nil && !s.HasField(e.Cmp.Field)) {
 			return fmt.Errorf("%w: %q", ErrUnknownField, e.Cmp.Field)
 		}
-		if len(e.Cmp.Value) == 0 || string(e.Cmp.Value) == "null" && (e.Cmp.Op == OpIn || e.Cmp.Op == OpNin) {
+		if len(e.Cmp.Value) == 0 || (string(e.Cmp.Value) == "null" && (e.Cmp.Op == OpIn || e.Cmp.Op == OpNin)) {
 			return fmt.Errorf("%w: comparison value required", ErrMalformed)
 		}
 	}
