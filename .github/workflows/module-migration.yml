@@ -1,0 +1,99 @@
+name: Migrate A-R-S-Y module identity
+
+on:
+  push:
+    paths:
+      - ".plan/module-migration.trigger"
+      - ".github/workflows/module-migration.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    name: Rename local Go module and verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Migrate module path and product identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          old='ganigeorgiev.com/pocketbase/pocketbase'
+          new='github.com/bridge-allah/a-r-s-y'
+
+          while IFS= read -r file; do
+            sed -i "s#${old}#${new}#g" "$file"
+          done < <(git grep -Il "$old" -- '*.go' || true)
+
+          go mod edit -module="$new"
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          release = Path(".goreleaser.yaml")
+          release.write_text(release.read_text().replace(
+              "ganigeorgiev.com/pocketbase/pocketbase.Version",
+              "github.com/bridge-allah/a-r-s-y.Version",
+          ))
+
+          launcher = Path("pocketbase.go")
+          source = launcher.read_text()
+          source = source.replace("// Version of PocketBase", "// Version of A-R-S-Y")
+          source = source.replace('Short:   executableName + " CLI",', 'Short:   "A-R-S-Y control-plane CLI",')
+          source = source.replace("Version: Version,", 'Version: "A-R-S-Y " + Version,')
+          launcher.write_text(source)
+
+          readme = Path("README.md")
+          source = readme.read_text()
+          marker = "## Architecture and scope"
+          section = """## Configuration
+
+          A-R-S-Y-specific settings use these environment variables:
+
+          | Variable | Default | Purpose |
+          | --- | --- | --- |
+          | `ARSY_DATA_DIR` | `pb_data/arsy` | Private A-R-S-Y runtime data directory |
+          | `ARSY_API_PREFIX` | `/api/arsy/v1` | Versioned A-R-S-Y API prefix |
+          | `ARSY_CONSOLE_PATH` | `/arsy` | A-R-S-Y web console route |
+          | `ARSY_SECRET_KEY_ENV` | `ARSY_SECRET_KEY` | Name of the environment variable that supplies the secret key |
+
+          The secret key value is never printed by diagnostics. Keep it outside source control and provide it through the environment of the A-R-S-Y process.
+
+          """
+          if "## Configuration" not in source:
+              source = source.replace(marker, section + marker)
+          readme.write_text(source)
+          PY
+
+          go mod tidy
+          test -z "$(git grep -n "$old" -- '*.go' || true)"
+          go list ./...
+          go test ./...
+          CGO_ENABLED=0 go build -o arsy ./examples/base
+          version_output="$(./arsy --version)"
+          printf '%s\n' "$version_output"
+          grep -q 'A-R-S-Y' <<< "$version_output"
+          ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY='ci-only-diagnostic-key' ./arsy doctor
+          rm -f arsy
+      - name: Commit verified migration
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit."
+            exit 0
+          fi
+          git commit -m "refactor: adopt A-R-S-Y Go module identity"
+          git push origin HEAD:main
