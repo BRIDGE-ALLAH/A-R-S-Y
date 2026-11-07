@@ -9,6 +9,7 @@ import (
 )
 
 var ErrNoQueuedDeployments = errors.New("no queued deployments are available")
+var ErrDeploymentInProgress = errors.New("deployment in progress for this application")
 
 var interruptedDeploymentStates = []State{
 	StatePreparing,
@@ -16,6 +17,68 @@ var interruptedDeploymentStates = []State{
 	StateValidating,
 	StateDeploying,
 	StateVerifying,
+}
+
+// HasActiveDeployment checks if the application has any non-terminal deployment.
+func HasActiveDeployment(app core.App, applicationID string) (bool, error) {
+	if app == nil {
+		return false, errors.New("PocketBase app is required")
+	}
+	records, err := app.FindRecordsByFilter(
+		"arsy_deployments",
+		`application = {:appID} && (status = "queued" || status = "preparing" || status = "uploading" || status = "validating" || status = "deploying" || status = "verifying")`,
+		"",
+		1, 0,
+		map[string]any{"appID": applicationID},
+	)
+	if err != nil {
+		return false, err
+	}
+	return len(records) > 0, nil
+}
+
+// FindDeploymentByIdempotencyKey returns the deployment with the given
+// idempotency key, or nil if none exists.
+func FindDeploymentByIdempotencyKey(app core.App, idempotencyKey string) (*core.Record, error) {
+	if app == nil {
+		return nil, errors.New("PocketBase app is required")
+	}
+	if idempotencyKey == "" {
+		return nil, nil
+	}
+	record, err := app.FindFirstRecordByData("arsy_deployments", "idempotency_key", idempotencyKey)
+	if err != nil {
+		return nil, nil
+	}
+	return record, nil
+}
+
+// RecoverStaleDeploymentLocks marks any non-terminal deployment started
+// more than 1 hour ago as failed. Called once on worker startup.
+func RecoverStaleDeploymentLocks(app core.App) error {
+	if app == nil {
+		return errors.New("PocketBase app is required")
+	}
+	const staleThreshold = 1 * time.Hour
+	cutoff := time.Now().UTC().Add(-staleThreshold)
+	records, err := app.FindRecordsByFilter(
+		"arsy_deployments",
+		`(status = "queued" || status = "preparing" || status = "uploading" || status = "validating" || status = "deploying" || status = "verifying") && created < {:cutoff}`,
+		"",
+		1000, 0,
+		map[string]any{"cutoff": cutoff.Format(time.RFC3339Nano)},
+	)
+	if err != nil {
+		return fmt.Errorf("query stale deployments: %w", err)
+	}
+	for _, record := range records {
+		record.Set("status", string(StateFailed))
+		record.Set("summary", "Deployment lock recovered after process restart.")
+		if err := app.Save(record); err != nil {
+			return fmt.Errorf("recover stale deployment %q: %w", record.GetString("deployment_id"), err)
+		}
+	}
+	return nil
 }
 
 // ClaimNextQueuedDeployment atomically claims the oldest queued deployment
@@ -26,14 +89,28 @@ func ClaimNextQueuedDeployment(app core.App) (*core.Record, error) {
 	}
 	var claimed *core.Record
 	err := app.RunInTransaction(func(txApp core.App) error {
-		records, err := txApp.FindRecordsByFilter("arsy_deployments", `status = "queued"`, "created", 1, 0)
+		records, err := txApp.FindRecordsByFilter("arsy_deployments", `status = "queued"`, "created", 100, 0)
 		if err != nil {
 			return fmt.Errorf("find queued deployments: %w", err)
 		}
 		if len(records) == 0 {
 			return ErrNoQueuedDeployments
 		}
-		record := records[0]
+		var record *core.Record
+		for _, candidate := range records {
+			appID := candidate.GetString("application")
+			active, err := HasActiveDeployment(txApp, appID)
+			if err != nil {
+				return err
+			}
+			if !active {
+				record = candidate
+				break
+			}
+		}
+		if record == nil {
+			return ErrNoQueuedDeployments
+		}
 		next, err := Transition(State(record.GetString("status")), StatePreparing)
 		if err != nil {
 			return err
@@ -119,3 +196,4 @@ func RecoverInterruptedDeployments(app core.App, staleBefore time.Time) (int, er
 	}
 	return recovered, nil
 }
+

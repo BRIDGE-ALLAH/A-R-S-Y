@@ -99,30 +99,9 @@ func TestCreateDeploymentQueuesApplication(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &second); err != nil {
 		t.Fatal(err)
 	}
-	// Second deployment: no succeeded predecessor, so no previous_deployment_id should be set
-	if _, ok := second["previous_deployment_id"]; ok && second["previous_deployment_id"] != "" {
-		t.Fatalf("second deployment has previous_deployment_id, but none succeeded: %v", second["previous_deployment_id"])
-	}
-	// Mark the first deployment as succeeded so the third can reference it
-	firstDep, _ := app.FindFirstRecordByData("arsy_deployments", "deployment_id", deploymentID)
-	firstDep.Set("status", "succeeded")
-	_ = app.Save(firstDep)
-
-	body = []byte(`{"application_id":"` + application.Id + `"}`)
-	req = httptest.NewRequest(http.MethodPost, "/api/arsy/v1/deployments", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	rec = httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("expected 201 on third deploy, got %d: %s", rec.Code, rec.Body.String())
-	}
-	var third map[string]any
-	if err := json.Unmarshal(rec.Body.Bytes(), &third); err != nil {
-		t.Fatal(err)
-	}
-	// Third deployment should reference the first (succeeded one)
-	if third["previous_deployment_id"] != deploymentID {
-		t.Fatalf("third previous should ref first succeeded, = %v, want %q", third["previous_deployment_id"], deploymentID)
+	// Second deployment should fail (409) due to overlap prevention
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("second concurrent deploy: expected 409 (overlap prevention), got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 

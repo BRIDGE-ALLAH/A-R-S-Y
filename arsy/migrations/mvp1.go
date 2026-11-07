@@ -81,6 +81,7 @@ func up(app core.App) error {
 			&core.AutodateField{Name: "created", OnCreate: true},
 			&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true},
 			&core.TextField{Name: "deployment_id", Required: true, Max: 80},
+			&core.TextField{Name: "idempotency_key", Max: 128},
 			&core.SelectField{Name: "status", Values: []string{"queued", "preparing", "uploading", "validating", "deploying", "verifying", "succeeded", "failed", "cancelled"}, Required: true, MaxSelect: 1},
 			&core.DateField{Name: "started_at"},
 			&core.DateField{Name: "finished_at"},
@@ -90,6 +91,7 @@ func up(app core.App) error {
 		)
 		c.Indexes = types.JSONArray[string]{
 			"CREATE UNIQUE INDEX idx_arsy_deployments_id ON arsy_deployments (deployment_id)",
+			"CREATE UNIQUE INDEX idx_arsy_deployments_idempotency ON arsy_deployments (idempotency_key) WHERE idempotency_key IS NOT NULL",
 		}
 	})
 	if err != nil {

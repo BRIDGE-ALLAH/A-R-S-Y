@@ -77,6 +77,9 @@ func (w Worker) Run(ctx context.Context) error {
 	if w.App == nil || w.Process == nil {
 		return errors.New("worker app and processor are required")
 	}
+	if err := RecoverStaleDeploymentLocks(w.App); err != nil {
+		return fmt.Errorf("recover stale deployment locks: %w", err)
+	}
 	recoveryAfter := w.RecoveryAfter
 	if recoveryAfter <= 0 {
 		recoveryAfter = 5 * time.Minute
