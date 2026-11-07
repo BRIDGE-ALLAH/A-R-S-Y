@@ -36,6 +36,8 @@ jobs:
         run: go mod verify
       - name: Test
         run: go test ./...
+      - name: Verify A-R-S-Y migrations
+        run: go test ./arsy/migrations
       - name: Build standalone server
         run: mkdir -p .builds && CGO_ENABLED=0 go build -o .builds/arsy ./examples/base
       - name: Run A-R-S-Y diagnostics
