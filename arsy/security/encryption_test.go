@@ -3,7 +3,6 @@ package security
 import (
 	"encoding/base64"
 	"errors"
-	"os"
 	"strings"
 	"testing"
 )
@@ -62,7 +61,12 @@ func TestDecryptRejectsTamperingAndWrongKey(t *testing.T) {
 	}
 
 	parts := strings.Split(ciphertext, ":")
-	parts[3] = parts[3][:len(parts[3])-1] + "A"
+	last := parts[3][len(parts[3])-1]
+	if last == 'A' {
+		parts[3] = parts[3][:len(parts[3])-1] + "B"
+	} else {
+		parts[3] = parts[3][:len(parts[3])-1] + "A"
+	}
 	if _, err := Decrypt(strings.Join(parts, ":"), key); err == nil {
 		t.Fatal("tampered ciphertext was accepted")
 	}
@@ -101,7 +105,7 @@ func TestLoadKeyReadsValidEnvironmentKey(t *testing.T) {
 }
 
 func TestEncryptWithEnvRejectsMissingKey(t *testing.T) {
-	os.Unsetenv("ARSY_TEST_KEY")
+	t.Setenv("ARSY_TEST_KEY", "")
 	if _, err := EncryptWithEnv([]byte("secret"), "ARSY_TEST_KEY"); !errors.Is(err, ErrMissingKey) {
 		t.Fatalf("error = %v, want missing key", err)
 	}
