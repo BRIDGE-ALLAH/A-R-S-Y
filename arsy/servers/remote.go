@@ -51,10 +51,9 @@ func (e Executor) Execute(ctx context.Context, client *ssh.Client, operation Rem
 	return e.executeCommand(ctx, client, operation, command, secrets...)
 }
 
-func (e Executor) ValidateComposeManifest(ctx context.Context, client *ssh.Client, applicationSlug, deploymentID string) (CommandResult, error) {
-	manifestPath, err := deployments.ManifestPath(applicationSlug, deploymentID)
-	if err != nil {
-		return CommandResult{}, err
+func (e Executor) ValidateComposeManifest(ctx context.Context, client *ssh.Client, manifestPath string) (CommandResult, error) {
+	if !remoteManifestPathPattern.MatchString(manifestPath) {
+		return CommandResult{}, errors.New("remote Compose manifest path is not an A-R-S-Y release path")
 	}
 	command := "docker compose -f " + shellQuote(manifestPath) + " config --quiet"
 	return e.executeCommand(ctx, client, RemoteComposeValidate, command)
@@ -114,6 +113,8 @@ func (e Executor) executeCommand(ctx context.Context, client *ssh.Client, operat
 	}
 	return result, fmt.Errorf("execute fixed SSH operation %q: %w", operation, runErr)
 }
+
+var remoteManifestPathPattern = regexp.MustCompile("^/opt/arsy/apps/[a-z0-9]+(?:-[a-z0-9]+)*/releases/[a-f0-9]{32}/compose\\.yaml$")
 
 func commandForOperation(operation RemoteOperation) (string, error) {
 	switch operation {
