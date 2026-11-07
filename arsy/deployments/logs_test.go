@@ -20,7 +20,7 @@ func TestAppendDeploymentLogPersistsBoundedEntries(t *testing.T) {
 	if err := AppendDeploymentLog(app, deployment.Id, "upload", "info", message); err != nil {
 		t.Fatal(err)
 	}
-	logs, err := app.FindRecordsByFilter("arsy_deployment_logs", "", "", 10, 0)
+	logs, err := app.FindAllRecords("arsy_deployment_logs")
 	if err != nil {
 		t.Fatal(err)
 	}
