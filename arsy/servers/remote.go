@@ -19,6 +19,7 @@ const (
 	RemoteOSFacts        RemoteOperation = "os_facts"
 	RemoteDockerVersion  RemoteOperation = "docker_version"
 	RemoteComposeVersion RemoteOperation = "compose_version"
+	RemoteComposeValidate RemoteOperation = "compose_validate"
 )
 
 type CommandResult struct {
@@ -46,6 +47,28 @@ func (e Executor) Execute(ctx context.Context, client *ssh.Client, operation Rem
 	command, err := commandForOperation(operation)
 	if err != nil {
 		return CommandResult{}, err
+	}
+	return e.executeCommand(ctx, client, operation, command, secrets...)
+}
+
+func (e Executor) ValidateComposeManifest(ctx context.Context, client *ssh.Client, applicationSlug, deploymentID string) (CommandResult, error) {
+	manifestPath, err := deployments.ManifestPath(applicationSlug, deploymentID)
+	if err != nil {
+		return CommandResult{}, err
+	}
+	command := "docker compose -f " + shellQuote(manifestPath) + " config --quiet"
+	return e.executeCommand(ctx, client, RemoteComposeValidate, command)
+}
+
+func (e Executor) executeCommand(ctx context.Context, client *ssh.Client, operation RemoteOperation, command string, secrets ...string) (CommandResult, error) {
+	if ctx == nil {
+		return CommandResult{}, errors.New("SSH context is required")
+	}
+	if err := ctx.Err(); err != nil {
+		return CommandResult{}, err
+	}
+	if client == nil {
+		return CommandResult{}, errors.New("SSH client is required")
 	}
 	timeout := e.Timeout
 	if timeout <= 0 {
@@ -100,6 +123,8 @@ func commandForOperation(operation RemoteOperation) (string, error) {
 		return "docker version --format '{{.Server.Version}}'", nil
 	case RemoteComposeVersion:
 		return "docker compose version --short", nil
+	case RemoteComposeValidate:
+		return "", fmt.Errorf("operation %q requires a generated deployment manifest path", operation)
 	default:
 		return "", fmt.Errorf("unsupported remote operation %q", operation)
 	}
@@ -128,6 +153,10 @@ func (b *boundedBuffer) Write(value []byte) (int, error) {
 
 func (b *boundedBuffer) String() string {
 	return b.buffer.String()
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
 }
 
 func redact(value string, secrets ...string) string {
