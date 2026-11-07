@@ -139,9 +139,9 @@ function renderPage() {
   } else if (id === "servers") {
     content = '<div id="server-manager"><article class="empty-card"><h2>Loading servers…</h2></article></div>';
   } else if (id === "projects") {
-    content = '<article class="empty-card"><h2>No project workflow yet</h2><p>Projects will organize applications and their deployment history.</p></article>';
+    content = '<div id="project-manager"><article class="empty-card"><h2>Loading projects…</h2></article></div>';
   } else {
-    content = '<article class="empty-card"><h2>No deployments yet</h2><p>Deployment history will appear after an application is deployed with Docker Compose.</p></article>';
+    content = '<div id="deployment-manager"><article class="empty-card"><h2>Loading deployments…</h2></article></div>';
   }
 
   document.querySelector("#page").innerHTML = `
@@ -151,6 +151,8 @@ function renderPage() {
     ${content}
   `;
   if (id === "servers") void renderServerManager();
+  if (id === "projects") void renderProjectManager();
+  if (id === "deployments") void renderDeploymentManager();
 }
 
 async function render() {
@@ -356,4 +358,228 @@ function escapeHTML(value) {
     '"': "&quot;",
     "'": "&#39;",
   })[character]);
+}
+
+async function renderProjectManager() {
+  const root = document.querySelector("#project-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <section class="form-card">
+      <h2>Create a project</h2>
+      <form id="project-create-form">
+        <label for="project-name">Project name</label>
+        <input id="project-name" name="name" required placeholder="Production Platform" />
+        <label for="project-desc">Description</label>
+        <input id="project-desc" name="description" placeholder="Main microservices stack" />
+        <button type="submit" class="primary-button">Create project</button>
+      </form>
+    </section>
+    <section class="form-card">
+      <h2>Create an application</h2>
+      <form id="app-create-form">
+        <div class="form-row">
+          <div><label for="app-project">Project</label><select id="app-project" name="project_id" required></select></div>
+          <div><label for="app-server">Server</label><select id="app-server" name="server_id" required></select></div>
+        </div>
+        <label for="app-name">Application name</label>
+        <input id="app-name" name="name" required placeholder="Web API" />
+        <label for="app-manifest">Docker Compose manifest</label>
+        <textarea id="app-manifest" name="compose_manifest" rows="6" required placeholder="services:\n  web:\n    image: nginx:alpine\n    ports:\n      - \"8080:80\""></textarea>
+        <button type="submit" class="primary-button">Create application</button>
+      </form>
+    </section>
+    <p id="project-feedback" class="server-feedback" role="status"></p>
+    <div id="project-list" class="server-list"></div>
+  `;
+
+  const projectForm = root.querySelector("#project-create-form");
+  const appForm = root.querySelector("#app-create-form");
+  const feedback = root.querySelector("#project-feedback");
+  const list = root.querySelector("#project-list");
+
+  async function loadSelectOptions() {
+    try {
+      const [projData, servData] = await Promise.all([
+        apiFetch("/api/arsy/v1/projects"),
+        apiFetch("/api/arsy/v1/servers")
+      ]);
+      const projSelect = appForm.querySelector("#app-project");
+      const servSelect = appForm.querySelector("#app-server");
+      projSelect.innerHTML = (projData.items || []).map(p => `<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>`).join("");
+      servSelect.innerHTML = (servData.items || []).map(s => `<option value="${escapeHTML(s.id)}">${escapeHTML(s.name)} (${escapeHTML(s.host)})</option>`).join("");
+    } catch (_) {}
+  }
+
+  async function refreshProjects() {
+    try {
+      const [projData, appData] = await Promise.all([
+        apiFetch("/api/arsy/v1/projects"),
+        apiFetch("/api/arsy/v1/applications")
+      ]);
+      const projects = projData.items || [];
+      const apps = appData.items || [];
+      if (!projects.length) {
+        list.innerHTML = '<article class="empty-card"><h2>No projects yet</h2><p>Create your first project above to group applications.</p></article>';
+        return;
+      }
+      list.innerHTML = projects.map(p => {
+        const pApps = apps.filter(a => a.project_id === p.id);
+        return `
+          <article class="project-card">
+            <h3>${escapeHTML(p.name)}</h3>
+            <p>${escapeHTML(p.description || "No description")}</p>
+            <div class="card-meta"><span>Slug: <code>${escapeHTML(p.slug)}</code></span><span>Applications: ${pApps.length}</span></div>
+            ${pApps.length ? `
+              <div style="margin-top:14px; border-top:1px solid #29364a; padding-top:10px;">
+                <strong>Applications in project:</strong>
+                ${pApps.map(a => `
+                  <div class="app-card" style="margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div><strong>${escapeHTML(a.name)}</strong> · <small>${escapeHTML(a.slug)}</small></div>
+                      <span class="deploy-status-tag ${escapeHTML(a.lifecycle_state)}">${escapeHTML(a.lifecycle_state)}</span>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("");
+    } catch (err) {
+      list.innerHTML = `<article class="notice-card"><p>${escapeHTML(err.message)}</p></article>`;
+    }
+  }
+
+  projectForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = projectForm.querySelector("button");
+    btn.disabled = true;
+    feedback.textContent = "";
+    const data = new FormData(projectForm);
+    try {
+      await apiFetch("/api/arsy/v1/projects", {
+        method: "POST",
+        body: JSON.stringify({ name: data.get("name"), description: data.get("description") })
+      });
+      projectForm.reset();
+      feedback.textContent = "Project created successfully.";
+      await Promise.all([refreshProjects(), loadSelectOptions()]);
+    } catch (err) {
+      feedback.textContent = err.message || "Failed to create project.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  appForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = appForm.querySelector("button");
+    btn.disabled = true;
+    feedback.textContent = "";
+    const data = new FormData(appForm);
+    try {
+      await apiFetch("/api/arsy/v1/applications", {
+        method: "POST",
+        body: JSON.stringify({
+          project_id: data.get("project_id"),
+          server_id: data.get("server_id"),
+          name: data.get("name"),
+          compose_manifest: data.get("compose_manifest")
+        })
+      });
+      appForm.reset();
+      feedback.textContent = "Application created successfully.";
+      await refreshProjects();
+    } catch (err) {
+      feedback.textContent = err.message || "Failed to create application.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  void loadSelectOptions();
+  void refreshProjects();
+}
+
+async function renderDeploymentManager() {
+  const root = document.querySelector("#deployment-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <div id="deployment-feedback" class="server-feedback" role="status"></div>
+    <div id="deployment-list" class="server-list"><article class="empty-card"><p>Loading deployments…</p></article></div>
+  `;
+
+  const list = root.querySelector("#deployment-list");
+  const feedback = root.querySelector("#deployment-feedback");
+
+  async function refreshDeployments() {
+    try {
+      const deployments = await apiFetch("/api/arsy/v1/deployments");
+      if (!deployments || !deployments.length) {
+        list.innerHTML = '<article class="empty-card"><h2>No deployments yet</h2><p>Deployments will appear here once applications are deployed.</p></article>';
+        return;
+      }
+      list.innerHTML = deployments.map(d => `
+        <article class="deploy-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h3>Deployment <code>${escapeHTML(d.deployment_id.slice(0, 8))}</code></h3>
+              <p>Application: <code>${escapeHTML(d.application_id)}</code></p>
+            </div>
+            <span class="deploy-status-tag ${escapeHTML(d.state)}">${escapeHTML(d.state)}</span>
+          </div>
+          <div class="card-meta">
+            ${d.started_at ? `<span>Started: ${escapeHTML(d.started_at)}</span>` : ""}
+            ${d.finished_at ? `<span>Finished: ${escapeHTML(d.finished_at)}</span>` : ""}
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="quiet-button" data-action="view-log" data-id="${escapeHTML(d.deployment_id)}">View Logs</button>
+            <button class="quiet-button" data-action="stop" data-id="${escapeHTML(d.deployment_id)}">Stop</button>
+            <button class="quiet-button" data-action="redeploy" data-id="${escapeHTML(d.deployment_id)}">Redeploy</button>
+            <button class="quiet-button" data-action="rollback" data-id="${escapeHTML(d.deployment_id)}">Rollback</button>
+          </div>
+          <div id="log-${escapeHTML(d.deployment_id)}" style="display:none;" class="log-output"></div>
+        </article>
+      `).join("");
+    } catch (err) {
+      list.innerHTML = `<article class="notice-card"><p>${escapeHTML(err.message)}</p></article>`;
+    }
+  }
+
+  list.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    btn.disabled = true;
+    try {
+      if (action === "view-log") {
+        const logBox = root.querySelector(`#log-${id}`);
+        if (logBox.style.display === "block") {
+          logBox.style.display = "none";
+        } else {
+          logBox.style.display = "block";
+          logBox.textContent = "Fetching logs…";
+          const res = await apiFetch(`/api/arsy/v1/deployments/${id}/logs`);
+          logBox.textContent = res.log || "(empty)";
+        }
+      } else if (action === "stop") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/stop`, { method: "POST" });
+        feedback.textContent = `Deployment ${id.slice(0, 8)} cancelled/stopped.`;
+        await refreshDeployments();
+      } else if (action === "redeploy") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/redeploy`, { method: "POST" });
+        feedback.textContent = `Redeploy requested for ${id.slice(0, 8)}.`;
+      } else if (action === "rollback") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/rollback`, { method: "POST" });
+        feedback.textContent = `Rollback requested for ${id.slice(0, 8)}.`;
+      }
+    } catch (err) {
+      feedback.textContent = err.message || "Operation failed.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  void refreshDeployments();
 }

@@ -27,7 +27,7 @@ func listDeployments(e *core.RequestEvent) error {
 	if appID != "" {
 		records, err = e.App.FindRecordsByFilter(
 			"arsy_deployments",
-			"application_id = {:appID}",
+			"application = {:appID}",
 			"-started_at",
 			100, 0,
 			map[string]any{"appID": appID},
@@ -49,11 +49,11 @@ func listDeployments(e *core.RequestEvent) error {
 	for _, r := range records {
 		rec := deploymentRecord{
 			DeploymentID:         r.GetString("deployment_id"),
-			ApplicationID:        r.GetString("application_id"),
+			ApplicationID:        r.GetString("application"),
 			ServerID:             r.GetString("server_id"),
-			State:                r.GetString("state"),
+			State:                r.GetString("status"),
 			PreviousDeploymentID: r.GetString("previous_deployment_id"),
-			Log:                  r.GetString("log"),
+			Log:                  r.GetString("summary"),
 		}
 		if r.GetDateTime("started_at").String() != "" {
 			rec.StartedAt = r.GetDateTime("started_at").String()
@@ -80,11 +80,11 @@ func getDeployment(e *core.RequestEvent) error {
 
 	rec := deploymentRecord{
 		DeploymentID:         record.GetString("deployment_id"),
-		ApplicationID:        record.GetString("application_id"),
+		ApplicationID:        record.GetString("application"),
 		ServerID:             record.GetString("server_id"),
-		State:                record.GetString("state"),
+		State:                record.GetString("status"),
 		PreviousDeploymentID: record.GetString("previous_deployment_id"),
-		Log:                  record.GetString("log"),
+		Log:                  record.GetString("summary"),
 	}
 	if record.GetDateTime("started_at").String() != "" {
 		rec.StartedAt = record.GetDateTime("started_at").String()
@@ -107,7 +107,7 @@ func getDeploymentLogs(e *core.RequestEvent) error {
 		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "deployment not found"})
 	}
 
-	log := record.GetString("log")
+	log := record.GetString("summary")
 	if log == "" {
 		log = "(no logs available)"
 	}
@@ -120,7 +120,7 @@ func getDeploymentLogs(e *core.RequestEvent) error {
 	return e.JSON(http.StatusOK, map[string]any{
 		"deployment_id": id,
 		"log":           log,
-		"state":         record.GetString("state"),
+		"state":         record.GetString("status"),
 	})
 }
 
@@ -135,13 +135,13 @@ func stopDeployment(e *core.RequestEvent) error {
 		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "deployment not found"})
 	}
 
-	state := record.GetString("state")
+	state := record.GetString("status")
 	if state != string(deployments.StateDeploying) && state != string(deployments.StatePreparing) &&
 		state != string(deployments.StateUploading) && state != string(deployments.StateValidating) {
 		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "deployment is not running"})
 	}
 
-	record.Set("state", string(deployments.StateCancelled))
+	record.Set("status", string(deployments.StateCancelled))
 	if err := e.App.Save(record); err != nil {
 		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
 	}
@@ -160,14 +160,14 @@ func redeployDeployment(e *core.RequestEvent) error {
 		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "deployment not found"})
 	}
 
-	if record.GetString("state") != string(deployments.StateSucceeded) {
+	if record.GetString("status") != string(deployments.StateSucceeded) {
 		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "can only redeploy from succeeded deployments"})
 	}
 
 	return e.JSON(http.StatusOK, map[string]any{
 		"status":                 "redeploy_requested",
 		"deployment_id":          id,
-		"application_id":         record.GetString("application_id"),
+		"application_id":         record.GetString("application"),
 		"previous_deployment_id": record.GetString("deployment_id"),
 		"message":                "Use POST /api/arsy/v1/deployments with application_id to create a new deployment",
 	})
@@ -184,7 +184,7 @@ func rollbackDeployment(e *core.RequestEvent) error {
 		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "deployment not found"})
 	}
 
-	if record.GetString("state") != string(deployments.StateSucceeded) {
+	if record.GetString("status") != string(deployments.StateSucceeded) {
 		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "can only rollback from succeeded deployments"})
 	}
 
@@ -202,8 +202,8 @@ func rollbackDeployment(e *core.RequestEvent) error {
 		"status":            "rollback_requested",
 		"deployment_id":     id,
 		"rollback_to":       prevID,
-		"application_id":    record.GetString("application_id"),
-		"previous_manifest": prevRecord.GetString("manifest"),
+		"application_id":    record.GetString("application"),
+		"previous_manifest": prevRecord.GetString("summary"),
 		"message":           "Create a new deployment using the previous manifest",
 	})
 }

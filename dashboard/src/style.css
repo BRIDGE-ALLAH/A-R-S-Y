@@ -109,3 +109,20 @@ h2 { margin: 22px 0 8px; font-size: 18px; color: #f3f4f6; }
 .readiness-list span { float: right; color: #c4b5fd; font-size: 11px; }
 .readiness-list p { clear: both; color: #94a3b8; font-size: 11px; line-height: 1.5; margin: 8px 0 0; }
 @media(max-width:700px) { .form-row, .readiness-list { grid-template-columns: 1fr; } .server-form-card, .server-card, .readiness-card { padding: 18px; } .server-card-head { flex-direction: column; } }
+/* Extended console components */
+.project-card, .app-card, .deploy-card { border: 1px solid #29364a; border-radius: 14px; padding: 22px; background: #111c2d; margin-bottom: 14px; }
+.project-card h3, .app-card h3 { margin: 0 0 6px; color: #f8fafc; font-size: 16px; }
+.project-card p, .app-card p { color: #94a3b8; font-size: 13px; margin: 0 0 14px; }
+.card-meta { display: flex; gap: 16px; font-size: 12px; color: #8190a5; margin-top: 10px; }
+.deploy-status-tag { border: 1px solid #3b4a60; border-radius: 999px; padding: 4px 10px; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+.deploy-status-tag.succeeded { border-color: #059669; color: #34d399; background: #064e3b33; }
+.deploy-status-tag.failed { border-color: #dc2626; color: #fca5a5; background: #7f1d1d33; }
+.deploy-status-tag.queued, .deploy-status-tag.preparing, .deploy-status-tag.deploying { border-color: #d97706; color: #fcd34d; background: #78350f33; }
+.log-output { background: #0b1322; border: 1px solid #1e293b; border-radius: 8px; padding: 14px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; color: #e2e8f0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; margin-top: 12px; }
+.form-card { max-width: 760px; border: 1px solid #29364a; border-radius: 14px; padding: 22px; background: #111c2d; margin-bottom: 20px; }
+.form-card h2 { margin: 0 0 14px; }
+.form-card form { display: grid; gap: 12px; }
+.form-card label { color: #cbd5e1; font-size: 12px; font-weight: 600; }
+.form-card input, .form-card select, .form-card textarea { width: 100%; padding: 11px 12px; border: 1px solid #3b4a60; border-radius: 8px; background: #0b1322; color: #f8fafc; outline: none; font: inherit; font-size: 12px; }
+.form-card textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; resize: vertical; }
+.form-card input:focus, .form-card select:focus, .form-card textarea:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px #8b5cf633; }

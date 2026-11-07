@@ -50,12 +50,12 @@
       </article>
       ${l.secret_key_configured?``:`<article class="notice-card"><h2>Configure the secret key</h2><p>Set <code>ARSY_SECRET_KEY</code> in the control-plane process environment before storing SSH credentials. Keep the value outside source control.</p></article>`}
       ${l.server_registered?``:`<article class="empty-card"><h2>Register your first server</h2><p>Open Servers to continue setup. A-R-S-Y will require an SSH host-key fingerprint confirmation before trusting a host.</p></article>`}
-    `:e===`servers`?`<div id="server-manager"><article class="empty-card"><h2>Loading servers…</h2></article></div>`:e===`projects`?`<article class="empty-card"><h2>No project workflow yet</h2><p>Projects will organize applications and their deployment history.</p></article>`:`<article class="empty-card"><h2>No deployments yet</h2><p>Deployment history will appear after an application is deployed with Docker Compose.</p></article>`,document.querySelector(`#page`).innerHTML=`
+    `:e===`servers`?`<div id="server-manager"><article class="empty-card"><h2>Loading servers…</h2></article></div>`:e===`projects`?`<div id="project-manager"><article class="empty-card"><h2>Loading projects…</h2></article></div>`:`<div id="deployment-manager"><article class="empty-card"><h2>Loading deployments…</h2></article></div>`,document.querySelector(`#page`).innerHTML=`
     <div class="eyebrow">A-R-S-Y CONSOLE</div>
     <h1>${t[0]}</h1>
     <p class="subtitle">${t[1]}</p>
     ${n}
-  `,e===`servers`&&v()}async function _(){l?l.unavailable?(document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>A-R-S-Y is starting</h1><p class="subtitle">${l.message}</p><button id="retry" class="primary-button">Retry</button></section></main>`,document.querySelector(`#retry`).addEventListener(`click`,f)):l.superuser_configured?i()?!d&&(d=!0,!await o())?(u=`Your session expired. Please sign in again.`,m()):h():m():p():document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>Loading A-R-S-Y…</h1></section></main>`}window.addEventListener(`hashchange`,g),f();function v(){let e=document.querySelector(`#server-manager`);if(!e)return;e.innerHTML=`
+  `,e===`servers`&&v(),e===`projects`&&C(),e===`deployments`&&w()}async function _(){l?l.unavailable?(document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>A-R-S-Y is starting</h1><p class="subtitle">${l.message}</p><button id="retry" class="primary-button">Retry</button></section></main>`,document.querySelector(`#retry`).addEventListener(`click`,f)):l.superuser_configured?i()?!d&&(d=!0,!await o())?(u=`Your session expired. Please sign in again.`,m()):h():m():p():document.querySelector(`#app`).innerHTML=`<main class="auth-screen"><section class="auth-card"><h1>Loading A-R-S-Y…</h1></section></main>`}window.addEventListener(`hashchange`,g),f();function v(){let e=document.querySelector(`#server-manager`);if(!e)return;e.innerHTML=`
     <section class="server-form-card">
       <h2>Register a Linux server</h2>
       <p>Use an unencrypted OpenSSH private key. The key is encrypted before it is stored and is never returned by the API.</p>
@@ -102,4 +102,78 @@
         ${[`ssh`,`host_key`,`os`,`docker`,`compose`].map(e=>{let n=t[e]||{};return`<div><strong>${S(e.replace(`_`,` `))}</strong><span>${S(n.code||`unknown`)}</span><p>${S(n.message||``)}${n.version?` · `+S(n.version):``}</p></div>`}).join(``)}
       </div>
     </article>
-  `}function S(e){return String(e??``).replace(/[&<>"']/g,e=>({"&":`&amp;`,"<":`&lt;`,">":`&gt;`,'"':`&quot;`,"'":`&#39;`})[e])}
+  `}function S(e){return String(e??``).replace(/[&<>"']/g,e=>({"&":`&amp;`,"<":`&lt;`,">":`&gt;`,'"':`&quot;`,"'":`&#39;`})[e])}async function C(){let e=document.querySelector(`#project-manager`);if(!e)return;e.innerHTML=`
+    <section class="form-card">
+      <h2>Create a project</h2>
+      <form id="project-create-form">
+        <label for="project-name">Project name</label>
+        <input id="project-name" name="name" required placeholder="Production Platform" />
+        <label for="project-desc">Description</label>
+        <input id="project-desc" name="description" placeholder="Main microservices stack" />
+        <button type="submit" class="primary-button">Create project</button>
+      </form>
+    </section>
+    <section class="form-card">
+      <h2>Create an application</h2>
+      <form id="app-create-form">
+        <div class="form-row">
+          <div><label for="app-project">Project</label><select id="app-project" name="project_id" required></select></div>
+          <div><label for="app-server">Server</label><select id="app-server" name="server_id" required></select></div>
+        </div>
+        <label for="app-name">Application name</label>
+        <input id="app-name" name="name" required placeholder="Web API" />
+        <label for="app-manifest">Docker Compose manifest</label>
+        <textarea id="app-manifest" name="compose_manifest" rows="6" required placeholder="services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80""></textarea>
+        <button type="submit" class="primary-button">Create application</button>
+      </form>
+    </section>
+    <p id="project-feedback" class="server-feedback" role="status"></p>
+    <div id="project-list" class="server-list"></div>
+  `;let t=e.querySelector(`#project-create-form`),n=e.querySelector(`#app-create-form`),r=e.querySelector(`#project-feedback`),i=e.querySelector(`#project-list`);async function a(){try{let[e,t]=await Promise.all([s(`/api/arsy/v1/projects`),s(`/api/arsy/v1/servers`)]),r=n.querySelector(`#app-project`),i=n.querySelector(`#app-server`);r.innerHTML=(e.items||[]).map(e=>`<option value="${S(e.id)}">${S(e.name)}</option>`).join(``),i.innerHTML=(t.items||[]).map(e=>`<option value="${S(e.id)}">${S(e.name)} (${S(e.host)})</option>`).join(``)}catch{}}async function o(){try{let[e,t]=await Promise.all([s(`/api/arsy/v1/projects`),s(`/api/arsy/v1/applications`)]),n=e.items||[],r=t.items||[];if(!n.length){i.innerHTML=`<article class="empty-card"><h2>No projects yet</h2><p>Create your first project above to group applications.</p></article>`;return}i.innerHTML=n.map(e=>{let t=r.filter(t=>t.project_id===e.id);return`
+          <article class="project-card">
+            <h3>${S(e.name)}</h3>
+            <p>${S(e.description||`No description`)}</p>
+            <div class="card-meta"><span>Slug: <code>${S(e.slug)}</code></span><span>Applications: ${t.length}</span></div>
+            ${t.length?`
+              <div style="margin-top:14px; border-top:1px solid #29364a; padding-top:10px;">
+                <strong>Applications in project:</strong>
+                ${t.map(e=>`
+                  <div class="app-card" style="margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div><strong>${S(e.name)}</strong> · <small>${S(e.slug)}</small></div>
+                      <span class="deploy-status-tag ${S(e.lifecycle_state)}">${S(e.lifecycle_state)}</span>
+                    </div>
+                  </div>
+                `).join(``)}
+              </div>
+            `:``}
+          </article>
+        `}).join(``)}catch(e){i.innerHTML=`<article class="notice-card"><p>${S(e.message)}</p></article>`}}t.addEventListener(`submit`,async e=>{e.preventDefault();let n=t.querySelector(`button`);n.disabled=!0,r.textContent=``;let i=new FormData(t);try{await s(`/api/arsy/v1/projects`,{method:`POST`,body:JSON.stringify({name:i.get(`name`),description:i.get(`description`)})}),t.reset(),r.textContent=`Project created successfully.`,await Promise.all([o(),a()])}catch(e){r.textContent=e.message||`Failed to create project.`}finally{n.disabled=!1}}),n.addEventListener(`submit`,async e=>{e.preventDefault();let t=n.querySelector(`button`);t.disabled=!0,r.textContent=``;let i=new FormData(n);try{await s(`/api/arsy/v1/applications`,{method:`POST`,body:JSON.stringify({project_id:i.get(`project_id`),server_id:i.get(`server_id`),name:i.get(`name`),compose_manifest:i.get(`compose_manifest`)})}),n.reset(),r.textContent=`Application created successfully.`,await o()}catch(e){r.textContent=e.message||`Failed to create application.`}finally{t.disabled=!1}}),a(),o()}async function w(){let e=document.querySelector(`#deployment-manager`);if(!e)return;e.innerHTML=`
+    <div id="deployment-feedback" class="server-feedback" role="status"></div>
+    <div id="deployment-list" class="server-list"><article class="empty-card"><p>Loading deployments…</p></article></div>
+  `;let t=e.querySelector(`#deployment-list`),n=e.querySelector(`#deployment-feedback`);async function r(){try{let e=await s(`/api/arsy/v1/deployments`);if(!e||!e.length){t.innerHTML=`<article class="empty-card"><h2>No deployments yet</h2><p>Deployments will appear here once applications are deployed.</p></article>`;return}t.innerHTML=e.map(e=>`
+        <article class="deploy-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h3>Deployment <code>${S(e.deployment_id.slice(0,8))}</code></h3>
+              <p>Application: <code>${S(e.application_id)}</code></p>
+            </div>
+            <span class="deploy-status-tag ${S(e.state)}">${S(e.state)}</span>
+          </div>
+          <div class="card-meta">
+            ${e.started_at?`<span>Started: ${S(e.started_at)}</span>`:``}
+            ${e.finished_at?`<span>Finished: ${S(e.finished_at)}</span>`:``}
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="quiet-button" data-action="view-log" data-id="${S(e.deployment_id)}">View Logs</button>
+            <button class="quiet-button" data-action="stop" data-id="${S(e.deployment_id)}">Stop</button>
+            <button class="quiet-button" data-action="redeploy" data-id="${S(e.deployment_id)}">Redeploy</button>
+            <button class="quiet-button" data-action="rollback" data-id="${S(e.deployment_id)}">Rollback</button>
+          </div>
+          <div id="log-${S(e.deployment_id)}" style="display:none;" class="log-output"></div>
+        </article>
+      `).join(``)}catch(e){t.innerHTML=`<article class="notice-card"><p>${S(e.message)}</p></article>`}}t.addEventListener(`click`,async t=>{let i=t.target.closest(`button[data-action]`);if(!i)return;let a=i.dataset.action,o=i.dataset.id;i.disabled=!0;try{if(a===`view-log`){let t=e.querySelector(`#log-${o}`);t.style.display===`block`?t.style.display=`none`:(t.style.display=`block`,t.textContent=`Fetching logs…`,t.textContent=(await s(`/api/arsy/v1/deployments/${o}/logs`)).log||`(empty)`)}else a===`stop`?(await s(`/api/arsy/v1/deployments/${o}/stop`,{method:`POST`}),n.textContent=`Deployment ${o.slice(0,8)} cancelled/stopped.`,await r()):a===`redeploy`?(await s(`/api/arsy/v1/deployments/${o}/redeploy`,{method:`POST`}),n.textContent=`Redeploy requested for ${o.slice(0,8)}.`):a===`rollback`&&(await s(`/api/arsy/v1/deployments/${o}/rollback`,{method:`POST`}),n.textContent=`Rollback requested for ${o.slice(0,8)}.`)}catch(e){n.textContent=e.message||`Operation failed.`}finally{i.disabled=!1}}),r()}
