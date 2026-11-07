@@ -149,7 +149,7 @@ For each completed task, append a short note to the task entry or its linked iss
 
 **Phase exit:** The repository still builds and tests; the produced executable and release metadata identify as A-R-S-Y; the executable no longer offers an upstream PocketBase self-update.
 
-- [x] **MVP1-001 — Capture the baseline build and test result**
+- [ ] **MVP1-001 — Capture the baseline build and test result**
   - Inspect the current Go version and existing Makefile targets.
   - Run `go test ./...` and the existing build command for `examples/base`.
   - Record failures that already exist; do not fix unrelated failures in this task.
