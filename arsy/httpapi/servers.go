@@ -50,7 +50,7 @@ func registerServerRoutes(api *router.RouterGroup[*core.RequestEvent], cfg confi
 func listServers(e *core.RequestEvent) error {
 	limit := parseBoundedQueryInt(e.Request.URL.Query().Get("limit"), 50, 1, 100)
 	offset := parseBoundedQueryInt(e.Request.URL.Query().Get("offset"), 0, 0, 100000)
-	records, err := e.App.FindRecordsByFilter("arsy_servers", "id != \"\"", "-created", limit, offset)
+	records, err := e.App.FindRecordsByFilter("arsy_servers", "", "-created", limit, offset)
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, map[string]string{"error": "unable to list servers"})
 	}
