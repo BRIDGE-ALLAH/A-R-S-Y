@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	KeySizeBytes    = 32
+	KeySizeBytes     = 32
 	CiphertextPrefix = "arsy:v1"
 )
 
 var (
-	ErrMissingKey             = errors.New("A-R-S-Y secret key is not configured")
-	ErrInvalidKey             = errors.New("A-R-S-Y secret key must be base64-encoded 32-byte material")
-	ErrInvalidCiphertext      = errors.New("invalid A-R-S-Y ciphertext format")
-	ErrAuthenticationFailed  = errors.New("A-R-S-Y ciphertext authentication failed")
+	ErrMissingKey            = errors.New("A-R-S-Y secret key is not configured")
+	ErrInvalidKey            = errors.New("A-R-S-Y secret key must be base64-encoded 32-byte material")
+	ErrInvalidCiphertext     = errors.New("invalid A-R-S-Y ciphertext format")
+	ErrAuthenticationFailed = errors.New("A-R-S-Y ciphertext authentication failed")
 )
 
 // GenerateKey returns a cryptographically random 32-byte key encoded as
