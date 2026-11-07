@@ -54,11 +54,24 @@ func main() {
 				return err
 			}
 			fmt.Printf("Data directories: accessible (%s, %s)\n", dirs.Temp, dirs.Manifests)
-			if os.Getenv(arsyConfig.SecretKeyEnv) == "" {
+			secretConfigured := os.Getenv(arsyConfig.SecretKeyEnv) != ""
+			if !secretConfigured {
 				fmt.Printf("Secret key: not configured (set %s)\n", arsyConfig.SecretKeyEnv)
+			} else {
+				fmt.Println("Secret key: configured (value hidden)")
+			}
+			if !app.IsBootstrapped() {
+				fmt.Println("Database: not ready")
+				return fmt.Errorf("A-R-S-Y database is not ready")
+			}
+			if _, err := app.DB().NewQuery("SELECT 1").Execute(); err != nil {
+				fmt.Printf("Database: unavailable (%v)\n", err)
+				return err
+			}
+			fmt.Println("Database: ready")
+			if !secretConfigured {
 				return fmt.Errorf("A-R-S-Y secret key is not configured")
 			}
-			fmt.Println("Secret key: configured (value hidden)")
 			return nil
 		},
 	})
