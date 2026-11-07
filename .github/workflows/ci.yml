@@ -30,7 +30,7 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Build standalone server
-        run: CGO_ENABLED=0 go build -o arsy ./examples/base
+        run: mkdir -p .builds && CGO_ENABLED=0 go build -o .builds/arsy ./examples/base
 
   frontend:
     name: Frontend build
