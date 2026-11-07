@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sort"
 	"time"
 
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
@@ -50,9 +51,21 @@ func registerServerRoutes(api *router.RouterGroup[*core.RequestEvent], cfg confi
 func listServers(e *core.RequestEvent) error {
 	limit := parseBoundedQueryInt(e.Request.URL.Query().Get("limit"), 50, 1, 100)
 	offset := parseBoundedQueryInt(e.Request.URL.Query().Get("offset"), 0, 0, 100000)
-	records, err := e.App.FindRecordsByFilter("arsy_servers", "", "", limit, offset)
+	records, err := e.App.FindAllRecords("arsy_servers")
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, map[string]string{"error": "unable to list servers"})
+	}
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].GetString("created") > records[j].GetString("created")
+	})
+	if offset >= len(records) {
+		records = records[:0]
+	} else {
+		end := offset + limit
+		if end > len(records) {
+			end = len(records)
+		}
+		records = records[offset:end]
 	}
 	items := make([]servers.ServerResponse, 0, len(records))
 	for _, record := range records {
