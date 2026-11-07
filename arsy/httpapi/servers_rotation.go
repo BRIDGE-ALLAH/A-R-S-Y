@@ -35,6 +35,9 @@ func rotateServerCredential(cfg config.Config) func(*core.RequestEvent) error {
 			}
 			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "credential rotation failed"})
 		}
+		_ = servers.LogAuditEvent(e.App, "credential_rotated", serverID, "", map[string]any{
+			"method": "ssh_private_key",
+		})
 		return e.JSON(http.StatusOK, map[string]any{
 			"status":    "rotated",
 			"server_id": serverID,

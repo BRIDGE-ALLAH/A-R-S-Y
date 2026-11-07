@@ -15,6 +15,8 @@ const (
 	applicationsCollectionName   = "arsy_applications"
 	deploymentsCollectionName    = "arsy_deployments"
 	deploymentLogsCollectionName = "arsy_deployment_logs"
+	auditLogCollectionName       = "arsy_audit_log"
+	sshSessionsCollectionName    = "arsy_ssh_sessions"
 )
 
 func init() {
@@ -48,9 +50,11 @@ func up(app core.App) error {
 			&core.TextField{Name: "pending_host_key_fingerprint", Hidden: true, Max: 128},
 			&core.SelectField{Name: "readiness_state", Values: []string{"unknown", "pending", "ready", "not_ready", "error"}, MaxSelect: 1},
 			&core.TextField{Name: "credential_ciphertext", Hidden: true, Max: 10000},
+			&core.BoolField{Name: "host_key_revoked"},
 		)
 		c.Indexes = types.JSONArray[string]{
 			"CREATE UNIQUE INDEX idx_arsy_servers_host_port ON arsy_servers (host, ssh_port)",
+			"CREATE INDEX idx_arsy_servers_host_key_revoked ON arsy_servers (host_key_revoked)",
 		}
 	})
 	if err != nil {
@@ -110,11 +114,48 @@ func up(app core.App) error {
 			"CREATE INDEX idx_arsy_deployment_logs_deployment_created ON arsy_deployment_logs (deployment, created)",
 		}
 	})
+	if err != nil {
+		return err
+	}
+
+	_, err = ensureCollection(app, auditLogCollectionName, func(c *core.Collection) {
+		c.Fields.Add(
+			&core.TextField{Name: "event_type", Required: true, Max: 64},
+			&core.RelationField{Name: "server", CollectionId: servers.Id, Required: true, MaxSelect: 1},
+			&core.TextField{Name: "changed_by", Max: 80},
+			&core.JSONField{Name: "metadata"},
+			&core.AutodateField{Name: "created", OnCreate: true},
+		)
+		c.Indexes = types.JSONArray[string]{
+			"CREATE INDEX idx_arsy_audit_log_server_created ON arsy_audit_log (server, created)",
+			"CREATE INDEX idx_arsy_audit_log_event_type ON arsy_audit_log (event_type)",
+		}
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = ensureCollection(app, sshSessionsCollectionName, func(c *core.Collection) {
+		c.Fields.Add(
+			&core.TextField{Name: "session_id", Required: true, Max: 128},
+			&core.RelationField{Name: "server", CollectionId: servers.Id, Required: true, MaxSelect: 1},
+			&core.TextField{Name: "auth_method", Required: true, Max: 32},
+			&core.AutodateField{Name: "created", OnCreate: true},
+			&core.DateField{Name: "expires_at"},
+			&core.DateField{Name: "invalidated_at"},
+		)
+		c.Indexes = types.JSONArray[string]{
+			"CREATE INDEX idx_arsy_ssh_sessions_server_invalidated ON arsy_ssh_sessions (server, invalidated_at)",
+			"CREATE INDEX idx_arsy_ssh_sessions_expires_at ON arsy_ssh_sessions (expires_at)",
+		}
+	})
 	return err
 }
 
 func down(app core.App) error {
 	for _, name := range []string{
+		sshSessionsCollectionName,
+		auditLogCollectionName,
 		deploymentLogsCollectionName,
 		deploymentsCollectionName,
 		applicationsCollectionName,

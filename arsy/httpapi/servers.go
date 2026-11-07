@@ -47,6 +47,8 @@ func registerServerRoutes(api *router.RouterGroup[*core.RequestEvent], cfg confi
 	api.POST("/servers/{id}/host-key/confirm", requireSuperuser(confirmServerHostKey))
 	api.POST("/servers/{id}/readiness", requireSuperuser(checkServerReadiness(cfg)))
 	api.POST("/servers/{id}/rotate-credential", requireSuperuser(rotateServerCredential(cfg)))
+	api.GET("/servers/{id}/audit-log", requireSuperuser(getServerAuditLog))
+	api.POST("/servers/{id}/host-key/revoke", requireSuperuser(revokeServerHostKey))
 }
 
 func listServers(e *core.RequestEvent) error {
@@ -307,4 +309,51 @@ func parseBoundedQueryInt(value string, fallback, minimum, maximum int) int {
 		return maximum
 	}
 	return parsed
+}
+
+func getServerAuditLog(e *core.RequestEvent) error {
+	serverID := e.Request.PathValue("id")
+	if serverID == "" {
+		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "server ID required"})
+	}
+	limit := parseBoundedQueryInt(e.Request.URL.Query().Get("limit"), 50, 1, 100)
+	offset := parseBoundedQueryInt(e.Request.URL.Query().Get("offset"), 0, 0, 100000)
+	eventType := e.Request.URL.Query().Get("event_type")
+
+	records, err := servers.GetServerAuditLog(e.App, serverID, eventType, limit, offset)
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+	}
+
+	items := make([]map[string]any, 0, len(records))
+	for _, r := range records {
+		items = append(items, map[string]any{
+			"event_type": r.GetString("event_type"),
+			"server_id":  r.GetString("server"),
+			"changed_by": r.GetString("changed_by"),
+			"created_at": r.GetDateTime("created").String(),
+			"metadata":   r.GetString("metadata"),
+		})
+	}
+	return e.JSON(http.StatusOK, map[string]any{"items": items, "limit": limit, "offset": offset})
+}
+
+func revokeServerHostKey(e *core.RequestEvent) error {
+	serverID := e.Request.PathValue("id")
+	if serverID == "" {
+		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "server ID required"})
+	}
+
+	if err := servers.RevokeServerHostKey(e.App, serverID, ""); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "server not found"})
+		}
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "revocation failed"})
+	}
+
+	return e.JSON(http.StatusOK, map[string]any{
+		"status":     "host_key_revoked",
+		"server_id":  serverID,
+		"revoked_at": time.Now().UTC().Format(time.RFC3339),
+	})
 }

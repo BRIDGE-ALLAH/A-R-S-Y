@@ -78,6 +78,13 @@ func createDeployment(cfg config.Config) func(e *core.RequestEvent) error {
 		if err != nil {
 			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
 		}
+		server, err := e.App.FindRecordById("arsy_servers", application.GetString("server"))
+		if err != nil {
+			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "server not found"})
+		}
+		if server.GetBool("host_key_revoked") {
+			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "host key revoked; cannot deploy"})
+		}
 		active, err := deployments.HasActiveDeployment(e.App, req.ApplicationID)
 		if err != nil {
 			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
