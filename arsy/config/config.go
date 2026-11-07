@@ -14,6 +14,7 @@ type Config struct {
 	APIPrefix    string
 	ConsolePath  string
 	SecretKeyEnv string
+	DockerTests  bool
 }
 
 const (
@@ -38,6 +39,7 @@ func LoadFrom(getenv func(string) string) (Config, error) {
 		APIPrefix:    valueOrDefault(getenv("ARSY_API_PREFIX"), DefaultAPIPrefix),
 		ConsolePath:  valueOrDefault(getenv("ARSY_CONSOLE_PATH"), DefaultConsolePath),
 		SecretKeyEnv: valueOrDefault(getenv("ARSY_SECRET_KEY_ENV"), DefaultSecretKeyEnv),
+		DockerTests:  getenv("ARSY_ENABLE_DOCKER_TESTS") == "true",
 	}
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err
