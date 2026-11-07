@@ -11,7 +11,6 @@ import (
 	"ganigeorgiev.com/pocketbase/pocketbase/core"
 	"ganigeorgiev.com/pocketbase/pocketbase/plugins/jsvm"
 	"ganigeorgiev.com/pocketbase/pocketbase/plugins/migratecmd"
-	"ganigeorgiev.com/pocketbase/pocketbase/plugins/update"
 	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
 	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
 )
@@ -100,12 +99,6 @@ func main() {
 		Dir:          migrationsDir,
 	})
 
-	// update command
-	update.MustRegister(app, app.RootCmd, update.Config{
-		BaseURL:    "https://ganigeorgiev.com",
-		Project:    "pocketbase",
-		Repository: "pocketbase",
-	})
 
 	// static route to serves files from the provided public dir
 	// (if publicDir exists and the route path is not already defined)
