@@ -38,11 +38,11 @@ func TestServerCreateListGetAndUpdateNeverExposeCredentials(t *testing.T) {
 	defer app.Cleanup()
 
 	body, err := json.Marshal(map[string]any{
-		"name": "test server",
-		"host": " Example.COM. ",
-		"ssh_port": 2222,
+		"name":         "test server",
+		"host":         " Example.COM. ",
+		"ssh_port":     2222,
 		"ssh_username": "deploy",
-		"private_key": string(privateKey),
+		"private_key":  string(privateKey),
 	})
 	if err != nil {
 		t.Fatal(err)
