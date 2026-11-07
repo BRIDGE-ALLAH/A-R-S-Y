@@ -1,22 +1,23 @@
 package main
 
 import (
-	"log"
 	"fmt"
-	"runtime"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"ganigeorgiev.com/pocketbase/pocketbase"
+	"ganigeorgiev.com/pocketbase/pocketbase/apis"
 	"ganigeorgiev.com/pocketbase/pocketbase/arsy/config"
 	"ganigeorgiev.com/pocketbase/pocketbase/arsy/httpapi"
-	"ganigeorgiev.com/pocketbase/pocketbase/apis"
 	"ganigeorgiev.com/pocketbase/pocketbase/core"
 	"ganigeorgiev.com/pocketbase/pocketbase/plugins/jsvm"
 	"ganigeorgiev.com/pocketbase/pocketbase/plugins/migratecmd"
 	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
 	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
+
 	"github.com/spf13/cobra"
 )
 
@@ -44,17 +45,17 @@ func main() {
 		Use:   "doctor",
 		Short: "check the local A-R-S-Y control-plane setup",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("Product: A-R-S-Y %s\\n", pocketbase.Version)
-			fmt.Printf("Go runtime: %s\\n", runtime.Version())
-			fmt.Printf("Data directory: %s\\n", arsyConfig.DataDir)
+			fmt.Printf("Product: A-R-S-Y %s\n", pocketbase.Version)
+			fmt.Printf("Go runtime: %s\n", runtime.Version())
+			fmt.Printf("Data directory: %s\n", arsyConfig.DataDir)
 			dirs, err := config.EnsureDirectories(arsyConfig.DataDir)
 			if err != nil {
-				fmt.Printf("Data directory: error (%v)\\n", err)
+				fmt.Printf("Data directory: error (%v)\n", err)
 				return err
 			}
-			fmt.Printf("Data directories: accessible (%s, %s)\\n", dirs.Temp, dirs.Manifests)
+			fmt.Printf("Data directories: accessible (%s, %s)\n", dirs.Temp, dirs.Manifests)
 			if os.Getenv(arsyConfig.SecretKeyEnv) == "" {
-				fmt.Printf("Secret key: not configured (set %s)\\n", arsyConfig.SecretKeyEnv)
+				fmt.Printf("Secret key: not configured (set %s)\n", arsyConfig.SecretKeyEnv)
 				return fmt.Errorf("A-R-S-Y secret key is not configured")
 			}
 			fmt.Println("Secret key: configured (value hidden)")
