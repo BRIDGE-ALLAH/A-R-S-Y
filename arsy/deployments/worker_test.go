@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tests"
@@ -104,3 +105,90 @@ func TestWorkerMarksProcessorCancellationAsCancelled(t *testing.T) {
 		t.Fatalf("cancelled deployment status = %q", latest.GetString("status"))
 	}
 }
+
+func TestWorkerRespectsContextTimeout(t *testing.T) {
+	app, err := tests.NewTestApp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer app.Cleanup()
+	deployment := createDeploymentFixture(t, app, "worker-timeout", StateQueued)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	defer cancel()
+
+	time.Sleep(10 * time.Millisecond)
+	worker := Worker{App: app, Process: func(context.Context, *core.Record) error {
+		return nil
+	}}
+	_, err = worker.ProcessNext(ctx)
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("ProcessNext() with timeout error = %v, want context.DeadlineExceeded", err)
+	}
+	record, _ := app.FindRecordById("arsy_deployments", deployment.Id)
+	if record.GetString("status") != string(StateQueued) {
+		t.Fatalf("timed-out unclaimed job status = %q, want queued", record.GetString("status"))
+	}
+}
+
+func TestClaimNextQueuedDeploymentEnforcesAtomicity(t *testing.T) {
+	app, err := tests.NewTestApp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer app.Cleanup()
+	dep1 := createDeploymentFixture(t, app, "atomic-app1", StateQueued)
+	serverCol, _ := app.FindCollectionByNameOrId("arsy_servers")
+	server2 := core.NewRecord(serverCol)
+	server2.Set("name", "Server2")
+	server2.Set("host", "server2.test")
+	server2.Set("ssh_port", 22)
+	server2.Set("ssh_username", "deploy")
+	if err := app.Save(server2); err != nil {
+		t.Fatal(err)
+	}
+	appCol, _ := app.FindCollectionByNameOrId("arsy_applications")
+	app2 := core.NewRecord(appCol)
+	projCol, _ := app.FindCollectionByNameOrId("arsy_projects")
+	proj2 := core.NewRecord(projCol)
+	proj2.Set("name", "Project2")
+	proj2.Set("slug", "atomic-proj2")
+	if err := app.Save(proj2); err != nil {
+		t.Fatal(err)
+	}
+	app2.Set("project", proj2.Id)
+	app2.Set("server", server2.Id)
+	app2.Set("name", "App2")
+	app2.Set("slug", "atomic-app2")
+	app2.Set("compose_manifest", "services:\n  web:\n    image: nginx\n")
+	app2.Set("lifecycle_state", "ready")
+	if err := app.Save(app2); err != nil {
+		t.Fatal(err)
+	}
+	
+	depCol, _ := app.FindCollectionByNameOrId("arsy_deployments")
+	dep2 := core.NewRecord(depCol)
+	dep2ID, _ := NewDeploymentID()
+	dep2.Set("application", app2.Id)
+	dep2.Set("deployment_id", dep2ID)
+	dep2.Set("status", string(StateQueued))
+	if err := app.Save(dep2); err != nil {
+		t.Fatal(err)
+	}
+
+	claimed1, err := ClaimNextQueuedDeployment(app)
+	if err != nil || claimed1 == nil || claimed1.Id != dep1.Id {
+		t.Fatalf("first claim: got %v, want dep1", claimed1)
+	}
+	claimed2, err := ClaimNextQueuedDeployment(app)
+	if err != nil || claimed2 == nil || claimed2.Id != dep2.Id {
+		t.Fatalf("second claim: got %v, want dep2", claimed2)
+	}
+	if claimed1.GetString("status") != string(StatePreparing) || claimed2.GetString("status") != string(StatePreparing) {
+		t.Fatal("both claimed deployments not in preparing state")
+	}
+	claimed3, err := ClaimNextQueuedDeployment(app)
+	if err != ErrNoQueuedDeployments || claimed3 != nil {
+		t.Fatalf("third claim: got (%v, %v), want (nil, ErrNoQueuedDeployments)", claimed3, err)
+	}
+}
+
