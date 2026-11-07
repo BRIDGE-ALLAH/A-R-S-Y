@@ -82,7 +82,15 @@ func UploadComposeManifest(ctx context.Context, client *ssh.Client, applicationS
 		return fmt.Errorf("start SFTP subsystem: %w", err)
 	}
 	defer sftpConnection.Close()
-	return uploadComposeManifest(ctx, pkgSFTPClient{client: sftpConnection}, remotePath, content)
+	cleanupTemporary := func(name string) error {
+		cleanupClient, cleanupErr := sftp.NewClient(client)
+		if cleanupErr != nil {
+			return cleanupErr
+		}
+		defer cleanupClient.Close()
+		return cleanupClient.Remove(name)
+	}
+	return uploadComposeManifest(ctx, pkgSFTPClient{client: sftpConnection}, remotePath, content, cleanupTemporary)
 }
 
 func validateComposeUpload(applicationSlug, deploymentID string, content []byte) (string, error) {
@@ -95,7 +103,7 @@ func validateComposeUpload(applicationSlug, deploymentID string, content []byte)
 	return ManifestPath(applicationSlug, deploymentID)
 }
 
-func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath string, content []byte) error {
+func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath string, content []byte, cleanup ...func(string) error) error {
 	if ctx == nil {
 		return errors.New("deployment context is required")
 	}
@@ -127,9 +135,14 @@ func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath st
 	}
 	renamed := false
 	defer func() {
-		if !renamed {
-			_ = client.Remove(tempPath)
+		if renamed {
+			return
 		}
+		if len(cleanup) > 0 && cleanup[0] != nil {
+			_ = cleanup[0](tempPath)
+			return
+		}
+		_ = client.Remove(tempPath)
 	}()
 
 	if err := file.Chmod(0600); err != nil {
