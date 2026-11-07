@@ -78,6 +78,8 @@ func up(app core.App) error {
 	deployments, err := ensureCollection(app, deploymentsCollectionName, func(c *core.Collection) {
 		c.Fields.Add(
 			&core.RelationField{Name: "application", CollectionId: applications.Id, Required: true, MaxSelect: 1},
+			&core.AutodateField{Name: "created", OnCreate: true},
+			&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true},
 			&core.TextField{Name: "deployment_id", Required: true, Max: 80},
 			&core.SelectField{Name: "status", Values: []string{"queued", "preparing", "uploading", "validating", "deploying", "verifying", "succeeded", "failed", "cancelled"}, Required: true, MaxSelect: 1},
 			&core.DateField{Name: "started_at"},
@@ -96,6 +98,7 @@ func up(app core.App) error {
 	_, err = ensureCollection(app, deploymentLogsCollectionName, func(c *core.Collection) {
 		c.Fields.Add(
 			&core.RelationField{Name: "deployment", CollectionId: deployments.Id, Required: true, MaxSelect: 1},
+			&core.AutodateField{Name: "created", OnCreate: true},
 			&core.TextField{Name: "step", Required: true, Max: 80},
 			&core.SelectField{Name: "level", Values: []string{"info", "warning", "error"}, Required: true, MaxSelect: 1},
 			&core.TextField{Name: "message", Required: true, Max: 5000},
