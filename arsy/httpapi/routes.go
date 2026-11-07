@@ -11,8 +11,6 @@ import (
 	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
 
-// Register attaches the A-R-S-Y API and console to the PocketBase HTTP server
-// without changing the existing PocketBase routes.
 func Register(app core.App, cfg config.Config, version string) {
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
 		Id: "arsy_http_api",
@@ -46,6 +44,8 @@ func Register(app core.App, cfg config.Config, version string) {
 				status := onboardingStatusFromCounts(superusers, servers, keyErr == nil)
 				return re.JSON(http.StatusOK, status)
 			})
+
+			registerDeploymentRoutes(e, api)
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {
 				return re.Redirect(http.StatusPermanentRedirect, cfg.ConsolePath+"/")
