@@ -21,6 +21,7 @@ func TestMVP1CollectionsAreCreatedWithPrivateRules(t *testing.T) {
 		"arsy_servers",
 		"arsy_applications",
 		"arsy_deployments",
+		"arsy_deployment_logs",
 	} {
 		collection, err := app.FindCollectionByNameOrId(name)
 		if err != nil {
@@ -46,6 +47,15 @@ func TestMVP1CollectionsAreCreatedWithPrivateRules(t *testing.T) {
 	credential, ok := servers.Fields.AsMap()["credential_ciphertext"].(*core.TextField)
 	if !ok || !credential.Hidden {
 		t.Fatal("server credential ciphertext must be a hidden text field")
+	}
+
+	logs, err := app.FindCollectionByNameOrId("arsy_deployment_logs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	logDeployment, ok := logs.Fields.GetByName("deployment").(*core.RelationField)
+	if !ok || logDeployment.CollectionId == "" {
+		t.Fatal("deployment logs must relate to deployments")
 	}
 
 	applications, err := app.FindCollectionByNameOrId("arsy_applications")
