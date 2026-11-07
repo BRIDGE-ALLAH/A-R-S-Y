@@ -8,10 +8,10 @@ import (
 func TestValidateConnectionInput(t *testing.T) {
 	validKey := testOpenSSHPrivateKey(t)
 	tests := []struct {
-		name  string
-		input ConnectionInput
+		name     string
+		input    ConnectionInput
 		wantHost string
-		wantErr string
+		wantErr  string
 	}{
 		{name: "valid hostname", input: ConnectionInput{Host: " Example.COM. ", Port: 22, Username: "deploy", PrivateKey: validKey}, wantHost: "example.com"},
 		{name: "valid IPv4", input: ConnectionInput{Host: "192.0.2.10", Port: 2222, Username: "root", PrivateKey: validKey}, wantHost: "192.0.2.10"},
@@ -21,7 +21,7 @@ func TestValidateConnectionInput(t *testing.T) {
 		{name: "invalid port low", input: ConnectionInput{Host: "host.test", Port: 0, Username: "root", PrivateKey: validKey}, wantErr: "port must be"},
 		{name: "invalid port high", input: ConnectionInput{Host: "host.test", Port: 65536, Username: "root", PrivateKey: validKey}, wantErr: "port must be"},
 		{name: "invalid username", input: ConnectionInput{Host: "host.test", Port: 22, Username: "root user", PrivateKey: validKey}, wantErr: "username"},
-		{name: "invalid key", input: ConnectionInput{Host: "host.test", Port: 22, Username: "root", PrivateKey: []byte("not a key")}, wantErr: "private key"},
+		{name: "invalid key", input: ConnectionInput{Host: "host.test", Port: 22, Username: "root", PrivateKey: []byte("not a key")}, wantErr: "private-key format"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
