@@ -19,6 +19,17 @@ func validDescriptor(id ModelID, source ModelSource) Descriptor {
 	}
 }
 
+func TestZeroValueRegistryCanRegister(t *testing.T) {
+	var r InMemoryRegistry
+	d := validDescriptor("base.company", SourceStaticGo)
+	if err := r.Register(d); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	if _, err := r.Lookup(d.ID); err != nil {
+		t.Fatalf("Lookup() error = %v", err)
+	}
+}
+
 func TestRegisterAndLookupSupportsBothSources(t *testing.T) {
 	for _, source := range []ModelSource{SourceStaticGo, SourceMetadata} {
 		t.Run(string(source), func(t *testing.T) {
