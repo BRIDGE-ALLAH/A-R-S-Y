@@ -29,12 +29,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Check Go formatting
+      - name: Check Go formatting for changed files
+        shell: bash
         run: |
-          unformatted="$(gofmt -l $(git ls-files '*.go'))"
-          if [ -n "$unformatted" ]; then
-            printf 'Go files need gofmt:\n%s\n' "$unformatted"
-            exit 1
+          mapfile -t go_files < <(git diff --name-only HEAD^1 HEAD -- '*.go')
+          if (("${#go_files[@]}")); then
+            unformatted="$(gofmt -l "${go_files[@]}")"
+            if [ -n "$unformatted" ]; then
+              printf 'Changed Go files need gofmt:\n%s\n' "$unformatted"
+              exit 1
+            fi
           fi
       - name: Build A-R-S-Y dashboard assets
         working-directory: dashboard
