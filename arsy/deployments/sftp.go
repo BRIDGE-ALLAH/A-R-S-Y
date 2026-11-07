@@ -24,6 +24,7 @@ type sftpFile interface {
 
 type sftpClient interface {
 	MkdirAll(string) error
+	Chmod(string, os.FileMode) error
 	OpenFile(string, int) (sftpFile, error)
 	Rename(string, string) error
 	Remove(string) error
@@ -36,6 +37,10 @@ type pkgSFTPClient struct {
 
 func (c pkgSFTPClient) MkdirAll(name string) error {
 	return c.client.MkdirAll(name)
+}
+
+func (c pkgSFTPClient) Chmod(name string, mode os.FileMode) error {
+	return c.client.Chmod(name, mode)
 }
 
 func (c pkgSFTPClient) OpenFile(name string, flags int) (sftpFile, error) {
@@ -70,7 +75,9 @@ func UploadComposeManifest(ctx context.Context, client *ssh.Client, applicationS
 	if err != nil {
 		return err
 	}
+	stopHandshakeCancellation := context.AfterFunc(ctx, func() { _ = client.Close() })
 	sftpConnection, err := sftp.NewClient(client)
+	stopHandshakeCancellation()
 	if err != nil {
 		return fmt.Errorf("start SFTP subsystem: %w", err)
 	}
@@ -102,8 +109,12 @@ func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath st
 	stopCancellation := context.AfterFunc(ctx, func() { _ = client.Close() })
 	defer stopCancellation()
 
-	if err := client.MkdirAll(path.Dir(remotePath)); err != nil {
+	releaseDirectory := path.Dir(remotePath)
+	if err := client.MkdirAll(releaseDirectory); err != nil {
 		return fmt.Errorf("create remote release directory: %w", err)
+	}
+	if err := client.Chmod(releaseDirectory, 0700); err != nil {
+		return fmt.Errorf("secure remote release directory permissions: %w", err)
 	}
 	tempID, err := NewDeploymentID()
 	if err != nil {
