@@ -11,8 +11,9 @@ import (
 )
 
 type fakeSFTPClient struct {
-	directories []string
-	files       map[string]*fakeSFTPFile
+	directories    []string
+	directoryModes map[string]os.FileMode
+	files          map[string]*fakeSFTPFile
 	renamed     map[string]string
 	removeCalls []string
 	mkdirErr    error
@@ -23,7 +24,7 @@ type fakeSFTPClient struct {
 }
 
 func newFakeSFTPClient() *fakeSFTPClient {
-	return &fakeSFTPClient{files: make(map[string]*fakeSFTPFile), renamed: make(map[string]string)}
+	return &fakeSFTPClient{directoryModes: make(map[string]os.FileMode), files: make(map[string]*fakeSFTPFile), renamed: make(map[string]string)}
 }
 
 func (c *fakeSFTPClient) MkdirAll(name string) error {
@@ -31,6 +32,11 @@ func (c *fakeSFTPClient) MkdirAll(name string) error {
 		return c.mkdirErr
 	}
 	c.directories = append(c.directories, name)
+	return nil
+}
+
+func (c *fakeSFTPClient) Chmod(name string, mode os.FileMode) error {
+	c.directoryModes[name] = mode
 	return nil
 }
 
@@ -107,8 +113,12 @@ func TestUploadComposeManifestWritesSecurelyAndRenamesAtomically(t *testing.T) {
 	if err := uploadComposeManifest(ctx, client, "/opt/arsy/apps/demo/releases/0123456789abcdef0123456789abcdef/compose.yaml", manifest); err != nil {
 		t.Fatal(err)
 	}
-	if len(client.directories) != 1 || client.directories[0] != "/opt/arsy/apps/demo/releases/0123456789abcdef0123456789abcdef" {
+	releaseDirectory := "/opt/arsy/apps/demo/releases/0123456789abcdef0123456789abcdef"
+	if len(client.directories) != 1 || client.directories[0] != releaseDirectory {
 		t.Fatalf("created directories = %#v", client.directories)
+	}
+	if client.directoryModes[releaseDirectory] != 0700 {
+		t.Fatalf("release directory mode = %o, want 0700", client.directoryModes[releaseDirectory])
 	}
 	if len(client.renamed) != 1 || len(client.removeCalls) != 0 {
 		t.Fatalf("rename operations = %#v, cleanup = %#v", client.renamed, client.removeCalls)
