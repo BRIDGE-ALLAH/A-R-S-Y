@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
 	"github.com/bridge-allah/a-r-s-y/arsy/security"
 	"github.com/bridge-allah/a-r-s-y/core"
-	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
 	"github.com/bridge-allah/a-r-s-y/tests"
 	"golang.org/x/crypto/ssh"
 )
@@ -93,7 +93,7 @@ func TestStorePrivateKeyPersistsCiphertextOnly(t *testing.T) {
 }
 
 func TestServerResponseIsAllowListed(t *testing.T) {
-	record := &core.Record{}
+	record := core.NewRecord(core.NewBaseCollection("test"))
 	record.Id = "server123456789"
 	record.Set("name", "production")
 	record.Set("host", "example.test")
