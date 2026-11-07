@@ -42,6 +42,41 @@ func TestValidate(t *testing.T) {
 	}
 }
 
+func TestValidateWithOptionsComplexity(t *testing.T) {
+	cmp := func() *Expr {
+		return &Expr{Cmp: &Comparison{Field: "name", Op: OpEq, Value: json.RawMessage(`"x"`)}}
+	}
+	deep := cmp()
+	for i := 0; i < 4; i++ {
+		deep = &Expr{Not: deep}
+	}
+	many := &Expr{And: []*Expr{cmp(), cmp(), cmp(), cmp()}}
+
+	cases := []struct {
+		name    string
+		q       *Query
+		opts    ValidateOptions
+		wantErr error
+	}{
+		{name: "limit too large", q: &Query{Limit: 5}, opts: ValidateOptions{MaxLimit: 2}, wantErr: ErrLimit},
+		{name: "offset too large", q: &Query{Offset: 5}, opts: ValidateOptions{MaxOffset: 2}, wantErr: ErrOffset},
+		{name: "depth too large", q: &Query{Filter: deep}, opts: ValidateOptions{MaxDepth: 2}, wantErr: ErrDepth},
+		{name: "node count too large", q: &Query{Filter: many}, opts: ValidateOptions{MaxNodeCount: 2}, wantErr: ErrNodeCount},
+		{name: "configured limits allow", q: &Query{Filter: cmp(), Limit: 5, Offset: 5}, opts: ValidateOptions{MaxLimit: 5, MaxOffset: 5, MaxDepth: 1, MaxNodeCount: 1}, wantErr: nil},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.q.ValidateWithOptions(schema, tc.opts)
+			if tc.wantErr == nil && err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.wantErr != nil && !errors.Is(err, tc.wantErr) {
+				t.Fatalf("got %v, want %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestDeterministicMarshal(t *testing.T) {
 	q := &Query{Select: []string{"status", "age", "name"}}
 	b1, _ := json.Marshal(q)
