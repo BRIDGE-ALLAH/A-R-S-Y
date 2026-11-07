@@ -117,6 +117,7 @@ func ValidateCompose(input string) (ComposeManifest, error) {
 			return ComposeManifest{}, &ValidationError{Field: field + ".image", Message: "must be a non-empty image reference"}
 		}
 		service := ComposeService{Image: strings.TrimSpace(image)}
+		var err error
 		if service.PublishedPorts, err = parsePublishedPorts(fields["ports"], field+".ports"); err != nil {
 			return ComposeManifest{}, err
 		}
