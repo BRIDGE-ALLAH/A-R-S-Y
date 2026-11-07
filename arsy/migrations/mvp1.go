@@ -81,7 +81,7 @@ func up(app core.App) error {
 			&core.DateField{Name: "finished_at"},
 			&core.TextField{Name: "manifest_checksum", Max: 128},
 			&core.TextField{Name: "summary", Max: 2000},
-			&core.RelationField{Name: "previous_deployment", CollectionId: c.Id, MaxSelect: 1},
+			&core.TextField{Name: "previous_deployment_id", Max: 80},
 		)
 		c.Indexes = types.JSONArray[string]{
 			"CREATE UNIQUE INDEX idx_arsy_deployments_id ON arsy_deployments (deployment_id)",
