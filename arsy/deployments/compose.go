@@ -11,9 +11,48 @@ import (
 )
 
 var (
-	serviceNamePattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$`)
-	volumeNamePattern  = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$`)
-	environmentKeyPattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
+	serviceNamePattern      = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}package deployments
+
+import (
+	"fmt"
+	"net"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	)
+	volumeNamePattern       = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}package deployments
+
+import (
+	"fmt"
+	"net"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	)
+	environmentKeyPattern  = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*package deployments
+
+import (
+	"fmt"
+	"net"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	)
 )
 
 // ValidationError identifies the exact Compose field that violates MVP-1 policy.
