@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -28,12 +27,12 @@ const (
 // Descriptor is the runtime identity and storage mapping for one model.
 // Field and relation metadata are intentionally added by later engine layers.
 type Descriptor struct {
-	ID         ModelID
-	Label      string
-	TableName  string
-	Version    string
+	ID          ModelID
+	Label       string
+	TableName   string
+	Version     string
 	OwnerModule ModuleID
-	Source     ModelSource
+	Source      ModelSource
 }
 
 // ModelRegistry is the minimal contract consumed by application-engine
@@ -154,8 +153,3 @@ func (r *InMemoryRegistry) Snapshot() []Descriptor {
 // Ensure the concrete implementation satisfies the public contract.
 var _ ModelRegistry = (*InMemoryRegistry)(nil)
 
-// IsRegistrationError reports whether err is a typed registry error wrapping
-// one of the package's sentinel errors.
-func IsRegistrationError(err, target error) bool {
-	return errors.Is(err, target)
-}
