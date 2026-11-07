@@ -13,9 +13,9 @@ require (
 	github.com/dop251/goja_nodejs v0.0.0-20260212111938-1f56ff5bcf14
 	github.com/fatih/color v1.19.0
 	github.com/fsnotify/fsnotify v1.10.1
-	github.com/pkg/sftp v1.13.12
 	github.com/gabriel-vasile/mimetype v1.4.15
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/pkg/sftp v1.13.12
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/crypto v0.58.0
@@ -29,6 +29,7 @@ require (
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+	github.com/davec/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2/v2 v2.9.1 // indirect
 	github.com/dop251/base64dec v0.0.0-20231022112746-c6c9f9a96217 // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
@@ -40,9 +41,8 @@ require (
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/davec/go-spew v1.1.1 // indirect
 	github.com/kr/fs v0.1.0 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	golang.org/x/mod v0.42.0 // indirect
