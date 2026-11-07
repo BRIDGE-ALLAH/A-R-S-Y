@@ -13,6 +13,7 @@ require (
 	github.com/dop251/goja_nodejs v0.0.0-20260212111938-1f56ff5bcf14
 	github.com/fatih/color v1.19.0
 	github.com/fsnotify/fsnotify v1.10.1
+	github.com/pkg/sftp v1.13.12
 	github.com/gabriel-vasile/mimetype v1.4.15
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/spf13/cast v1.10.0
@@ -40,7 +41,10 @@ require (
 	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
+	github.com/davec/go-spew v1.1.1 // indirect
+	github.com/kr/fs v0.1.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
