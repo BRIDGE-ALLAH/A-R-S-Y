@@ -1,0 +1,7 @@
+- [x] Step 1: Pulihkan CI hijau main - perbaiki 5 test regresi arsy/deployments (jobs/worker) akibat overlap-prevention tanpa melemahkan jaminan #149; go test ./arsy/deployments/... hijau, verifikasi CI
+- [x] Step 2: Tutup gap keamanan #142 - enkripsi manifest saat save (API/hook), redaksi ciphertext/plaintext dari DTO/list-detail/log/diagnostik, test no-plaintext-leakage
+- [x] Step 3: Lengkapi acceptance #143 - audit trail rotasi/revoke (who/when), host-key revoke & mismatch semantics (tak silent-update), invalidasi sesi komprehensif, test
+- [x] Step 4: Selesaikan #64 frontend - Deploy button, bounded polling 3s, progress bar/styles, sanitized output, build/test dashboard
+- [x] Step 5: Kukuhkan #68/#69 ke acceptance penuh deterministik - SSH test-server suite; compose/worker tests fixture/fake executor, success/failure/timeout/duplicate/recovery, network-independent
+- [x] Step 6: Rekonsiliasi GitHub issues MVP1 (#50,51,53,54,55,56,64,68,69,70,142,143,149) - verifikasi terhadap main+CI, komentar evidence, tutup/dedup sesuai kriteria (gh auth via token; evidence comments added)
+- [x] Step 7: Lanjut BaaS/AENG dari dependensi terdekat (audit fondasi arsy/engine, tenancy) - kerjakan issue prioritas seperti #131/#103 lalu #138/#139/#140/#91 sesuai dependency
