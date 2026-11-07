@@ -131,7 +131,7 @@ func TestConsoleRouteServesEmbeddedDashboard(t *testing.T) {
 }
 
 func TestOnboardingEndpointReturnsOnlyNonSensitiveState(t *testing.T) {
-	const secret = "never-return-this-test-secret"
+	const secret = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 	t.Setenv("ARSY_SECRET_KEY", secret)
 	app, mux := newTestMux(t, false)
 	defer app.Cleanup()
@@ -147,6 +147,9 @@ func TestOnboardingEndpointReturnsOnlyNonSensitiveState(t *testing.T) {
 	}
 	if len(body) != 3 {
 		t.Fatalf("onboarding response contains unexpected fields: %#v", body)
+	}
+	if body["secret_key_configured"] != true {
+		t.Fatalf("valid 32-byte secret key was not reported as configured: %#v", body)
 	}
 	for _, key := range []string{"superuser_configured", "secret_key_configured", "server_registered"} {
 		if _, ok := body[key].(bool); !ok {
