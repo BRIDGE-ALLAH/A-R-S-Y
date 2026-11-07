@@ -11,7 +11,7 @@ import (
 
 const (
 	projectsCollectionName       = "arsy_projects"
-	serversCollectionName         = "arsy_servers"
+	serversCollectionName        = "arsy_servers"
 	applicationsCollectionName   = "arsy_applications"
 	deploymentsCollectionName    = "arsy_deployments"
 	deploymentLogsCollectionName = "arsy_deployment_logs"
