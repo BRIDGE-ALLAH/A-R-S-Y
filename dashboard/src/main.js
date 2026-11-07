@@ -1,5 +1,5 @@
 import "./style.css";
-import { currentUser, isAuthenticated, login, logout, verifySession } from "./auth.js";
+import { apiFetch, currentUser, isAuthenticated, login, logout, verifySession } from "./auth.js";
 
 const pages = {
   overview: ["Overview", "Your infrastructure at a glance."],
@@ -137,13 +137,11 @@ function renderPage() {
       ${!onboarding.server_registered ? '<article class="empty-card"><h2>Register your first server</h2><p>Open Servers to continue setup. A-R-S-Y will require an SSH host-key fingerprint confirmation before trusting a host.</p></article>' : ""}
     `;
   } else if (id === "servers") {
-    content = onboarding.server_registered
-      ? '<article class="empty-card"><h2>Server records detected</h2><p>Server inspection and management actions are being added in the SSH management phase.</p></article>'
-      : '<article class="empty-card"><h2>No servers registered</h2><p>First register a Linux host from this section. SSH host-key pinning is required before a connection is trusted.</p></article>';
+    content = '<div id="server-manager"><article class="empty-card"><h2>Loading servers…</h2></article></div>';
   } else if (id === "projects") {
-    content = '<article class="empty-card"><h2>No project workflow yet</h2><p>Projects will organize applications and their deployment history.</p></article>';
+    content = '<div id="project-manager"><article class="empty-card"><h2>Loading projects…</h2></article></div>';
   } else {
-    content = '<article class="empty-card"><h2>No deployments yet</h2><p>Deployment history will appear after an application is deployed with Docker Compose.</p></article>';
+    content = '<div id="deployment-manager"><article class="empty-card"><h2>Loading deployments…</h2></article></div>';
   }
 
   document.querySelector("#page").innerHTML = `
@@ -152,6 +150,9 @@ function renderPage() {
     <p class="subtitle">${page[1]}</p>
     ${content}
   `;
+  if (id === "servers") void renderServerManager();
+  if (id === "projects") void renderProjectManager();
+  if (id === "deployments") void renderDeploymentManager();
 }
 
 async function render() {
@@ -186,3 +187,399 @@ async function render() {
 
 window.addEventListener("hashchange", renderPage);
 loadOnboarding();
+
+function renderServerManager() {
+  const root = document.querySelector("#server-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <section class="server-form-card">
+      <h2>Register a Linux server</h2>
+      <p>Use an unencrypted OpenSSH private key. The key is encrypted before it is stored and is never returned by the API.</p>
+      <form id="server-create-form" class="server-form">
+        <label for="server-name">Display name</label>
+        <input id="server-name" name="name" required maxlength="120" placeholder="Production host" />
+        <div class="form-row">
+          <div><label for="server-host">Host or IP address</label><input id="server-host" name="host" required placeholder="server.example.com" /></div>
+          <div><label for="server-port">SSH port</label><input id="server-port" name="ssh_port" type="number" min="1" max="65535" value="22" required /></div>
+        </div>
+        <label for="server-username">SSH username</label>
+        <input id="server-username" name="ssh_username" required placeholder="deploy" />
+        <label for="server-private-key">Private key (OpenSSH format)</label>
+        <textarea id="server-private-key" name="private_key" rows="5" required autocomplete="off" spellcheck="false" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"></textarea>
+        <button type="submit" class="primary-button">Save server securely</button>
+      </form>
+    </section>
+    <p id="server-feedback" class="server-feedback" role="status" aria-live="polite"></p>
+    <div id="server-list" class="server-list"><article class="empty-card"><p>Loading server records…</p></article></div>
+  `;
+
+  const form = root.querySelector("#server-create-form");
+  const feedback = root.querySelector("#server-feedback");
+  const list = root.querySelector("#server-list");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = form.querySelector("button[type=submit]");
+    const values = new FormData(form);
+    submit.disabled = true;
+    submit.textContent = "Encrypting and saving…";
+    feedback.textContent = "";
+    try {
+      await apiFetch("/api/arsy/v1/servers", {
+        method: "POST",
+        body: JSON.stringify({
+          name: String(values.get("name") || ""),
+          host: String(values.get("host") || ""),
+          ssh_port: Number(values.get("ssh_port")),
+          ssh_username: String(values.get("ssh_username") || ""),
+          private_key: String(values.get("private_key") || ""),
+        }),
+      });
+      form.reset();
+      feedback.textContent = "Server saved. Run the SSH test to inspect and confirm its host key.";
+      await refreshServerList(list, feedback);
+    } catch (error) {
+      feedback.textContent = error.message || "Unable to save the server.";
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Save server securely";
+    }
+  });
+
+  list.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    const serverId = button.dataset.serverId;
+    const action = button.dataset.action;
+    if (!serverId) return;
+    button.disabled = true;
+    try {
+      if (action === "test") {
+        const result = await apiFetch(`/api/arsy/v1/servers/${encodeURIComponent(serverId)}/test`, { method: "POST" });
+        if (result.code === "host_key_confirmation_required") {
+          showHostKeyConfirmation(feedback, serverId, result.fingerprint);
+        } else {
+          feedback.textContent = result.message || "SSH test completed.";
+        }
+      } else if (action === "readiness") {
+        try {
+          const summary = await apiFetch(`/api/arsy/v1/servers/${encodeURIComponent(serverId)}/readiness`, { method: "POST" });
+          showReadinessSummary(feedback, summary);
+        } catch (error) {
+          if (error.data && typeof error.data.ready === "boolean") showReadinessSummary(feedback, error.data);
+          else throw error;
+        }
+      }
+      await refreshServerList(list, feedback);
+    } catch (error) {
+      feedback.textContent = error.message || "The server operation failed.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  void refreshServerList(list, feedback);
+}
+
+async function refreshServerList(list, feedback) {
+  try {
+    const data = await apiFetch("/api/arsy/v1/servers");
+    const items = Array.isArray(data.items) ? data.items : [];
+    if (!items.length) {
+      list.innerHTML = '<article class="empty-card"><h2>No servers registered</h2><p>Register a Linux host above to begin the SSH trust and readiness workflow.</p></article>';
+      return;
+    }
+    list.innerHTML = items.map((server) => `
+      <article class="server-card">
+        <div class="server-card-head">
+          <div><h3>${escapeHTML(server.name)}</h3><p>${escapeHTML(server.host)}:${Number(server.ssh_port) || 22} · ${escapeHTML(server.ssh_username)}</p></div>
+          <span class="server-state">${escapeHTML(server.readiness_state || "unknown")}</span>
+        </div>
+        <p class="server-meta">${escapeHTML([server.os_name, server.architecture].filter(Boolean).join(" · ") || "Readiness not checked")}</p>
+        ${server.host_key_fingerprint ? `<p class="server-meta">Pinned key: <code>${escapeHTML(server.host_key_fingerprint)}</code></p>` : '<p class="server-meta">Host key not yet pinned</p>'}
+        <div class="server-actions">
+          <button class="quiet-button" data-action="test" data-server-id="${escapeHTML(server.id)}">Test SSH / host key</button>
+          <button class="quiet-button" data-action="readiness" data-server-id="${escapeHTML(server.id)}" ${server.host_key_fingerprint ? "" : "disabled"}>Check readiness</button>
+        </div>
+      </article>
+    `).join("");
+  } catch (error) {
+    list.innerHTML = `<article class="notice-card"><p>${escapeHTML(error.message || "Unable to load servers.")}</p></article>`;
+    if (error.message?.includes("session")) feedback.textContent = error.message;
+  }
+}
+
+function showHostKeyConfirmation(feedback, serverId, fingerprint) {
+  feedback.innerHTML = `
+    <article class="notice-card host-key-card">
+      <h2>Verify this SSH host key</h2>
+      <p>Compare this fingerprint with a trusted source on the target host before confirming. A-R-S-Y will not authenticate until you confirm the exact fingerprint.</p>
+      <code class="fingerprint-value">${escapeHTML(fingerprint)}</code>
+      <button id="confirm-host-key" class="primary-button">I verified this fingerprint</button>
+    </article>
+  `;
+  feedback.querySelector("#confirm-host-key").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await apiFetch(`/api/arsy/v1/servers/${encodeURIComponent(serverId)}/host-key/confirm`, {
+        method: "POST",
+        body: JSON.stringify({ fingerprint, confirmed: true }),
+      });
+      feedback.textContent = "Fingerprint pinned. Testing SSH authentication…";
+      const result = await apiFetch(`/api/arsy/v1/servers/${encodeURIComponent(serverId)}/test`, { method: "POST" });
+      feedback.textContent = result.message || "SSH connection test completed.";
+    } catch (error) {
+      feedback.textContent = error.message || "Unable to confirm the host key.";
+    }
+  });
+}
+
+function showReadinessSummary(feedback, summary) {
+  const names = ["ssh", "host_key", "os", "docker", "compose"];
+  feedback.innerHTML = `
+    <article class="readiness-card">
+      <h2>${summary.ready ? "Server is ready" : "Readiness checks need attention"}</h2>
+      <div class="readiness-list">
+        ${names.map((name) => {
+          const item = summary[name] || {};
+          return `<div><strong>${escapeHTML(name.replace("_", " "))}</strong><span>${escapeHTML(item.code || "unknown")}</span><p>${escapeHTML(item.message || "")}${item.version ? " · " + escapeHTML(item.version) : ""}</p></div>`;
+        }).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character]);
+}
+
+async function renderProjectManager() {
+  const root = document.querySelector("#project-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <section class="form-card">
+      <h2>Create a project</h2>
+      <form id="project-create-form">
+        <label for="project-name">Project name</label>
+        <input id="project-name" name="name" required placeholder="Production Platform" />
+        <label for="project-desc">Description</label>
+        <input id="project-desc" name="description" placeholder="Main microservices stack" />
+        <button type="submit" class="primary-button">Create project</button>
+      </form>
+    </section>
+    <section class="form-card">
+      <h2>Create an application</h2>
+      <form id="app-create-form">
+        <div class="form-row">
+          <div><label for="app-project">Project</label><select id="app-project" name="project_id" required></select></div>
+          <div><label for="app-server">Server</label><select id="app-server" name="server_id" required></select></div>
+        </div>
+        <label for="app-name">Application name</label>
+        <input id="app-name" name="name" required placeholder="Web API" />
+        <label for="app-manifest">Docker Compose manifest</label>
+        <textarea id="app-manifest" name="compose_manifest" rows="6" required placeholder="services:\n  web:\n    image: nginx:alpine\n    ports:\n      - \"8080:80\""></textarea>
+        <button type="submit" class="primary-button">Create application</button>
+      </form>
+    </section>
+    <p id="project-feedback" class="server-feedback" role="status"></p>
+    <div id="project-list" class="server-list"></div>
+  `;
+
+  const projectForm = root.querySelector("#project-create-form");
+  const appForm = root.querySelector("#app-create-form");
+  const feedback = root.querySelector("#project-feedback");
+  const list = root.querySelector("#project-list");
+
+  async function loadSelectOptions() {
+    try {
+      const [projData, servData] = await Promise.all([
+        apiFetch("/api/arsy/v1/projects"),
+        apiFetch("/api/arsy/v1/servers")
+      ]);
+      const projSelect = appForm.querySelector("#app-project");
+      const servSelect = appForm.querySelector("#app-server");
+      projSelect.innerHTML = (projData.items || []).map(p => `<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>`).join("");
+      servSelect.innerHTML = (servData.items || []).map(s => `<option value="${escapeHTML(s.id)}">${escapeHTML(s.name)} (${escapeHTML(s.host)})</option>`).join("");
+    } catch (_) {}
+  }
+
+  async function refreshProjects() {
+    try {
+      const [projData, appData] = await Promise.all([
+        apiFetch("/api/arsy/v1/projects"),
+        apiFetch("/api/arsy/v1/applications")
+      ]);
+      const projects = projData.items || [];
+      const apps = appData.items || [];
+      if (!projects.length) {
+        list.innerHTML = '<article class="empty-card"><h2>No projects yet</h2><p>Create your first project above to group applications.</p></article>';
+        return;
+      }
+      list.innerHTML = projects.map(p => {
+        const pApps = apps.filter(a => a.project_id === p.id);
+        return `
+          <article class="project-card">
+            <h3>${escapeHTML(p.name)}</h3>
+            <p>${escapeHTML(p.description || "No description")}</p>
+            <div class="card-meta"><span>Slug: <code>${escapeHTML(p.slug)}</code></span><span>Applications: ${pApps.length}</span></div>
+            ${pApps.length ? `
+              <div style="margin-top:14px; border-top:1px solid #29364a; padding-top:10px;">
+                <strong>Applications in project:</strong>
+                ${pApps.map(a => `
+                  <div class="app-card" style="margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div><strong>${escapeHTML(a.name)}</strong> · <small>${escapeHTML(a.slug)}</small></div>
+                      <span class="deploy-status-tag ${escapeHTML(a.lifecycle_state)}">${escapeHTML(a.lifecycle_state)}</span>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("");
+    } catch (err) {
+      list.innerHTML = `<article class="notice-card"><p>${escapeHTML(err.message)}</p></article>`;
+    }
+  }
+
+  projectForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = projectForm.querySelector("button");
+    btn.disabled = true;
+    feedback.textContent = "";
+    const data = new FormData(projectForm);
+    try {
+      await apiFetch("/api/arsy/v1/projects", {
+        method: "POST",
+        body: JSON.stringify({ name: data.get("name"), description: data.get("description") })
+      });
+      projectForm.reset();
+      feedback.textContent = "Project created successfully.";
+      await Promise.all([refreshProjects(), loadSelectOptions()]);
+    } catch (err) {
+      feedback.textContent = err.message || "Failed to create project.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  appForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = appForm.querySelector("button");
+    btn.disabled = true;
+    feedback.textContent = "";
+    const data = new FormData(appForm);
+    try {
+      await apiFetch("/api/arsy/v1/applications", {
+        method: "POST",
+        body: JSON.stringify({
+          project_id: data.get("project_id"),
+          server_id: data.get("server_id"),
+          name: data.get("name"),
+          compose_manifest: data.get("compose_manifest")
+        })
+      });
+      appForm.reset();
+      feedback.textContent = "Application created successfully.";
+      await refreshProjects();
+    } catch (err) {
+      feedback.textContent = err.message || "Failed to create application.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  void loadSelectOptions();
+  void refreshProjects();
+}
+
+async function renderDeploymentManager() {
+  const root = document.querySelector("#deployment-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <div id="deployment-feedback" class="server-feedback" role="status"></div>
+    <div id="deployment-list" class="server-list"><article class="empty-card"><p>Loading deployments…</p></article></div>
+  `;
+
+  const list = root.querySelector("#deployment-list");
+  const feedback = root.querySelector("#deployment-feedback");
+
+  async function refreshDeployments() {
+    try {
+      const deployments = await apiFetch("/api/arsy/v1/deployments");
+      if (!deployments || !deployments.length) {
+        list.innerHTML = '<article class="empty-card"><h2>No deployments yet</h2><p>Deployments will appear here once applications are deployed.</p></article>';
+        return;
+      }
+      list.innerHTML = deployments.map(d => `
+        <article class="deploy-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h3>Deployment <code>${escapeHTML(d.deployment_id.slice(0, 8))}</code></h3>
+              <p>Application: <code>${escapeHTML(d.application_id)}</code></p>
+            </div>
+            <span class="deploy-status-tag ${escapeHTML(d.state)}">${escapeHTML(d.state)}</span>
+          </div>
+          <div class="card-meta">
+            ${d.started_at ? `<span>Started: ${escapeHTML(d.started_at)}</span>` : ""}
+            ${d.finished_at ? `<span>Finished: ${escapeHTML(d.finished_at)}</span>` : ""}
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="quiet-button" data-action="view-log" data-id="${escapeHTML(d.deployment_id)}">View Logs</button>
+            <button class="quiet-button" data-action="stop" data-id="${escapeHTML(d.deployment_id)}">Stop</button>
+            <button class="quiet-button" data-action="redeploy" data-id="${escapeHTML(d.deployment_id)}">Redeploy</button>
+            <button class="quiet-button" data-action="rollback" data-id="${escapeHTML(d.deployment_id)}">Rollback</button>
+          </div>
+          <div id="log-${escapeHTML(d.deployment_id)}" style="display:none;" class="log-output"></div>
+        </article>
+      `).join("");
+    } catch (err) {
+      list.innerHTML = `<article class="notice-card"><p>${escapeHTML(err.message)}</p></article>`;
+    }
+  }
+
+  list.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    btn.disabled = true;
+    try {
+      if (action === "view-log") {
+        const logBox = root.querySelector(`#log-${id}`);
+        if (logBox.style.display === "block") {
+          logBox.style.display = "none";
+        } else {
+          logBox.style.display = "block";
+          logBox.textContent = "Fetching logs…";
+          const res = await apiFetch(`/api/arsy/v1/deployments/${id}/logs`);
+          logBox.textContent = res.log || "(empty)";
+        }
+      } else if (action === "stop") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/stop`, { method: "POST" });
+        feedback.textContent = `Deployment ${id.slice(0, 8)} cancelled/stopped.`;
+        await refreshDeployments();
+      } else if (action === "redeploy") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/redeploy`, { method: "POST" });
+        feedback.textContent = `Redeploy requested for ${id.slice(0, 8)}.`;
+      } else if (action === "rollback") {
+        await apiFetch(`/api/arsy/v1/deployments/${id}/rollback`, { method: "POST" });
+        feedback.textContent = `Rollback requested for ${id.slice(0, 8)}.`;
+      }
+    } catch (err) {
+      feedback.textContent = err.message || "Operation failed.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  void refreshDeployments();
+}

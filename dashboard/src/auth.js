@@ -41,3 +41,25 @@ export async function verifySession() {
   }
   return true;
 }
+
+export async function apiFetch(path, options = {}) {
+  if (!authToken) throw new Error("Your session has expired. Please sign in again.");
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", authToken);
+  if (options.body && !(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+  const response = await fetch(path, { ...options, headers });
+  const data = await response.json().catch(() => ({}));
+  if (response.status === 401) {
+    logout();
+    throw new Error("Your session expired. Please sign in again.");
+  }
+  if (!response.ok) {
+    const error = new Error(data.error || data.message || `Request failed (${response.status}).`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+}

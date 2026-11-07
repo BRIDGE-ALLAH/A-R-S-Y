@@ -45,6 +45,7 @@ func up(app core.App) error {
 			&core.TextField{Name: "os_name", Max: 80},
 			&core.TextField{Name: "architecture", Max: 40},
 			&core.TextField{Name: "host_key_fingerprint", Max: 128},
+			&core.TextField{Name: "pending_host_key_fingerprint", Hidden: true, Max: 128},
 			&core.SelectField{Name: "readiness_state", Values: []string{"unknown", "pending", "ready", "not_ready", "error"}, MaxSelect: 1},
 			&core.TextField{Name: "credential_ciphertext", Hidden: true, Max: 10000},
 		)

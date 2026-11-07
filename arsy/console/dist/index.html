@@ -1,19 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>A-R-S-Y Console</title>
-<style>
-:root{font-family:system-ui,sans-serif;color:#e5e7eb;background:#0b1120}*{box-sizing:border-box}body{margin:0}.shell{min-height:100vh;display:grid;grid-template-columns:230px 1fr}.side{background:#111827;padding:24px 18px;border-right:1px solid #29364a}.brand{font-weight:800;letter-spacing:.1em;padding:0 8px 28px}.side small{display:block;color:#8492a6;margin:8px}.side nav{display:grid;gap:6px}.side a{color:#b3bfd0;text-decoration:none;padding:11px;border-radius:8px;font-size:13px}.side a.active,.side a:hover{background:#292344;color:#c4b5fd}.main header{height:64px;border-bottom:1px solid #29364a;padding:22px 32px;color:#94a3b8;font-size:12px}.page{padding:48px 32px}.eyebrow{font-size:10px;letter-spacing:.15em;color:#a78bfa}h1{font-size:36px;margin:12px 0}.muted{color:#94a3b8}.card{margin-top:30px;padding:30px;border:1px solid #29364a;border-radius:14px;max-width:700px;background:#121d2e}h2{font-size:18px}@media(max-width:650px){.shell{grid-template-columns:1fr}.side{padding:14px}.brand{padding:0 8px 12px}.side small{display:none}.side nav{grid-template-columns:repeat(4,1fr)}.side a{text-align:center;padding:10px 2px;font-size:11px}.main header{height:50px;padding:17px}.page{padding:32px 18px}}
-</style>
-</head>
-<body>
-<div class="shell"><aside class="side"><div class="brand">A-R-S-Y</div><small>WORKSPACE</small><nav id="nav"></nav></aside><main class="main"><header>Self-hosted deployment control plane</header><section class="page" id="page"></section></main></div>
-<script>
-const pages={overview:["Overview","Your infrastructure at a glance.","Welcome to A-R-S-Y","Register a server to begin managing applications and deployments."],servers:["Servers","Manage connected Linux hosts.","No servers registered","Server registration will be available after SSH management is enabled."],projects:["Projects","Group related applications.","No projects yet","Create a project after registering your first server."],deployments:["Deployments","Review deployment activity.","No deployments yet","Deployment history appears after your first Compose deployment."]};
-const nav=document.querySelector("#nav");nav.innerHTML=Object.keys(pages).map(k=>'<a href="#'+k+'">'+pages[k][0]+'</a>').join("");
-function render(){const k=location.hash.slice(1)||"overview",p=pages[k]||pages.overview;document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("active",a.hash==="#"+k));document.querySelector("#page").innerHTML='<div class="eyebrow">A-R-S-Y CONSOLE</div><h1>'+p[0]+'</h1><p class="muted">'+p[1]+'</p><article class="card"><h2>'+p[2]+'</h2><p class="muted">'+p[3]+'</p></article>'}window.addEventListener("hashchange",render);render();
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="description" content="A-R-S-Y self-hosted deployment control plane" />
+    <title>A-R-S-Y Console</title>
+    <script type="module" crossorigin src="./assets/index-AVAIpdlT.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C8iAF8hd.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
 </html>
