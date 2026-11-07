@@ -1,1 +1,0 @@
-This marker triggers the one-time online module migration workflow. The workflow updates only repository-local Go imports, runs go mod tidy, tests and builds the renamed executable, verifies the version output and doctor command, then commits the migration if all checks pass.
