@@ -17,12 +17,12 @@ const (
 )
 
 var allowedTransitions = map[State]map[State]struct{}{
-	StateQueued:     {StatePreparing:  {}, StateFailed: {}, StateCancelled: {}},
-	StatePreparing: {StateUploading:  {}, StateFailed: {}, StateCancelled: {}},
-	StateUploading: {StateValidating: {}, StateFailed: {}, StateCancelled: {}},
-	StateValidating: {StateDeploying:  {}, StateFailed: {}, StateCancelled: {}},
-	StateDeploying: {StateVerifying:  {}, StateFailed: {}, StateCancelled: {}},
-	StateVerifying: {StateSucceeded: {}, StateFailed: {}, StateCancelled: {}},
+	StateQueued:     {StatePreparing: {}, StateFailed: {}, StateCancelled: {}},
+	StatePreparing:  {StateUploading: {}, StateFailed: {}, StateCancelled: {}},
+	StateUploading:  {StateValidating: {}, StateFailed: {}, StateCancelled: {}},
+	StateValidating: {StateDeploying: {}, StateFailed: {}, StateCancelled: {}},
+	StateDeploying:  {StateVerifying: {}, StateFailed: {}, StateCancelled: {}},
+	StateVerifying:  {StateSucceeded: {}, StateFailed: {}, StateCancelled: {}},
 }
 
 // Transition validates and returns the next deployment state.
