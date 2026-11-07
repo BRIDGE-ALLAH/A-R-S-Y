@@ -123,12 +123,16 @@ func TestUploadComposeManifestWritesSecurelyAndRenamesAtomically(t *testing.T) {
 	}
 }
 
-func TestUploadComposeManifestRejectsInvalidManifestBeforeSFTP(t *testing.T) {
-	if _, err := ValidateCompose("services: []"); err == nil {
-		t.Fatal("invalid Compose manifest unexpectedly passed validation")
+func TestValidateComposeUploadRejectsInvalidManifestAndPath(t *testing.T) {
+	valid := []byte("services:\\n  web:\\n    image: nginx\\n")
+	if path, err := validateComposeUpload("demo", "0123456789abcdef0123456789abcdef", valid); err != nil || !strings.HasSuffix(path, "/compose.yaml") {
+		t.Fatalf("valid Compose upload path = %q, %v", path, err)
 	}
-	if _, err := ManifestPath("../escape", "0123456789abcdef0123456789abcdef"); err == nil {
-		t.Fatal("unsafe application slug unexpectedly passed path validation")
+	if _, err := validateComposeUpload("demo", "0123456789abcdef0123456789abcdef", []byte("services: []")); err == nil {
+		t.Fatal("invalid Compose manifest unexpectedly passed upload validation")
+	}
+	if _, err := validateComposeUpload("../escape", "0123456789abcdef0123456789abcdef", valid); err == nil {
+		t.Fatal("unsafe application slug unexpectedly passed upload validation")
 	}
 }
 
@@ -162,11 +166,13 @@ func TestUploadComposeManifestPropagatesRemotePermissionFailure(t *testing.T) {
 	}
 }
 
-func TestUploadComposeManifestEnforcesMaximumSizeAndFixedPath(t *testing.T) {
-	if len(make([]byte, maxComposeManifestBytes+1)) <= maxComposeManifestBytes {
-		t.Fatal("test payload must exceed manifest limit")
+func TestValidateComposeUploadEnforcesMaximumSizeAndDeploymentPath(t *testing.T) {
+	valid := []byte("services:\\n  web:\\n    image: nginx\\n")
+	oversized := bytes.Repeat(valid, maxComposeManifestBytes/len(valid)+1)
+	if _, err := validateComposeUpload("demo", "0123456789abcdef0123456789abcdef", oversized); err == nil {
+		t.Fatal("oversized Compose manifest was accepted")
 	}
-	if _, err := ManifestPath("demo", "../../etc"); err == nil {
+	if _, err := validateComposeUpload("demo", "../../etc", valid); err == nil {
 		t.Fatal("path traversal deployment ID accepted")
 	}
 }
