@@ -35,7 +35,7 @@ func NewServeCommand(app core.App, showStartBanner bool) *cobra.Command {
 			go func() {
 				defer close(workerDone)
 				worker := deployments.Worker{
-					App: app,
+					App:     app,
 					Process: deployments.NewSSHDeploymentProcessor(app, workerConfig.SecretKeyEnv),
 				}
 				if err := worker.Run(workerCtx); err != nil && !errors.Is(err, context.Canceled) {
