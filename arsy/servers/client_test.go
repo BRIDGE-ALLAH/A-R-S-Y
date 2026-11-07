@@ -81,7 +81,7 @@ func startTestSSHServer(t *testing.T) (net.Listener, ssh.PublicKey) {
 				_ = channel.Reject(ssh.UnknownChannelType, "not used in test")
 			}
 		}()
-		<-serverConn.Done()
+		_ = serverConn.Wait()
 		_ = serverConn.Close()
 	}()
 	return listener, hostSigner.PublicKey()
