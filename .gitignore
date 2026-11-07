@@ -7,6 +7,10 @@
 # goreleaser builds folder
 /.builds/
 
+# runtime data directory (keep only the generated types.d.ts)
+/pb_data/*
+!/pb_data/types.d.ts
+
 # tests coverage
 coverage.out
 
