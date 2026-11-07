@@ -34,6 +34,12 @@ type Executor struct {
 }
 
 func (e Executor) Execute(ctx context.Context, client *ssh.Client, operation RemoteOperation, secrets ...string) (CommandResult, error) {
+	if ctx == nil {
+		return CommandResult{}, errors.New("SSH context is required")
+	}
+	if err := ctx.Err(); err != nil {
+		return CommandResult{}, err
+	}
 	if client == nil {
 		return CommandResult{}, errors.New("SSH client is required")
 	}
