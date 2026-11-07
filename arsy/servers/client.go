@@ -49,10 +49,10 @@ func NewSSHClient(ctx context.Context, address, username string, privateKey []by
 	defer stopCancellation()
 
 	config := &ssh.ClientConfig{
-		User: username,
-		Auth: []ssh.AuthMethod{ssh.PublicKeys(signer)},
+		User:            username,
+		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
 		HostKeyCallback: PinnedHostKeyCallback(pinnedFingerprint),
-		Timeout: timeout,
+		Timeout:         timeout,
 	}
 	connection, channels, requests, err := ssh.NewClientConn(conn, address, config)
 	if err != nil {
