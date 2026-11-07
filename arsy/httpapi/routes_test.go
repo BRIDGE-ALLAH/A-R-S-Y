@@ -129,3 +129,32 @@ func TestConsoleRouteServesEmbeddedDashboard(t *testing.T) {
 		t.Fatalf("console response does not contain the dashboard title: %s", rec.Body.String())
 	}
 }
+
+
+func TestOnboardingEndpointReturnsOnlyNonSensitiveState(t *testing.T) {
+	const secret = "never-return-this-test-secret"
+	t.Setenv("ARSY_SECRET_KEY", secret)
+	app, mux := newTestMux(t, false)
+	defer app.Cleanup()
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/arsy/v1/onboarding", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body) != 3 {
+		t.Fatalf("onboarding response contains unexpected fields: %#v", body)
+	}
+	for _, key := range []string{"superuser_configured", "secret_key_configured", "server_registered"} {
+		if _, ok := body[key].(bool); !ok {
+			t.Fatalf("onboarding field %q must be boolean: %#v", key, body[key])
+		}
+	}
+	if strings.Contains(rec.Body.String(), secret) {
+		t.Fatal("onboarding response exposed the secret key value")
+	}
+}
