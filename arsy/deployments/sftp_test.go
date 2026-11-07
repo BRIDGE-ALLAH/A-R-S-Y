@@ -124,7 +124,7 @@ func TestUploadComposeManifestWritesSecurelyAndRenamesAtomically(t *testing.T) {
 }
 
 func TestValidateComposeUploadRejectsInvalidManifestAndPath(t *testing.T) {
-	valid := []byte("services:\\n  web:\\n    image: nginx\\n")
+	valid := []byte("services:\n  web:\n    image: nginx\n")
 	if path, err := validateComposeUpload("demo", "0123456789abcdef0123456789abcdef", valid); err != nil || !strings.HasSuffix(path, "/compose.yaml") {
 		t.Fatalf("valid Compose upload path = %q, %v", path, err)
 	}
@@ -167,7 +167,7 @@ func TestUploadComposeManifestPropagatesRemotePermissionFailure(t *testing.T) {
 }
 
 func TestValidateComposeUploadEnforcesMaximumSizeAndDeploymentPath(t *testing.T) {
-	valid := []byte("services:\\n  web:\\n    image: nginx\\n")
+	valid := []byte("services:\n  web:\n    image: nginx\n")
 	oversized := bytes.Repeat(valid, maxComposeManifestBytes/len(valid)+1)
 	if _, err := validateComposeUpload("demo", "0123456789abcdef0123456789abcdef", oversized); err == nil {
 		t.Fatal("oversized Compose manifest was accepted")
