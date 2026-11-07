@@ -4,21 +4,15 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bridge-allah/a-r-s-y/arsy/servers"
 	"github.com/bridge-allah/a-r-s-y/core"
 )
-
-type composeContainerStatus struct {
-	State string `json:"State"`
-}
 
 // NewSSHDeploymentProcessor builds the MVP-1 deployment processor. It validates
 // the manifest locally, uploads it via SFTP, validates it with Compose on the
@@ -142,36 +136,15 @@ func NewSSHDeploymentProcessor(app core.App, secretKeyEnv string) DeploymentProc
 	}
 }
 
-// AllComposeContainersRunning accepts Docker Compose JSON array output or
-// newline-delimited JSON and rejects empty or non-running service sets.
+// AllComposeContainersRunning rejects empty or non-running Compose service
+// sets, delegating the parsing to the shared inspection parser.
 func AllComposeContainersRunning(output string) error {
-	output = strings.TrimSpace(output)
-	if output == "" {
-		return errors.New("Compose inspection returned no containers")
-	}
-	containers := make([]composeContainerStatus, 0)
-	if strings.HasPrefix(output, "[") {
-		if err := json.Unmarshal([]byte(output), &containers); err != nil {
-			return errors.New("Compose inspection returned invalid JSON")
-		}
-	} else {
-		for _, line := range strings.Split(output, "\n") {
-			line = strings.TrimSpace(line)
-			if line == "" {
-				continue
-			}
-			var container composeContainerStatus
-			if err := json.Unmarshal([]byte(line), &container); err != nil {
-				return errors.New("Compose inspection returned invalid JSON")
-			}
-			containers = append(containers, container)
-		}
-	}
-	if len(containers) == 0 {
-		return errors.New("Compose inspection returned no containers")
+	containers, err := ParseComposePS(output)
+	if err != nil {
+		return err
 	}
 	for _, container := range containers {
-		if strings.ToLower(strings.TrimSpace(container.State)) != "running" {
+		if container.State != "running" {
 			return errors.New("one or more Compose services are not running")
 		}
 	}
