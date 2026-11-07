@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	projectsCollectionName        = "arsy_projects"
+	projectsCollectionName       = "arsy_projects"
 	serversCollectionName         = "arsy_servers"
 	applicationsCollectionName   = "arsy_applications"
 	deploymentsCollectionName    = "arsy_deployments"
