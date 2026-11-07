@@ -95,7 +95,7 @@ func NewSSHDeploymentProcessor(app core.App, secretKeyEnv string) DeploymentProc
 		if _, err := UpdateDeploymentState(app, deployment.Id, StateUploading, "Uploading Compose manifest over SFTP."); err != nil {
 			return err
 		}
-		if err := UploadComposeManifest(ctx, client, applicationSlug, deploymentID, manifest); err != nil {
+		if err := UploadComposeManifestWithTimeout(ctx, client, applicationSlug, deploymentID, manifest, 2*time.Minute); err != nil {
 			_ = AppendDeploymentLog(app, deployment.Id, "upload", "error", "SFTP manifest upload failed.")
 			return errors.New("SFTP manifest upload failed")
 		}
