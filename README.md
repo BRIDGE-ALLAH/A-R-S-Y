@@ -8,7 +8,7 @@ A-R-S-Y is derived from [PocketBase](https://github.com/pocketbase/pocketbase) a
 
 A-R-S-Y is under active early-stage development. The MVP-1 plan defines the intended first release: server registration over SSH, explicit SSH host-key pinning, Docker/Compose readiness checks, projects and applications, Compose deployments, deployment history, logs, and safe lifecycle operations.
 
-**Status note:** planned features are not necessarily implemented yet. Consult the [MVP-1 task checklist](.plan/task-mvp-1.md) and the [Actions results](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions) for the current implementation and verification status. Do not use this project to manage production infrastructure until the relevant security and integration checks have passed.
+**Status note:** planned features are not necessarily implemented yet. Consult the [GitHub Issues](https://github.com/BRIDGE-ALLAH/A-R-S-Y/issues) and the [Actions results](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions) for the current implementation and verification status. Do not use this project to manage production infrastructure until the relevant security and integration checks have passed.
 
 ## Requirements
 
