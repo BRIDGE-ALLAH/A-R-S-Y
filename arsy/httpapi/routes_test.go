@@ -9,6 +9,7 @@ import (
 
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
 	"github.com/bridge-allah/a-r-s-y/arsy/httpapi"
+	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tests"
 	"github.com/bridge-allah/a-r-s-y/tools/router"

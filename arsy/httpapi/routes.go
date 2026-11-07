@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/bridge-allah/a-r-s-y/apis"
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
@@ -21,16 +22,27 @@ func Register(app core.App, cfg config.Config, version string) {
 				return re.JSON(http.StatusOK, map[string]any{
 					"product": "A-R-S-Y",
 					"version": version,
-					"status":  "alive",
+					"status": "alive",
 				})
 			})
 			api.GET("/ready", requireSuperuser(func(re *core.RequestEvent) error {
-				statusCode, status := readinessStatus(re.App.IsBootstrapped(), func() error {
-					_, err := re.App.DB().NewQuery("SELECT 1").Execute()
-					return err
-				})
-				return re.JSON(statusCode, map[string]any{"status": status})
+				if !re.App.IsBootstrapped() {
+					return re.JSON(http.StatusServiceUnavailable, map[string]any{"status": "not_ready"})
+				}
+				return re.JSON(http.StatusOK, map[string]any{"status": "ready"})
 			}))
+			api.GET("/onboarding", func(re *core.RequestEvent) error {
+				superusers, err := re.App.CountRecords(core.CollectionNameSuperusers)
+				if err != nil {
+					return re.JSON(http.StatusServiceUnavailable, map[string]any{"status": "unavailable"})
+				}
+				servers, err := re.App.CountRecords("arsy_servers")
+				if err != nil {
+					return re.JSON(http.StatusServiceUnavailable, map[string]any{"status": "unavailable"})
+				}
+				status := onboardingStatusFromCounts(superusers, servers, os.Getenv(cfg.SecretKeyEnv) != "")
+				return re.JSON(http.StatusOK, status)
+			})
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {
 				return re.Redirect(http.StatusPermanentRedirect, cfg.ConsolePath+"/")
