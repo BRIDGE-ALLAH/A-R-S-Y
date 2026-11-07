@@ -57,6 +57,14 @@ func NewSSHDeploymentProcessor(app core.App, secretKeyEnv string) DeploymentProc
 			return errors.New("deployment ID is invalid")
 		}
 		manifest := []byte(application.GetString("compose_manifest"))
+		ciphertext := application.GetString("manifest_ciphertext")
+		if ciphertext != "" {
+			plaintext, err := DecryptManifest(ciphertext, secretKeyEnv)
+			if err != nil {
+				return fmt.Errorf("decrypt application manifest: %w", err)
+			}
+			manifest = []byte(plaintext)
+		}
 		if _, err := ValidateCompose(string(manifest)); err != nil {
 			return fmt.Errorf("application Compose manifest is invalid: %w", err)
 		}

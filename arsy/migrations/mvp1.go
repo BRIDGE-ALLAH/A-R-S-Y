@@ -64,6 +64,7 @@ func up(app core.App) error {
 			&core.TextField{Name: "name", Required: true, Max: 120},
 			&core.TextField{Name: "slug", Required: true, Max: 64, Pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
 			&core.TextField{Name: "compose_manifest", Required: true, Max: 50000},
+			&core.TextField{Name: "manifest_ciphertext", Hidden: true, Max: 100000},
 			&core.SelectField{Name: "lifecycle_state", Values: []string{"draft", "ready", "deploying", "running", "stopped", "failed"}, MaxSelect: 1},
 		)
 		c.Indexes = types.JSONArray[string]{
