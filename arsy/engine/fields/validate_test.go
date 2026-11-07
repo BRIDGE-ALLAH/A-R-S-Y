@@ -116,7 +116,7 @@ func TestValidateNormalizesAndDetachesOptions(t *testing.T) {
 
 func TestCanonicalSerializationIsStable(t *testing.T) {
 	a := []Descriptor{
-		{Name: "zeta", Type: TypeString, Label: "Zeta", Default: map[string]any{"b": 2, "a": 1}},
+		{Name: "zeta", Type: TypeJSON, Label: "Zeta", Default: map[string]any{"b": 2, "a": 1}},
 		{Name: "alpha", Type: TypeBoolean, Label: "Alpha", Default: true},
 	}
 	b := []Descriptor{a[1], a[0]}
