@@ -116,7 +116,7 @@ func (m *MFA) Updated() types.DateTime {
 // HasExpired checks if the mfa is expired, aka. whether it has been
 // more than maxElapsed time since its creation.
 func (m *MFA) HasExpired(maxElapsed time.Duration) bool {
-	return time.Since(m.Created().Time()) > maxElapsed
+	return time.Since(m.Created().Time()) >= maxElapsed
 }
 
 func (app *BaseApp) registerMFAHooks() {

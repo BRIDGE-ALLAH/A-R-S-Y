@@ -114,7 +114,7 @@ func (m *OTP) Updated() types.DateTime {
 // HasExpired checks if the otp is expired, aka. whether it has been
 // more than maxElapsed time since its creation.
 func (m *OTP) HasExpired(maxElapsed time.Duration) bool {
-	return time.Since(m.Created().Time()) > maxElapsed
+	return time.Since(m.Created().Time()) >= maxElapsed
 }
 
 func (app *BaseApp) registerOTPHooks() {
