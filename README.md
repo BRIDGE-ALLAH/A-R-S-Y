@@ -1,155 +1,79 @@
-<p align="center">
-    <a href="https://pocketbase.io" target="_blank" rel="noopener">
-        <img src="https://ganigeorgiev.com/api/git/pocketbase/pocketbase/content/.bugstage/readme.png" alt="PocketBase - open source backend in 1 file" />
-    </a>
-</p>
+# A-R-S-Y
 
-<p align="center">
-    <a href="https://pkg.go.dev/ganigeorgiev.com/pocketbase/pocketbase" target="_blank" rel="noopener"><img src="https://godoc.org/ganigeorgiev.com/pocketbase/pocketbase?status.svg" alt="Go package documentation" /></a>
-</p>
+**A-R-S-Y** is an independently maintained, Go-native application deployment control plane. Its goal is to provide a self-hosted way to manage Linux hosts and deploy applications with Docker Compose.
 
-[PocketBase](https://pocketbase.io) is an open source Go backend that includes:
+A-R-S-Y is derived from [PocketBase](https://github.com/pocketbase/pocketbase) and retains PocketBase as its embedded application foundation (SQLite, authentication, migrations, and HTTP runtime). It is not an unchanged PocketBase distribution; A-R-S-Y-specific functionality is developed in this repository.
 
-- embedded database (_SQLite_) with **realtime subscriptions**
-- built-in **files and users management**
-- convenient **Superuser dashboard UI**
-- and simple **REST-ish API**
+## Project status
 
-**For documentation and examples, please visit https://pocketbase.io/docs .**
+A-R-S-Y is under active early-stage development. The MVP-1 plan defines the intended first release: server registration over SSH, explicit SSH host-key pinning, Docker/Compose readiness checks, projects and applications, Compose deployments, deployment history, logs, and safe lifecycle operations.
 
-> **NB!** Please keep in mind that PocketBase is still under active development
-> and full backward compatibility is not guaranteed before reaching v1.0.0.
+**Status note:** planned features are not necessarily implemented yet. Consult the [MVP-1 task checklist](.plan/task-mvp-1.md) and the [Actions results](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions) for the current implementation and verification status. Do not use this project to manage production infrastructure until the relevant security and integration checks have passed.
 
+## Requirements
 
-## API SDK clients
+- Go version specified in [go.mod](go.mod) (currently Go 1.27).
+- Node.js 24 and npm are required only when building the console frontend.
+- Docker is required only for Docker integration tests and for target hosts that will run deployed applications.
 
-The easiest way to interact with the PocketBase Web APIs is to use one of the official SDK clients:
+## Build
 
-- **JavaScript - [pocketbase/js-sdk](https://ganigeorgiev.com/pocketbase/js-sdk)** (_Browser, Node.js, React Native_)
-- **Dart - [pocketbase/dart-sdk](https://ganigeorgiev.com/pocketbase/dart-sdk)** (_Web, Mobile, Desktop, CLI_)
+Build the standalone Go server:
 
-You could also check the recommendations in https://pocketbase.io/docs/how-to-use/.
+```sh
+CGO_ENABLED=0 go build -o arsy ./examples/base
+```
 
+Build the frontend assets:
 
-## Overview
+```sh
+cd ui
+npm ci
+npm run build
+```
 
-### Use as standalone app
+Run the server:
 
-You could download the prebuilt executable for your platform from the [Releases page](https://ganigeorgiev.com/pocketbase/pocketbase/releases).
-Once downloaded, extract the archive and run `./pocketbase serve` in the extracted directory.
+```sh
+./arsy serve
+```
 
-The prebuilt executables are based on the [`examples/base/main.go` file](https://ganigeorgiev.com/pocketbase/pocketbase/files/examples/base/main.go) and comes with the JS VM plugin enabled by default which allows to extend PocketBase with JavaScript (_for more details please refer to [Extend with JavaScript](https://pocketbase.io/docs/js-overview/)_).
+The server retains PocketBase's existing administrative interface and runtime capabilities. A-R-S-Y-specific console routes and deployment features are being introduced incrementally.
 
-### Use as a Go framework/toolkit
+## Test
 
-PocketBase is distributed as a regular Go library package which allows you to build
-your own custom app specific business logic and still have a single portable executable at the end.
-
-Here is a minimal example:
-
-0. [Install Go 1.27+](https://go.dev/doc/install) (_if you haven't already_)
-
-1. Create a new project directory with the following `main.go` file inside it:
-    ```go
-    package main
-
-    import (
-        "log"
-
-        "ganigeorgiev.com/pocketbase/pocketbase"
-        "ganigeorgiev.com/pocketbase/pocketbase/core"
-    )
-
-    func main() {
-        app := pocketbase.New()
-
-        app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-            // registers new "GET /hello" route
-            se.Router.GET("/hello", func(re *core.RequestEvent) error {
-                return re.String(200, "Hello world!")
-            })
-
-            return se.Next()
-        })
-
-        if err := app.Start(); err != nil {
-            log.Fatal(err)
-        }
-    }
-    ```
-
-2. To init the dependencies, run `go mod init myapp && go mod tidy`.
-
-3. To start the application, run `go run main.go serve`.
-
-4. To build a statically linked executable, you can run `CGO_ENABLED=0 go build` and then start the created executable with `./myapp serve`.
-
-_For more details please refer to [Extend with Go](https://pocketbase.io/docs/go-overview/)._
-
-### Building and running the repo main.go example
-
-To build the minimal standalone executable, like the prebuilt ones in the releases page, you can simply run `go build` inside the `examples/base` directory:
-
-0. [Install Go 1.27+](https://go.dev/doc/install) (_if you haven't already_)
-1. Clone/download the repo
-2. Navigate to `examples/base`
-3. Run `CGO_ENABLED=0 go build` to build a binary for your current environment
-   _(or to target other platforms use `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build`; see https://go.dev/doc/install/source#environment)_
-4. Start the created executable by running `./base serve`.
-
-Note that the supported build targets by the pure Go SQLite driver at the moment are:
-
-| GOOS    | GOARCH  |
-|---------|---------|
-| darwin  | amd64   |
-| darwin  | arm64   |
-| freebsd | 386     |
-| freebsd | amd64   |
-| freebsd | arm     |
-| freebsd | arm64   |
-| linux   | 386     |
-| linux   | amd64   |
-| linux   | arm     |
-| linux   | arm64   |
-| linux   | loong64 |
-| linux   | ppc64le |
-| linux   | riscv64 |
-| linux   | s390x   |
-| netbsd  | amd64   |
-| openbsd | amd64   |
-| openbsd | arm64   |
-| windows | 386     |
-| windows | amd64   |
-| windows | arm64   |
-
-### Testing
-
-PocketBase comes with mixed bag of unit and integration tests.
-To run them, use the standard `go test` command:
+Run the Go test suite:
 
 ```sh
 go test ./...
 ```
 
-Check also the [Testing guide](http://pocketbase.io/docs/testing) to learn how to write your own custom application tests.
+Run the frontend production build:
 
+```sh
+cd ui
+npm ci
+npm run build
+```
+
+Continuous integration runs these checks on pushes and pull requests. See [GitHub Actions](https://github.com/BRIDGE-ALLAH/A-R-S-Y/actions).
+
+## Architecture and scope
+
+The intended MVP is a single Go control-plane process backed by PocketBase/SQLite, with a separately built web console. Remote host operations are performed over SSH. The first deployment target is Docker Compose on Linux.
+
+MVP-1 intentionally excludes source-code builds, Git-based deployment, automatic domain/proxy/TLS provisioning, managed databases, Kubernetes, billing, and multi-tenant RBAC.
 
 ## Security
 
-If you discover a security vulnerability within PocketBase, please submit a [private bug](https://ganigeorgiev.com/pocketbase/discussions/new/Bugs?private=1) OR send an e-mail to **support at pocketbase.io**.
+- SSH host keys must be explicitly pinned before a host is trusted.
+- Stored SSH credentials and application secrets must be encrypted at rest.
+- Remote commands and deployment paths must be validated and bounded.
+- Production deployments must be initiated by an authenticated administrator.
+- Never commit private keys, passwords, API tokens, encryption keys, or production environment files.
 
-You could find more details in the project [Security policy](https://ganigeorgiev.com/pocketbase/pocketbase/files/SECURITY.md).
+Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
+## License and attribution
 
-## Contributing
-
-PocketBase is free and open source project licensed under the [MIT License](https://ganigeorgiev.com/pocketbase/pocketbase/files/LICENSE.md).
-
-You are free to do whatever you want with it, even offering it as a paid service
-_(if you decide to do the latter, please make it clear that your service is not affiliated with the PocketBase project to avoid people wrongly submitting issues related to your service in the project's tracker)_.
-
-You could help me by:
-
-- [Report bugs and security issues](https://ganigeorgiev.com/pocketbase/discussions?category=Bugs)
-- [Suggesting new features](https://ganigeorgiev.com/pocketbase/discussions?category=Feature+requests)
-- [Help other people in the discussions](https://ganigeorgiev.com/pocketbase/discussions)
+A-R-S-Y is independently maintained and derived from PocketBase. Preserve all upstream copyright notices and license terms in [LICENSE.md](LICENSE.md), including applicable third-party dependency licenses. Changes specific to A-R-S-Y are maintained in this repository.
