@@ -39,6 +39,9 @@ jobs:
             unformatted="$(gofmt -l "${go_files[@]}")"
             if [ -n "$unformatted" ]; then
               printf 'Changed Go files need gofmt:\n%s\n' "$unformatted"
+              while IFS= read -r file; do
+                gofmt -d "$file"
+              done <<< "$unformatted"
               exit 1
             fi
           fi
