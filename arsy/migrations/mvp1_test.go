@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bridge-allah/a-r-s-y/core"
 	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
+	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tests"
 )
 
