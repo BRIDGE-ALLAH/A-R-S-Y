@@ -10,7 +10,7 @@ import (
 
 var (
 	applicationSlugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
-	deploymentIDPattern   = regexp.MustCompile(`^[a-f0-9]{32}$`)
+	deploymentIDPattern    = regexp.MustCompile(`^[a-f0-9]{32}$`)
 )
 
 const remoteApplicationRoot = "/opt/arsy/apps"
