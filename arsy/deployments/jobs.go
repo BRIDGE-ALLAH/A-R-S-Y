@@ -217,4 +217,3 @@ func RecoverInterruptedDeployments(app core.App, staleBefore time.Time) (int, er
 	}
 	return recovered, nil
 }
-
