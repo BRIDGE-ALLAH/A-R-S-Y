@@ -70,7 +70,7 @@ A-R-S-Y-specific settings use these environment variables:
 | `ARSY_CONSOLE_PATH` | `/arsy` | A-R-S-Y web console route |
 | `ARSY_SECRET_KEY_ENV` | `ARSY_SECRET_KEY` | Name of the environment variable that supplies the secret key |
 
-The secret key value is never printed by diagnostics. Keep it outside source control and provide it through the environment of the A-R-S-Y process.
+The secret key must decode from base64 to exactly 32 bytes for AES-256-GCM. Generate one explicitly with `arsy secret-key generate`; the command prints it once to stdout and does not save it. Store it in a secret manager or a file readable only by the service account (mode `0600`), then provide it through the environment. Diagnostics never print the key value. Do not commit it to source control.
 
 ## Architecture and scope
 

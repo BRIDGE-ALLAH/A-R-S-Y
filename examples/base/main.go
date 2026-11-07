@@ -13,6 +13,7 @@ import (
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
 	"github.com/bridge-allah/a-r-s-y/arsy/httpapi"
 	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
+	"github.com/bridge-allah/a-r-s-y/arsy/security"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/plugins/jsvm"
 	"github.com/bridge-allah/a-r-s-y/plugins/migratecmd"
@@ -42,6 +43,8 @@ func main() {
 		},
 	})
 
+	app.RootCmd.AddCommand(security.NewSecretKeyCommand())
+
 	app.RootCmd.AddCommand(&cobra.Command{
 		Use:   "doctor",
 		Short: "check the local A-R-S-Y control-plane setup",
@@ -55,9 +58,10 @@ func main() {
 				return err
 			}
 			fmt.Printf("Data directories: accessible (%s, %s)\n", dirs.Temp, dirs.Manifests)
-			secretConfigured := os.Getenv(arsyConfig.SecretKeyEnv) != ""
+			_, keyErr := security.LoadKey(arsyConfig.SecretKeyEnv)
+			secretConfigured := keyErr == nil
 			if !secretConfigured {
-				fmt.Printf("Secret key: not configured (set %s)\n", arsyConfig.SecretKeyEnv)
+				fmt.Printf("Secret key: not configured or invalid (set a valid 32-byte key in %s)\n", arsyConfig.SecretKeyEnv)
 			} else {
 				fmt.Println("Secret key: configured (value hidden)")
 			}

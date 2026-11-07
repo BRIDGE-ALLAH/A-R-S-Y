@@ -59,9 +59,10 @@ jobs:
         if: always()
         shell: bash
         run: |
-          output="$(ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY="ci-only-diagnostic-key" .builds/arsy doctor 2>&1)"
+          test_key="$(openssl rand -base64 32)"
+          output="$(ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY="$test_key" .builds/arsy doctor 2>&1)"
           printf '%s\n' "$output"
-          if grep -Fq "ci-only-diagnostic-key" <<< "$output"; then
+          if grep -Fq "$test_key" <<< "$output"; then
             echo "doctor leaked the configured secret value"
             exit 1
           fi
