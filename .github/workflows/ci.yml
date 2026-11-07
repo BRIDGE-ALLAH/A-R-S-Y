@@ -59,7 +59,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test_key="$(openssl rand -base64 32)"
+          test_key="$(.builds/arsy secret-key generate)"
           output="$(ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY="$test_key" .builds/arsy doctor 2>&1)"
           printf '%s\n' "$output"
           if grep -Fq "$test_key" <<< "$output"; then
