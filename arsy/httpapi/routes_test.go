@@ -161,7 +161,6 @@ func TestOnboardingEndpointReturnsOnlyNonSensitiveState(t *testing.T) {
 	}
 }
 
-
 func newFullTestMux(t *testing.T) (*tests.TestApp, http.Handler) {
 	t.Helper()
 	app, err := tests.NewTestApp()
