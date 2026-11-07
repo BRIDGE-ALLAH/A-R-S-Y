@@ -162,7 +162,6 @@ func main() {
 		Dir:          migrationsDir,
 	})
 
-
 	// static route to serves files from the provided public dir
 	// (if publicDir exists and the route path is not already defined)
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
