@@ -2,7 +2,6 @@ package httpapi_test
 
 import (
 	"encoding/json"
-	"regexp"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,13 +9,13 @@ import (
 
 	"github.com/bridge-allah/a-r-s-y/apis"
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
-	"github.com/bridge-allah/a-r-s-y/arsy/console"
 	"github.com/bridge-allah/a-r-s-y/arsy/httpapi"
 	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tests"
 	"github.com/bridge-allah/a-r-s-y/tools/router"
 	"github.com/bridge-allah/a-r-s-y/ui"
+	"regexp"
 )
 
 func newTestMux(t *testing.T, authenticated bool) (*tests.TestApp, http.Handler) {
@@ -216,7 +215,7 @@ func TestConsoleAndPocketBaseRoutesCoexist(t *testing.T) {
 		t.Fatalf("console page = %d: %s", consolePage.Code, consolePage.Body.String())
 	}
 
-	assetPattern := regexp.MustCompile(`(?:src|href)="\\./(assets/[^"]+)"`)
+	assetPattern := regexp.MustCompile(`(?:src|href)="\./(assets/[^"]+)"`)
 	assets := assetPattern.FindAllStringSubmatch(consolePage.Body.String(), -1)
 	if len(assets) == 0 {
 		t.Fatalf("built dashboard index has no asset references; build dashboard before Go tests: %s", consolePage.Body.String())
@@ -246,5 +245,4 @@ func TestConsoleAndPocketBaseRoutesCoexist(t *testing.T) {
 	if pbUI.Code != http.StatusOK {
 		t.Fatalf("PocketBase Superuser UI route = %d: %s", pbUI.Code, pbUI.Body.String())
 	}
-	_ = console.FS()
 }
