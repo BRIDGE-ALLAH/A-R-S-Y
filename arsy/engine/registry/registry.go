@@ -44,9 +44,9 @@ type ModelRegistry interface {
 	Snapshot() []Descriptor
 }
 
-// InMemoryRegistry stores immutable descriptor values in memory. It is not a
-// process-wide singleton; callers own its lifecycle and may create one per
-// application runtime.
+// InMemoryRegistry stores immutable descriptor values in memory. Its zero
+// value is ready for use. It is not a process-wide singleton; callers own its
+// lifecycle and may create one per application runtime.
 type InMemoryRegistry struct {
 	mu     sync.RWMutex
 	models map[ModelID]Descriptor
