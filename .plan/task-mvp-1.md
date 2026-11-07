@@ -335,16 +335,22 @@ For each completed task, append a short note to the task entry or its linked iss
   - Do not add a second user/password system.
   - **Done when:** tests prove unauthenticated and regular authenticated users cannot manage servers or deployments.
 
-- [ ] **MVP1-021 — Add a console login and logout flow**
+- [x] **MVP1-021 — Add a console login and logout flow**
   - Use the existing PocketBase Superuser authentication API.
   - Keep the auth token in memory for MVP-1; do not persist it in `localStorage`.
   - Show clear expired-session and invalid-credential states.
   - **Done when:** a superuser can log in, access protected console pages, and log out.
+  - **Changed:** added PocketBase `_superusers/auth-with-password` login, in-memory-only token storage, sign-out clearing, and a protected readiness check for expired sessions.
+  - **Verified:** dashboard Vite production build and the API auth/readiness tests passed in GitHub Actions run `42337180082`.
+  - **Remaining:** Browser-level end-to-end tests are not configured.
 
-- [ ] **MVP1-022 — Add the first-run onboarding status API**
+- [x] **MVP1-022 — Add the first-run onboarding status API**
   - Return non-sensitive setup state: whether a superuser exists, whether the secrets key is configured, and whether a server has been registered.
   - Do not return emails, credentials, private keys, or environment values.
   - **Done when:** tests cover fresh install and already-configured states.
+  - **Changed:** added a non-sensitive onboarding status endpoint reporting superuser presence, secret-key configuration, and registered-server presence; no emails, key values, or credentials are returned.
+  - **Verified:** fresh/configured status helper tests and HTTP response tests (including secret non-disclosure) passed in GitHub Actions run `42337180082`.
+  - **Remaining:** None.
 
 - [ ] **MVP1-023 — Build the onboarding wizard**
   - Show a welcome screen and explain the A-R-S-Y control-plane/managed-server model.
