@@ -2,11 +2,11 @@ package httpapi
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/bridge-allah/a-r-s-y/apis"
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
 	"github.com/bridge-allah/a-r-s-y/arsy/console"
+	"github.com/bridge-allah/a-r-s-y/arsy/security"
 	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
@@ -40,7 +40,8 @@ func Register(app core.App, cfg config.Config, version string) {
 				if err != nil {
 					return re.JSON(http.StatusServiceUnavailable, map[string]any{"status": "unavailable"})
 				}
-				status := onboardingStatusFromCounts(superusers, servers, os.Getenv(cfg.SecretKeyEnv) != "")
+				_, keyErr := security.LoadKey(cfg.SecretKeyEnv)
+				status := onboardingStatusFromCounts(superusers, servers, keyErr == nil)
 				return re.JSON(http.StatusOK, status)
 			})
 
