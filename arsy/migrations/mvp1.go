@@ -66,6 +66,7 @@ func up(app core.App) error {
 		)
 		c.Indexes = types.JSONArray[string]{
 			"CREATE UNIQUE INDEX idx_arsy_applications_project_slug ON arsy_applications (project, slug)",
+			"CREATE UNIQUE INDEX idx_arsy_applications_server ON arsy_applications (server)",
 		}
 	})
 	if err != nil {
