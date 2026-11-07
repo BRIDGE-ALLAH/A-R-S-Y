@@ -78,6 +78,18 @@ The intended MVP is a single Go control-plane process backed by PocketBase/SQLit
 
 MVP-1 intentionally excludes source-code builds, Git-based deployment, automatic domain/proxy/TLS provisioning, managed databases, Kubernetes, billing, and multi-tenant RBAC.
 
+
+### Supported Docker Compose subset (MVP-1)
+
+The current validator accepts a deliberately small Compose subset:
+
+- Top-level services, volumes, networks, and optional name/version.
+- Per-service image, ports, environment, named volumes, declared networks, and restart.
+- Published ports must use explicit numeric host:container mappings with optional tcp or udp protocol.
+- Environment variable names are validated; environment values are not retained in the validator's structural result.
+
+The validator rejects build, privileged containers, host networking, host PID/IPC namespaces, device access, Docker socket mounts, host-path/anonymous volumes, undeclared named volumes/networks, and unsupported service keys. This is a policy validator, not a general-purpose Compose implementation. Review the current code and tests before relying on a manifest; unsupported Compose features are intentionally rejected rather than silently ignored.
+
 ## Security
 
 - SSH host keys must be explicitly pinned before a host is trusted.
