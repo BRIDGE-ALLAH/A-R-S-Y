@@ -1,0 +1,18 @@
+# Fixture only - base.company model
+model:
+  id: base.company
+  label: Company
+  module: base
+  fields:
+    name:
+      type: text
+      label: Name
+      required: true
+    code:
+      type: text
+      label: Code
+      required: true
+    active:
+      type: bool
+      label: Active
+      required: false

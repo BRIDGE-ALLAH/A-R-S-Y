@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "name": "base",
+  "version": "0.1.0",
+  "title": "Base Module Fixture",
+  "description": "Test fixture only - no production use"
+}
