@@ -21,11 +21,11 @@ import (
 const maxServerRequestBytes = 64 * 1024
 
 type createServerRequest struct {
-	Name       string `json:"name"`
-	Host       string `json:"host"`
-	SSHPort    int    `json:"ssh_port"`
+	Name        string `json:"name"`
+	Host        string `json:"host"`
+	SSHPort     int    `json:"ssh_port"`
 	SSHUsername string `json:"ssh_username"`
-	PrivateKey string `json:"private_key"`
+	PrivateKey  string `json:"private_key"`
 }
 
 type updateServerRequest struct {
