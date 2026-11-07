@@ -97,6 +97,13 @@ func TestRegisterDistinguishesDuplicateAndVersionConflict(t *testing.T) {
 	}
 }
 
+func TestLookupRejectsInvalidModelID(t *testing.T) {
+	_, err := New().Lookup("../company")
+	if !errors.Is(err, ErrInvalidModelID) {
+		t.Fatalf("Lookup() error = %v, want ErrInvalidModelID", err)
+	}
+}
+
 func TestLookupUnknownModelReturnsTypedError(t *testing.T) {
 	_, err := New().Lookup("base.company")
 	if !errors.Is(err, ErrUnknownModel) {
