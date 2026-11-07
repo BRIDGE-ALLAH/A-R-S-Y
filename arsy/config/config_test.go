@@ -16,7 +16,7 @@ func TestLoadFromEnvironment(t *testing.T) {
 	values := map[string]string{
 		"ARSY_DATA_DIR": "/var/lib/arsy",
 		"ARSY_API_PREFIX": "/control/api/v1",
-		"ARSY_CONSOLE_PATH": "/control",
+		"ARSY_CONSOLE_PATH": "/console",
 		"ARSY_SECRET_KEY_ENV": "CONTROL_SECRET",
 	}
 	cfg, err := LoadFrom(func(key string) string { return values[key] })
