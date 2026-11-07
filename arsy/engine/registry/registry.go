@@ -109,6 +109,9 @@ func (r *InMemoryRegistry) Register(input Descriptor) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	if r.models == nil {
+		r.models = make(map[ModelID]Descriptor)
+	}
 	if existing, ok := r.models[d.ID]; ok {
 		if existing.Version != d.Version {
 			return registryError(d.ID, ErrModelVersionConflict,
