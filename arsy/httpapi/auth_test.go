@@ -11,7 +11,7 @@ import (
 func TestRequireSuperuserRejectsMissingAndRegularAuth(t *testing.T) {
 	regularUser := core.NewRecord(&core.Collection{Name: "users"})
 	for name, auth := range map[string]*core.Record{
-		"missing": nil,
+		"missing":      nil,
 		"regular user": regularUser,
 	} {
 		t.Run(name, func(t *testing.T) {
