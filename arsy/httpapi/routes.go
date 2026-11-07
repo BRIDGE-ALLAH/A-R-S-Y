@@ -16,24 +16,21 @@ func Register(app core.App, cfg config.Config, version string) {
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
 		Id: "arsy_http_api",
 		Func: func(e *core.ServeEvent) error {
-			e.Router.GET(cfg.APIPrefix+"/health", func(re *core.RequestEvent) error {
+			api := e.Router.Group(cfg.APIPrefix)
+			api.GET("/health", func(re *core.RequestEvent) error {
 				return re.JSON(http.StatusOK, map[string]any{
 					"product": "A-R-S-Y",
 					"version": version,
 					"status":  "alive",
 				})
 			})
-			e.Router.GET(cfg.APIPrefix+"/ready", func(re *core.RequestEvent) error {
-				if !re.HasSuperuserAuth() {
-					return re.JSON(http.StatusUnauthorized, map[string]any{"status": "unauthorized"})
-				}
-
+			api.GET("/ready", requireSuperuser(func(re *core.RequestEvent) error {
 				statusCode, status := readinessStatus(re.App.IsBootstrapped(), func() error {
 					_, err := re.App.DB().NewQuery("SELECT 1").Execute()
 					return err
 				})
 				return re.JSON(statusCode, map[string]any{"status": status})
-			})
+			}))
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {
 				return re.Redirect(http.StatusPermanentRedirect, cfg.ConsolePath+"/")
