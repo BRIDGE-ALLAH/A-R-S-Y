@@ -39,9 +39,9 @@ func newTestMux(t *testing.T, authenticated bool) (*tests.TestApp, http.Handler)
 		return event, nil
 	})
 	cfg := config.Config{
-		DataDir: t.TempDir(),
-		APIPrefix: "/api/arsy/v1",
-		ConsolePath: "/arsy",
+		DataDir:      t.TempDir(),
+		APIPrefix:    "/api/arsy/v1",
+		ConsolePath:  "/arsy",
 		SecretKeyEnv: "ARSY_SECRET_KEY",
 	}
 	httpapi.Register(app, cfg, "test-version")
@@ -129,7 +129,6 @@ func TestConsoleRouteServesEmbeddedDashboard(t *testing.T) {
 		t.Fatalf("console response does not contain the dashboard title: %s", rec.Body.String())
 	}
 }
-
 
 func TestOnboardingEndpointReturnsOnlyNonSensitiveState(t *testing.T) {
 	const secret = "never-return-this-test-secret"
