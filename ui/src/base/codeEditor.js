@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -539,3 +539,5 @@ function updateDropdownPosition(dropdown) {
     dropdown.style.left = left + "px";
     dropdown.style.top = top + "px";
 }
+
+

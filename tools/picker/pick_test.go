@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/picker"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
+	"github.com/bridge-allah/a-r-s-y/tools/picker"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
 )
 
 type brokenModifier struct {
@@ -81,7 +81,7 @@ func TestPickFields(t *testing.T) {
 			},
 			"a,  c  ,missing", // test individual fields trim
 			false,
-			`[{"a":11,"c":"test1"},{"a":22,"c":"�"}]`,
+			`[{"a":11,"c":"test1"},{"a":22,"c":"ï¿½"}]`,
 		},
 		{
 			"nested fields with mixed map and any slices",
@@ -275,7 +275,7 @@ func TestPickFields(t *testing.T) {
 			map[string]any{"a": "test\xc3", "b": jsontext.Value(`{"a":1,"a":2}`)},
 			"a, b",
 			false,
-			`{"a":"test�","b":{"a":2}}`,
+			`{"a":"testï¿½","b":{"a":2}}`,
 		},
 	}
 

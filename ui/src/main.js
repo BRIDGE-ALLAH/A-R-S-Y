@@ -1,4 +1,4 @@
-import "./css/_main.css";
+﻿import "./css/_main.css";
 
 import "./utils";
 import "./mimeTypes";
@@ -145,3 +145,5 @@ document.body.appendChild(t.script({
         app.store._ready = true;
     },
 }));
+
+

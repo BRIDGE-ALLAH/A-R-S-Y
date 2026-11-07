@@ -1,4 +1,4 @@
-const DEFAULT_RANDOM_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
+﻿const DEFAULT_RANDOM_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 const navigationStore = store({
     hash: window.location.hash,
@@ -465,39 +465,39 @@ const utils = {
 
         // special characters
         const specialCharsMap = {
-            a: /а|à|á|å|â/gi,
-            b: /б/gi,
-            c: /ц|ç/gi,
-            d: /д/gi,
-            e: /е|è|é|ê|ẽ|ë/gi,
-            f: /ф/gi,
-            g: /г/gi,
-            h: /х/gi,
-            i: /й|и|ì|í|î/gi,
-            j: /ж/gi,
-            k: /к/gi,
-            l: /л/gi,
-            m: /м/gi,
-            n: /н|ñ/gi,
-            o: /о|ò|ó|ô|ø/gi,
-            p: /п/gi,
-            q: /я/gi,
-            r: /р/gi,
-            s: /с/gi,
-            t: /т/gi,
-            u: /ю|ù|ú|ů|û/gi,
-            v: /в/gi,
-            w: /в/gi,
-            x: /ь/gi,
-            y: /ъ/gi,
-            z: /з/gi,
-            ae: /ä|æ/gi,
-            oe: /ö/gi,
-            ue: /ü/gi,
-            Ae: /Ä/gi,
-            Ue: /Ü/gi,
-            Oe: /Ö/gi,
-            ss: /ß/gi,
+            a: /Ð°|Ã |Ã¡|Ã¥|Ã¢/gi,
+            b: /Ð±/gi,
+            c: /Ñ†|Ã§/gi,
+            d: /Ð´/gi,
+            e: /Ðµ|Ã¨|Ã©|Ãª|áº½|Ã«/gi,
+            f: /Ñ„/gi,
+            g: /Ð³/gi,
+            h: /Ñ…/gi,
+            i: /Ð¹|Ð¸|Ã¬|Ã­|Ã®/gi,
+            j: /Ð¶/gi,
+            k: /Ðº/gi,
+            l: /Ð»/gi,
+            m: /Ð¼/gi,
+            n: /Ð½|Ã±/gi,
+            o: /Ð¾|Ã²|Ã³|Ã´|Ã¸/gi,
+            p: /Ð¿/gi,
+            q: /Ñ/gi,
+            r: /Ñ€/gi,
+            s: /Ñ/gi,
+            t: /Ñ‚/gi,
+            u: /ÑŽ|Ã¹|Ãº|Å¯|Ã»/gi,
+            v: /Ð²/gi,
+            w: /Ð²/gi,
+            x: /ÑŒ/gi,
+            y: /ÑŠ/gi,
+            z: /Ð·/gi,
+            ae: /Ã¤|Ã¦/gi,
+            oe: /Ã¶/gi,
+            ue: /Ã¼/gi,
+            Ae: /Ã„/gi,
+            Ue: /Ãœ/gi,
+            Oe: /Ã–/gi,
+            ss: /ÃŸ/gi,
             and: /&/gi,
         };
 
@@ -898,7 +898,7 @@ const utils = {
         }
 
         // for broader compatibility replace localhost with 127.0.0.1
-        // (see https://ganigeorgiev.com/pocketbase/js-sdk/issues/21)
+        // (see https://ganigeorgiev.com/ARSY/js-sdk/issues/21)
         return url.replace("//localhost", "//127.0.0.1");
     },
 
@@ -1848,3 +1848,5 @@ const utils = {
 
 window.app = window.app || {};
 window.app.utils = utils;
+
+

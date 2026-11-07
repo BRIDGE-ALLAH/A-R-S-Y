@@ -1,4 +1,4 @@
-export function docsBatch(collection) {
+﻿export function docsBatch(collection) {
     const baseURL = app.utils.getApiExampleURL();
 
     const baseDummyRecord = {
@@ -94,9 +94,9 @@ export function docsBatch(collection) {
                     title: "JS SDK",
                     language: "js",
                     value: `
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${baseURL}');
+                        const pb = new ARSY('${baseURL}');
 
                         ...
 
@@ -123,9 +123,9 @@ export function docsBatch(collection) {
                     title: "Dart SDK",
                     language: "dart",
                     value: `
-                        import 'package:pocketbase/pocketbase.dart';
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${baseURL}');
+                        final pb = ARSY('${baseURL}');
 
                         ...
 
@@ -261,3 +261,5 @@ export function docsBatch(collection) {
         }),
     );
 }
+
+

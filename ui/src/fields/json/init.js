@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { onrecordsave } from "./onrecordsave";
 import { settings } from "./settings";
 import { view } from "./view";
@@ -16,3 +16,5 @@ window.app.fieldTypes.json = {
         return { "example": 123 };
     },
 };
+
+

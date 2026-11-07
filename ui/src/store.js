@@ -1,4 +1,4 @@
-const notifyChannel = new BroadcastChannel("tabsSync");
+﻿const notifyChannel = new BroadcastChannel("tabsSync");
 
 const SETTINGS_STORAGE_KEY = "pbSettings";
 const COLOR_SCHEME_STORAGE_KEY = "pbColorScheme";
@@ -51,7 +51,7 @@ window.app.store = store({
         {
             href: import.meta.env.PB_RELEASES,
             icon: "ri-git-pull-request-line",
-            label: `PocketBase ${import.meta.env.PB_VERSION}`,
+            label: `A-R-S-Y ${import.meta.env.PB_VERSION}`,
         },
     ],
 
@@ -476,3 +476,5 @@ watch(
         window.localStorage.setItem(SETTINGS_STORAGE_KEY, newHash);
     },
 );
+
+

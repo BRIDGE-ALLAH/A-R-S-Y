@@ -1,4 +1,4 @@
-import { logLevel } from "./logLevel";
+﻿import { logLevel } from "./logLevel";
 
 const perPage = 50;
 
@@ -397,7 +397,7 @@ export function logsList(logsSettings) {
                                             }),
                                             t.label({
                                                 htmlFor: "cb_" + log.id,
-                                                // workaround https://ganigeorgiev.com/pocketbase/discussions/7771
+                                                // workaround https://ganigeorgiev.com/ARSY/discussions/7771
                                                 onclick: (e) => {
                                                     e.preventDefault();
                                                     const input = document.getElementById(e.target.htmlFor);
@@ -515,3 +515,5 @@ export function logsList(logsSettings) {
         ),
     );
 }
+
+

@@ -1,4 +1,4 @@
-import { onrecordduplicate } from "./onrecordduplicate";
+﻿import { onrecordduplicate } from "./onrecordduplicate";
 import { settings } from "./settings";
 import { view } from "./view";
 
@@ -18,3 +18,5 @@ window.app.fieldTypes.autodate = {
         return new Date().toISOString().replaceAll("T", " ");
     },
 };
+
+

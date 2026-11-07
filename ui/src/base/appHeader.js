@@ -1,4 +1,4 @@
-export function appHeader() {
+﻿export function appHeader() {
     return () => {
         if (!app.store._ready || !app.store.showHeader || !app.store.superuser?.id) {
             return;
@@ -148,3 +148,5 @@ function colorSchemeButton() {
         ),
     ];
 }
+
+

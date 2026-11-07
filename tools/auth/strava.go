@@ -5,7 +5,7 @@ import (
 	"encoding/json/v2"
 	"strconv"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"golang.org/x/oauth2"
 )
 

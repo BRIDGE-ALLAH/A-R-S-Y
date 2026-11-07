@@ -1,4 +1,4 @@
-.modal.collections-overview-modal {
+﻿.modal.collections-overview-modal {
     width: 1500px;
     max-width: 90%;
     min-height: 90%;
@@ -68,3 +68,4 @@
         }
     }
 }
+

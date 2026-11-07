@@ -1,4 +1,4 @@
-.accordion.record-field-settings {
+﻿.accordion.record-field-settings {
     --fieldsGap: 10px;
     border-color: var(--surfaceAlt4Color);
 
@@ -337,3 +337,4 @@
         width: 832px;
     }
 }
+

@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 // note: data is the providerSettingsModal form store
@@ -113,3 +113,5 @@ window.app.oauth2.mailcow = function(providerInfo, namePrefix, data) {
         data,
     );
 };
+
+

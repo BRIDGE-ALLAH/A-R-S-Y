@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     get collection: undefined,
 //     get originalRecord: undefined,
 //     get record: undefined,
@@ -103,3 +103,5 @@ export function input(props) {
         },
     );
 }
+
+

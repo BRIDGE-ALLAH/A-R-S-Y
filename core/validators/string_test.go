@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core/validators"
+	"github.com/bridge-allah/a-r-s-y/core/validators"
 )
 
 func TestIsRegex(t *testing.T) {

@@ -149,14 +149,14 @@ func TestExcerptModifierModify(t *testing.T) {
 		{
 			"mutibyte chars <= max",
 			[]string{"4", "t"},
-			"аб\nв ",
-			"аб в",
+			"Ð°Ð±\nÐ² ",
+			"Ð°Ð± Ð²",
 		},
 		{
 			"mutibyte chars > max",
 			[]string{"3", "t"},
-			"аб\nв ",
-			"аб...",
+			"Ð°Ð±\nÐ² ",
+			"Ð°Ð±...",
 		},
 	}
 

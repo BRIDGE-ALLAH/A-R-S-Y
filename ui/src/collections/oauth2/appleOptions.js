@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.oauth2 = window.app.oauth2 || {};
 
 // note: data is the providerSettingsModal form store
@@ -234,3 +234,5 @@ function appleSecretGeneratorModal(modalSettings = {}) {
 
     return modal;
 }
+
+

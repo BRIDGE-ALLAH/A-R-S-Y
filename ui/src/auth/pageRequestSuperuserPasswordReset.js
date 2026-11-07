@@ -1,4 +1,4 @@
-export function pageRequestSuperuserPasswordReset(route) {
+﻿export function pageRequestSuperuserPasswordReset(route) {
     app.store.title = "Forgotten superuser password";
 
     const data = store({
@@ -90,3 +90,5 @@ export function pageRequestSuperuserPasswordReset(route) {
         ),
     );
 }
+
+

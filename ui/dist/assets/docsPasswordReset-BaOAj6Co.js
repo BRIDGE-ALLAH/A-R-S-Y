@@ -1,7 +1,7 @@
-function e(e){let i=app.utils.getApiExampleURL(),a=[{title:`Request password reset`,content:n},{title:`Confirm password reset`,content:r}],o=store({activeActionIndex:0});return t.div({pbEvent:`apiPreviewPasswordReset`,className:`content`},t.p(null,`Sends ${e.name} password reset email request.`),t.p(null,`On successful password reset all previously issued auth tokens for the specific record will be invalidated (and the user will be marked as verified if not already).`),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
-                        import PocketBase from 'pocketbase';
+﻿function e(e){let i=app.utils.getApiExampleURL(),a=[{title:`Request password reset`,content:n},{title:`Confirm password reset`,content:r}],o=store({activeActionIndex:0});return t.div({pbEvent:`apiPreviewPasswordReset`,className:`content`},t.p(null,`Sends ${e.name} password reset email request.`),t.p(null,`On successful password reset all previously issued auth tokens for the specific record will be invalidated (and the user will be marked as verified if not already).`),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${i}');
+                        const pb = new ARSY('${i}');
 
                         ...
 
@@ -18,10 +18,10 @@ function e(e){let i=app.utils.getApiExampleURL(),a=[{title:`Request password res
                             'NEW_PASSWORD',
                             'NEW_PASSWORD_CONFIRM',
                         );
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
-                        import 'package:pocketbase/pocketbase.dart';
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${i}');
+                        final pb = ARSY('${i}');
 
                         ...
 
@@ -38,7 +38,7 @@ function e(e){let i=app.utils.getApiExampleURL(),a=[{title:`Request password res
                           'NEW_PASSWORD',
                           'NEW_PASSWORD_CONFIRM',
                         );
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
                         # Request password reset
                         curl -X POST \\
                           -H 'Content-Type:application/json' \\
@@ -76,3 +76,4 @@ function e(e){let i=app.utils.getApiExampleURL(),a=[{title:`Request password res
                   }
                 }
             `}]})]}export{e as docsPasswordReset};
+

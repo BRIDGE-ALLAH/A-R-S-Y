@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
+	"github.com/bridge-allah/a-r-s-y/tests"
 )
 
 func TestHealthAPI(t *testing.T) {

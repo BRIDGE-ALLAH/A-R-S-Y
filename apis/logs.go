@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/router"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
 )
 
 // bindLogsApi registers the request logs api endpoints.

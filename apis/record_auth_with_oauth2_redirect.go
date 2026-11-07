@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/subscriptions"
-	"ganigeorgiev.com/pocketbase/pocketbase/ui"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/subscriptions"
+	"github.com/bridge-allah/a-r-s-y/ui"
 )
 
 const (

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 func TestJSONMapMarshalJSON(t *testing.T) {
@@ -19,7 +19,7 @@ func TestJSONMapMarshalJSON(t *testing.T) {
 		{types.JSONMap[any]{"test": []int{1, 2, 3}}, `{"test":[1,2,3]}`},
 		{
 			types.JSONMap[any]{"test1": 123, "test2": "lorem\xc3" /* invalid utf8 char to test mangling */},
-			`{"test1":123,"test2":"lorem�"}`,
+			`{"test1":123,"test2":"loremï¿½"}`,
 		},
 	}
 

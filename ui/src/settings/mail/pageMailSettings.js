@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 
 export function pageMailSettings(route) {
     app.store.title = "Mail settings";
@@ -168,7 +168,7 @@ export function pageMailSettings(route) {
                                     t.i({
                                         className: "ri-information-line link-faded",
                                         ariaDescription: app.attrs.tooltip(
-                                            `By default PocketBase uses the unix "sendmail" command for sending emails. For better emails deliverability it is recommended to use a SMTP mail server.`,
+                                            `By default ARSY uses the unix "sendmail" command for sending emails. For better emails deliverability it is recommended to use a SMTP mail server.`,
                                         ),
                                     }),
                                 ),
@@ -384,3 +384,5 @@ export function pageMailSettings(route) {
         ),
     );
 }
+
+

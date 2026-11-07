@@ -1,4 +1,4 @@
-.rate-limit-table {
+﻿.rate-limit-table {
     background: none;
     tr,
     td,
@@ -95,3 +95,4 @@
         min-width: 550px;
     }
 }
+

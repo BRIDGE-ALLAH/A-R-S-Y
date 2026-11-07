@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/forms"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/inflector"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/router"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/forms"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem"
+	"github.com/bridge-allah/a-r-s-y/tools/inflector"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 )
 
 // bindRecordCrudApi registers the record crud api endpoints and

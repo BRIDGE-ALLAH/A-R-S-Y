@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openApiPreview = function(collection, settings = {
@@ -226,3 +226,5 @@ function apiPreviewModal(collection, settings) {
 
     return modal;
 }
+
+

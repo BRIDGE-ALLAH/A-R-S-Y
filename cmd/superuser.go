@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"ganigeorgiev.com/pocketbase/ozzo-validation/v4/is"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -201,9 +201,9 @@ func superuserOTPCommand(app core.App) *cobra.Command {
 			}
 
 			color.New(color.BgGreen, color.FgBlack).Printf("Successfully created OTP for superuser %q:", superuser.Email())
-			color.Green("\n├─ Id:    %s", otp.Id)
-			color.Green("├─ Pass:  %s", pass)
-			color.Green("└─ Valid: %ds\n\n", superuser.Collection().OTP.Duration)
+			color.Green("\nâ”œâ”€ Id:    %s", otp.Id)
+			color.Green("â”œâ”€ Pass:  %s", pass)
+			color.Green("â””â”€ Valid: %ds\n\n", superuser.Collection().OTP.Duration)
 			return nil
 		},
 	}
@@ -232,9 +232,9 @@ func superuserIPsCommand(app core.App) *cobra.Command {
 				superuserIPs := app.Settings().SuperuserIPs
 				for i, ip := range superuserIPs {
 					if i == len(superuserIPs)-1 {
-						color.Green("└─ %s", ip)
+						color.Green("â””â”€ %s", ip)
 					} else {
-						color.Green("├─ %s", ip)
+						color.Green("â”œâ”€ %s", ip)
 					}
 				}
 			}

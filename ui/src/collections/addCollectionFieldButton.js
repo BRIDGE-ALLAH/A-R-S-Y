@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 window.app.components.addCollectionFieldButton = function(collection) {
@@ -102,3 +102,5 @@ window.app.components.addCollectionFieldButton = function(collection) {
         ),
     );
 };
+
+

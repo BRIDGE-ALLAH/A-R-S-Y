@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.oauth2 = window.app.oauth2 || {};
 
 // note: data is the providerSettingsModal form store
@@ -165,3 +165,5 @@ window.app.oauth2.microsoft = function(providerInfo, namePrefix, data) {
         ),
     );
 };
+
+

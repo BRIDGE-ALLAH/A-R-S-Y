@@ -5,9 +5,9 @@ import (
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
 	"ganigeorgiev.com/pocketbase/ozzo-validation/v4/is"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/mails"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/mails"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 const (

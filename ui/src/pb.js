@@ -1,4 +1,4 @@
-import PocketBase, { isTokenExpired, LocalAuthStore } from "pocketbase";
+﻿import ARSY, { isTokenExpired, LocalAuthStore } from "pocketbase";
 
 const LOGIN_PATH = "#/login";
 
@@ -7,7 +7,7 @@ const currentPath = window.location.pathname.endsWith("/")
     : window.location.pathname;
 
 window.app = window.app || {};
-window.app.pb = new PocketBase(
+window.app.pb = new ARSY(
     import.meta.env.PB_BACKEND_URL,
     // concatenate the path in case hosted under subpath alongside other apps
     new LocalAuthStore("__pb_superusers__" + currentPath),
@@ -230,3 +230,5 @@ window.app.checkApiError = function(err, showToast = true) {
         return app.pb.authStore.clear();
     }
 };
+
+

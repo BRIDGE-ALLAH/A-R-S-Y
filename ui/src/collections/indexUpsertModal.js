@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openIndexUpsert = function(
@@ -271,3 +271,5 @@ function indexUpsertModal(collection, index = "", settings = {}) {
 
     return modal;
 }
+
+

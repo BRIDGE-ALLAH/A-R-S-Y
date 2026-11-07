@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     collection: {},
 //     field: {},
 //     originalRecord: {},
@@ -7,3 +7,5 @@
 export function onrecordduplicate(props) {
     delete props.clone[props.field.name];
 }
+
+

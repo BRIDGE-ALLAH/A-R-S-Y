@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -195,7 +195,7 @@ func TestPasswordFieldValidateValue(t *testing.T) {
 			&core.PasswordField{Name: "test", Min: 3},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", &core.PasswordFieldValue{Plain: "аб"}) // multi-byte chars test
+				record.SetRaw("test", &core.PasswordFieldValue{Plain: "Ð°Ð±"}) // multi-byte chars test
 				return record
 			},
 			true,
@@ -205,7 +205,7 @@ func TestPasswordFieldValidateValue(t *testing.T) {
 			&core.PasswordField{Name: "test", Min: 3},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", &core.PasswordFieldValue{Plain: "абв"}) // multi-byte chars test
+				record.SetRaw("test", &core.PasswordFieldValue{Plain: "Ð°Ð±Ð²"}) // multi-byte chars test
 				return record
 			},
 			false,
@@ -235,7 +235,7 @@ func TestPasswordFieldValidateValue(t *testing.T) {
 			&core.PasswordField{Name: "test", Max: 2},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", &core.PasswordFieldValue{Plain: "абв"}) // multi-byte chars test
+				record.SetRaw("test", &core.PasswordFieldValue{Plain: "Ð°Ð±Ð²"}) // multi-byte chars test
 				return record
 			},
 			true,
@@ -245,7 +245,7 @@ func TestPasswordFieldValidateValue(t *testing.T) {
 			&core.PasswordField{Name: "test", Max: 2},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", &core.PasswordFieldValue{Plain: "аб"}) // multi-byte chars test
+				record.SetRaw("test", &core.PasswordFieldValue{Plain: "Ð°Ð±"}) // multi-byte chars test
 				return record
 			},
 			false,

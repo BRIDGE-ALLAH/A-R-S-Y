@@ -1,4 +1,4 @@
-export function collectionsDiffTable(propsArg = {}) {
+﻿export function collectionsDiffTable(propsArg = {}) {
     const props = store({
         rid: undefined,
         collectionA: null,
@@ -318,3 +318,5 @@ export function collectionsDiffTable(propsArg = {}) {
         ),
     );
 }
+
+

@@ -1,4 +1,4 @@
-export function pageOAuth2RedirectFailure(route) {
+﻿export function pageOAuth2RedirectFailure(route) {
     app.store.title = "OAuth2 auth failed";
 
     window.close();
@@ -18,3 +18,5 @@ export function pageOAuth2RedirectFailure(route) {
         ),
     );
 }
+
+

@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 const responsiveThreshold = 1000;
@@ -168,3 +168,5 @@ window.app.components.pageSidebar = function(propsArg = {}, ...children) {
 
     return sidebarElem;
 };
+
+

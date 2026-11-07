@@ -1,4 +1,4 @@
-import { expandInfo } from "./expandInfo";
+﻿import { expandInfo } from "./expandInfo";
 import { fieldsInfo } from "./fieldsInfo";
 
 export function docsAuthRefresh(collection) {
@@ -74,9 +74,9 @@ export function docsAuthRefresh(collection) {
                     title: "JS SDK",
                     language: "js",
                     value: `
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${baseURL}');
+                        const pb = new ARSY('${baseURL}');
 
                         ...
 
@@ -101,9 +101,9 @@ export function docsAuthRefresh(collection) {
                     title: "Dart SDK",
                     language: "dart",
                     value: `
-                        import 'package:pocketbase/pocketbase.dart';
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${baseURL}');
+                        final pb = ARSY('${baseURL}');
 
                         ...
 
@@ -177,3 +177,5 @@ export function docsAuthRefresh(collection) {
         }),
     );
 }
+
+

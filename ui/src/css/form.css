@@ -1,4 +1,4 @@
-button {
+﻿button {
     outline: 0;
     border: 0;
     background: none;
@@ -11,6 +11,7 @@ button {
     line-height: inherit;
     letter-spacing: inherit;
 }
+/* RIOT FUNKY MANGA - Button overrides (loaded after base.css) */
 .btn {
     --btnGap: 8px;
     position: relative;
@@ -18,11 +19,11 @@ button {
     align-items: center;
     justify-content: center;
     outline: 0;
-    border: 0;
+    border: 4px solid #0a0a0a;
     margin: 0;
     flex-shrink: 0;
     cursor: pointer;
-    padding: 5px 25px;
+    padding: 0 var(--spacing);
     gap: var(--btnGap);
     user-select: none;
     min-height: var(--btnHeight);
@@ -31,25 +32,28 @@ button {
     text-align: center;
     text-decoration: none;
     line-height: 1;
-    color: var(--primaryTxtColor);
+    color: #0a0a0a;
     font-weight: bold;
     font-size: var(--fontSize);
     font-family: var(--baseFontFamily);
-    border-radius: var(--borderRadius);
-    background: var(--primaryColor);
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: 6px 6px 0px 0px #0a0a0a;
     transition:
         color var(--animationSpeed),
         border-color var(--animationSpeed),
-        background var(--animationSpeed);
+        background var(--animationSpeed),
+        transform var(--animationSpeed);
 
     /* hover/active states */
-    &:hover,
-    &:focus-visible {
-        background: var(--primaryAlt1Color);
+    &:hover {
+        color: #ff001a;
+        border-color: #ff001a;
+        box-shadow: 6px 6px 0px 0px #ff001a;
     }
-    &[data-popover-state="true"],
     &:active {
-        background: var(--primaryAlt2Color);
+        transform: translate(2px, 2px);
+        box-shadow: 4px 4px 0px 0px #0a0a0a;
         transition-duration: var(--activeAnimationSpeed);
     }
 
@@ -57,170 +61,78 @@ button {
         font-size: 1.25em;
     }
 
-    /* colors */
+    /* colors - manga accents */
     &.secondary {
-        color: var(--secondaryTxtColor);
-        background: var(--secondaryColor);
-        &:hover,
-        &:focus-visible {
-            background: var(--secondaryAlt1Color);
-        }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--secondaryAlt2Color);
-        }
-    }
-    &.info {
-        color: var(--infoTxtColor);
-        background: var(--infoColor);
-        &:hover,
-        &:focus-visible {
-            background: var(--infoAlt1Color);
-        }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--infoAlt2Color);
+        color: #4a4a4a;
+        background: #ffffff;
+        border-color: #4a4a4a;
+        box-shadow: 6px 6px 0px 0px #4a4a4a;
+        &:hover {
+            color: #ff001a;
+            border-color: #ff001a;
+            box-shadow: 6px 6px 0px 0px #ff001a;
         }
     }
-    &.success {
-        color: var(--successTxtColor);
-        background: var(--successColor);
-        &:hover,
-        &:focus-visible {
-            background: var(--successAlt1Color);
-        }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--successAlt2Color);
-        }
-    }
-    &.warning {
-        color: var(--warningTxtColor);
-        background: var(--warningColor);
-        &:hover,
-        &:focus-visible {
-            background: var(--warningAlt1Color);
-        }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--warningAlt2Color);
-        }
-    }
+    &.info,
+    &.success,
+    &.warning,
     &.danger {
-        color: var(--dangerTxtColor);
-        background: var(--dangerColor);
-        &:hover,
-        &:focus-visible {
-            background: var(--dangerAlt1Color);
-        }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--dangerAlt2Color);
+        color: #ffffff;
+        background: #ff001a;
+        border-color: #ff001a;
+        box-shadow: 6px 6px 0px 0px #ff001a;
+        &:hover {
+            filter: brightness(1.1);
         }
     }
 
     /* variants */
     &.outline {
-        border: 2px solid currentColor;
+        border: 4px solid currentColor;
+        background: transparent;
     }
     &.outline,
     &.transparent {
-        color: var(--surfaceTxtColor);
-        background: var(--surfaceColor);
-        [data-color-scheme="dark"] & {
-            border-color: var(--surfaceAlt3Color);
-            &:hover,
-            &:focus-visible {
-                background: var(--surfaceAlt4Color);
-            }
-            &[data-popover-state="true"],
-            &:active {
-                background: var(--surfaceAlt5Color);
-            }
-        }
+        color: #0a0a0a;
+        background: #ffffff;
         &:hover,
         &:focus-visible {
-            background: var(--surfaceAlt1Color);
+            background: #fdf5e6;
         }
         &[data-popover-state="true"],
         &:active {
-            background: var(--surfaceAlt2Color);
+            background: #f8ecd6;
         }
         &.secondary {
-            color: var(--surfaceTxtHintColor);
+            color: #4a4a4a;
         }
-        &.info {
-            color: var(--infoColor);
-        }
-        &.success {
-            color: var(--successColor);
-        }
-        &.warning {
-            color: var(--warningColor);
-        }
-        &.danger {
-            color: var(--dangerColor);
-        }
-        &.secondary,
         &.info,
         &.success,
         &.warning,
         &.danger {
-            &:hover,
-            &:focus-visible {
-                background: color-mix(in srgb, currentColor, transparent 92%);
-            }
-            &[data-popover-state="true"],
-            &:active {
-                background: color-mix(in srgb, currentColor, transparent 85%);
-            }
+            color: #ff001a;
         }
     }
     &.transparent {
         background: transparent;
-        &:hover,
-        &:focus-visible {
-            background: var(--surfaceAlt2Color);
+        box-shadow: none;
+        border: 4px solid transparent;
+        &:hover {
+            background: rgba(255, 0, 26, 0.1);
+            border-color: #ff001a;
         }
-        &[data-popover-state="true"],
-        &:active {
-            background: var(--surfaceAlt4Color);
-        }
-    }
-
-    /* pill */
-    &.pill {
-        border-radius: 30px;
     }
 
     /* sizes */
-    &.expanded {
-        min-width: 130px;
-    }
-    &.expanded-sm {
-        min-width: 100px;
-    }
-    &.expanded-lg {
-        min-width: 160px;
-    }
     &.sm {
         --btnGap: 5px;
-        padding-left: 12px;
-        padding-right: 12px;
+        padding-left: var(--smSpacing);
+        padding-right: var(--smSpacing);
         min-height: var(--smBtnHeight);
         font-size: var(--smFontSize);
         line-height: var(--smLineHeight);
         i {
             font-size: 1.15em;
-        }
-        &.expanded {
-            min-width: 110px;
-        }
-        &.expanded-sm {
-            min-width: 85px;
-        }
-        &.expanded-lg {
-            min-width: 130px;
         }
     }
     &.lg {
@@ -229,15 +141,7 @@ button {
         i {
             font-size: 1.4em;
         }
-        &.expanded {
-            min-width: 150px;
-        }
-        &.expanded-sm {
-            min-width: 120px;
-        }
-        &.expanded-lg {
-            min-width: 190px;
-        }
+        padding: 0 calc(var(--spacing) + 10px);
     }
 
     /* circle */
@@ -248,7 +152,7 @@ button {
         padding: 0 !important;
         width: var(--circleSize);
         height: var(--circleSize);
-        border-radius: 50%;
+        border-radius: 0;
         text-align: center;
         align-content: center;
         i {
@@ -277,75 +181,71 @@ button {
         &:active,
         &:focus-visible {
             i {
-                transform: translateX(3px);
+                transform: translateX(4px);
             }
         }
     }
 
-    /* hacky visual alignment workaround for the rotating icon since it renders differently in Chrome and Firefox */
-    &.sm .ri-refresh-line {
-        &::before {
-            font-size: 18px;
-            transform: scale(0.85);
-        }
-    }
-
-    &[data-rotate="true"],
-    &.rotate {
-        i {
-            animation: halfRotate 300ms;
-        }
-    }
-
-    &[data-loading="true"],
+    /* loading state */
     &.loading {
-        cursor: default;
-        &::after {
-            --size: 24px;
-            content: var(--loaderIcon);
-            display: block;
-            position: absolute;
-            flex-shrink: 0;
-            top: 50%;
-            left: 50%;
-            width: var(--size);
-            height: var(--size);
-            line-height: var(--size);
-            margin-top: calc(var(--size) / -2);
-            margin-left: calc(var(--size) / -2);
-            padding: 0;
-            color: inherit;
-            font-size: 1.4rem;
-            font-weight: normal;
-            text-align: center;
-            font-family: var(--iconFontFamily);
-            will-change: transform;
-            animation:
-                fadeIn var(--animationSpeed),
-                rotate var(--loaderAnimationSpeed) infinite linear;
-        }
-        &.lg::after {
-            --size: 26px;
-            font-size: 1.68rem;
-        }
-        & > * {
-            opacity: 0;
-        }
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 
     /* disabled */
     &.disabled,
     &[disabled] {
         cursor: default;
-        color: var(--surfaceTxtDisabledColor) !important;
-        background: var(--surfaceAlt2Color) !important;
-        &.outline,
-        &.transparent {
-            color: var(--surfaceTxtDisabledColor);
-            background: none !important;
+        color: #8a8a8a !important;
+        background: #f3e3c2 !important;
+        border-color: #8a8a8a !important;
+        box-shadow: 6px 6px 0px 0px #8a8a8a !important;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+/* Manga field borders */
+.field {
+    border: 3px solid #0a0a0a;
+    box-shadow: 4px 4px 0px 0px #0a0a0a;
+    background: #ffffff;
+    &:focus-within:not(.addon) {
+        border-color: #ff001a;
+        box-shadow: 4px 4px 0px 0px #ff001a;
+    }
+    input,
+    textarea,
+    select,
+    .input {
+        border: 0;
+        background: none;
+    }
+    &.error {
+        border-color: #ff001a;
+        box-shadow: 4px 4px 0px 0px #ff001a;
+    }
+    hr {
+        height: 4px;
+        background: #0a0a0a;
+        border: 0;
+    }
+}
+
+/* Manga checkbox/radio */
+.field:has(input[type="checkbox"]),
+.field:has(input[type="radio"]) {
+    label {
+        &::before {
+            border: 3px solid #0a0a0a;
+            box-shadow: 3px 3px 0px 0px #0a0a0a;
         }
-        &.outline {
-            border-color: var(--surfaceAlt2Color);
+    }
+    input:checked ~ label {
+        &::before {
+            border-color: #ff001a;
+            box-shadow: 3px 3px 0px 0px #ff001a;
         }
     }
 }
@@ -1156,3 +1056,4 @@ button {
         }
     }
 }
+

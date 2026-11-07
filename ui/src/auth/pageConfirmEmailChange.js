@@ -1,4 +1,4 @@
-import PocketBase, { getTokenPayload } from "pocketbase";
+﻿import ARSY, { getTokenPayload } from "pocketbase";
 
 export function pageConfirmEmailChange(route) {
     const token = route.params?.token || "";
@@ -27,7 +27,7 @@ export function pageConfirmEmailChange(route) {
         data.isSubmitting = true;
 
         // init a custom client to avoid interfering with the superuser state
-        const client = new PocketBase(app.pb.baseURL);
+        const client = new ARSY(app.pb.baseURL);
 
         try {
             await client.collection(tokenPayload.collectionId).confirmEmailChange(token, data.password);
@@ -128,3 +128,5 @@ export function pageConfirmEmailChange(route) {
         },
     );
 }
+
+

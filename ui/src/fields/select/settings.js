@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     originalCollection: undefined,
 //     collection: undefined,
 //     field
@@ -79,7 +79,7 @@ export function settings(props) {
                     type: "text",
                     placeholder: "Add choices*",
                     className: "txt-left inline-error",
-                    value: () => props.field.values?.join(" • ") || "",
+                    value: () => props.field.values?.join(" â€¢ ") || "",
                     name: () => `fields.${props.fieldIndex}.values`,
                     onfocus: (e) => {
                         optionsDropdown?.showPopover({ source: e.target });
@@ -178,3 +178,5 @@ export function settings(props) {
         ],
     });
 }
+
+

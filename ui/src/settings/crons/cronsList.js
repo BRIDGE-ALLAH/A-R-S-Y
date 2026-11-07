@@ -1,4 +1,4 @@
-export function cronsList(propsArg = {}) {
+﻿export function cronsList(propsArg = {}) {
     const props = store({
         reset: null,
     });
@@ -111,3 +111,5 @@ export function cronsList(propsArg = {}) {
         },
     );
 }
+
+

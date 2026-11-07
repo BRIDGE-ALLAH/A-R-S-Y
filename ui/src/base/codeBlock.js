@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -76,3 +76,5 @@ function highlight(content, language) {
 
     return Prism.highlight(content, Prism.languages[language] || Prism.languages.js, language);
 }
+
+

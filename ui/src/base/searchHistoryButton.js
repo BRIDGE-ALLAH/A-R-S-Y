@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -153,3 +153,5 @@ window.app.components.searchHistoryButton = function(propsArg = {}) {
         dropdown,
     );
 };
+
+

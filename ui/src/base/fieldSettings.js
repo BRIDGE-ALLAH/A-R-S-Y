@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 export const toDeleteProp = "@toDelete";
@@ -438,3 +438,5 @@ function replaceIndexesColumn(collection, oldName, newName) {
     // update indexes on renamed fields
     collection.indexes = collection.indexes.map((idx) => app.utils.replaceIndexColumn(idx, oldName, newName));
 }
+
+

@@ -1,4 +1,4 @@
-@font-face {
+﻿@font-face {
     font-display: block;
     font-family: "remixicon";
     src: url("/fonts/remixicon/remixicon.woff2?t=1734404658139") format("woff2");
@@ -55,3 +55,4 @@
     font-weight: 600;
     src: url("/fonts/ibm-plex-mono/ibm-plex-mono-v20-latin-600.woff2") format("woff2");
 }
+

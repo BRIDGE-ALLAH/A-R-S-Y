@@ -1,4 +1,4 @@
-import { collectionsDiffTable } from "./collectionsDiffTable";
+﻿import { collectionsDiffTable } from "./collectionsDiffTable";
 
 window.app = window.app || {};
 window.app.modals = window.app.modals || {};
@@ -178,3 +178,5 @@ function importCollectionsModal(oldCollections, newCollections, settingsArg) {
 
     return modal;
 }
+
+

@@ -1,4 +1,4 @@
-import { toDeleteProp } from "@/base/fieldSettings";
+﻿import { toDeleteProp } from "@/base/fieldSettings";
 import { collectionAuthOptionsTab } from "./collectionAuthOptionsTab";
 import { collectionFieldsTab } from "./collectionFieldsTab";
 import { collectionRulesTab } from "./collectionRulesTab";
@@ -994,3 +994,5 @@ function deleteDropdownItem(data, modalSettings) {
         t.span({ className: "txt" }, "Delete"),
     );
 }
+
+

@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/dbutils"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/dbutils"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"github.com/spf13/cast"
 )
 

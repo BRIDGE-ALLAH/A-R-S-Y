@@ -1,4 +1,4 @@
-.accordion {
+﻿.accordion {
     --siblingSpacing: var(--smSpacing);
     --contentPadding: var(--smSpacing);
 
@@ -161,3 +161,4 @@
         }
     }
 }
+

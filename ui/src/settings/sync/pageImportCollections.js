@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 
 export function pageImportCollections(route) {
     app.store.title = "Import collections";
@@ -535,3 +535,5 @@ export function pageImportCollections(route) {
         ),
     );
 }
+
+

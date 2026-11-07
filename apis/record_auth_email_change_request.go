@@ -5,8 +5,8 @@ import (
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
 	"ganigeorgiev.com/pocketbase/ozzo-validation/v4/is"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/mails"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/mails"
 )
 
 func recordRequestEmailChange(e *core.RequestEvent) error {

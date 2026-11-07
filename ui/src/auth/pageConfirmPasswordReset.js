@@ -1,4 +1,4 @@
-import PocketBase, { getTokenPayload } from "pocketbase";
+﻿import ARSY, { getTokenPayload } from "pocketbase";
 
 export function pageConfirmPasswordReset(route) {
     const token = route.params?.token || "";
@@ -29,7 +29,7 @@ export function pageConfirmPasswordReset(route) {
         data.isSubmitting = true;
 
         // init a custom client to avoid interfering with the superuser state
-        const client = new PocketBase(app.pb.baseURL);
+        const client = new ARSY(app.pb.baseURL);
 
         try {
             await client
@@ -167,3 +167,5 @@ export function pageConfirmPasswordReset(route) {
         },
     );
 }
+
+

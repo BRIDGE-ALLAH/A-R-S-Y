@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     originalCollection: undefined,
 //     collection: undefined,
 //     field
@@ -194,3 +194,5 @@ export function settings(props) {
         },
     });
 }
+
+

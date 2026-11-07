@@ -16,11 +16,11 @@ import (
 	"time"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"github.com/spf13/cast"
 )
 
@@ -1440,7 +1440,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			false,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_base_123","collectionName":"test_base","expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id"}`,
+			`{"collectionId":"_pbc_base_123","collectionName":"test_base","expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id"}`,
 		},
 		{
 			"[base] with email visibility",
@@ -1449,7 +1449,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			false,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_base_123","collectionName":"test_base","expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id"}`,
+			`{"collectionId":"_pbc_base_123","collectionName":"test_base","expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id"}`,
 		},
 		{
 			"[base] with custom data",
@@ -1458,7 +1458,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			true,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_base_123","collectionName":"test_base","email":"test_email","emailVisibility":"test_invalid","expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","password":"test_passwordHash","tokenKey":"test_tokenKey","unknown":"test_unknown","verified":true}`,
+			`{"collectionId":"_pbc_base_123","collectionName":"test_base","email":"test_email","emailVisibility":"test_invalid","expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","password":"test_passwordHash","tokenKey":"test_tokenKey","unknown":"test_unknown","verified":true}`,
 		},
 		{
 			"[base] with explicit hide and unhide fields",
@@ -1476,7 +1476,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			true,
 			nil,
 			[]string{"field5", "@pbInternalAbc", "email", "tokenKey", "unknown"},
-			`{"collectionId":"_pbc_base_123","collectionName":"test_base","email":"test_email","emailVisibility":"test_invalid","expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field5":"field_5","field6":{"a":1,"a":2},"id":"test_id","password":"test_passwordHash","tokenKey":"test_tokenKey","unknown":"test_unknown","verified":true}`,
+			`{"collectionId":"_pbc_base_123","collectionName":"test_base","email":"test_email","emailVisibility":"test_invalid","expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field5":"field_5","field6":{"a":1,"a":2},"id":"test_id","password":"test_passwordHash","tokenKey":"test_tokenKey","unknown":"test_unknown","verified":true}`,
 		},
 
 		// auth
@@ -1487,7 +1487,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			false,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","verified":true}`,
+			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","verified":true}`,
 		},
 		{
 			"[auth] with email visibility",
@@ -1496,7 +1496,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			false,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","email":"test_email","emailVisibility":false,"expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","verified":true}`,
+			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","email":"test_email","emailVisibility":false,"expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","verified":true}`,
 		},
 		{
 			"[auth] with custom data",
@@ -1505,7 +1505,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			true,
 			nil,
 			nil,
-			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","unknown":"test_unknown","verified":true}`,
+			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field6":{"a":1,"a":2},"id":"test_id","unknown":"test_unknown","verified":true}`,
 		},
 		{
 			"[auth] with explicit hide and unhide fields",
@@ -1523,7 +1523,7 @@ func TestRecordPublicExportAndMarshalJSON(t *testing.T) {
 			true,
 			nil,
 			[]string{"field5", "@pbInternalAbc", "tokenKey", "unknown", "email"}, // emailVisibility:false has higher priority
-			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1�","field2":"field_2.png","field3":["test1","test2"],"field5":"field_5","field6":{"a":1,"a":2},"id":"test_id","unknown":"test_unknown","verified":true}`,
+			`{"collectionId":"_pbc_auth_123","collectionName":"test_auth","emailVisibility":false,"expand":{"test":123},"field1":"field_1ï¿½","field2":"field_2.png","field3":["test1","test2"],"field5":"field_5","field6":{"a":1,"a":2},"id":"test_id","unknown":"test_unknown","verified":true}`,
 		},
 	}
 

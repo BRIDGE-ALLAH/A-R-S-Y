@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 const modalAttr = "data-modal-state";
@@ -267,3 +267,5 @@ function findLargestZIndexModal(excludeEl) {
 window.app.modals.getTop = function() {
     return findLargestZIndexModal();
 };
+
+

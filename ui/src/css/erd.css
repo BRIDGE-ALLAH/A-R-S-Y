@@ -1,4 +1,4 @@
-.erd-table-row {
+﻿.erd-table-row {
     display: flex;
     width: 100%;
     align-items: center;
@@ -186,3 +186,4 @@
         }
     }
 }
+

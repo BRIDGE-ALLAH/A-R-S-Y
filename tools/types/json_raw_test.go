@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 func TestParseJSONRaw(t *testing.T) {
@@ -170,7 +170,7 @@ func TestJSONRawScan(t *testing.T) {
 		{
 			map[string]string{"test": "a\xc3" /* invalid utf8 char to test mangling */},
 			false,
-			`{"test":"a�"}`,
+			`{"test":"aï¿½"}`,
 		},
 	}
 

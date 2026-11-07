@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem"
+	"github.com/bridge-allah/a-r-s-y/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem"
 )
 
 func TestFileAsMap(t *testing.T) {

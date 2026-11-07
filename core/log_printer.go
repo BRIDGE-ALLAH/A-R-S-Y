@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/logger"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/logger"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
 	"github.com/fatih/color"
 	"github.com/spf13/cast"
 )
@@ -53,13 +53,13 @@ var printLog = func(log *logger.Log) {
 		keys := []string{"error", "details"}
 		for _, k := range keys {
 			if v := log.Data[k]; v != nil {
-				str.WriteString(getColor(color.FgHiRed).Sprintf("%s└─ %v", strings.Repeat(" ", padding), v))
+				str.WriteString(getColor(color.FgHiRed).Sprintf("%sâ””â”€ %v", strings.Repeat(" ", padding), v))
 				str.WriteString("\n")
 				padding += 3
 			}
 		}
 	} else if len(log.Data) > 0 {
-		str.WriteString(getColor(color.FgHiBlack).Sprintf("└─ %v", log.Data))
+		str.WriteString(getColor(color.FgHiBlack).Sprintf("â””â”€ %v", log.Data))
 		str.WriteString("\n")
 	}
 

@@ -1,4 +1,4 @@
-import cssVars from "@/css/vars.css?inline";
+﻿import cssVars from "@/css/vars.css?inline";
 
 window.app = window.app || {};
 window.app.components = window.app.components || {};
@@ -567,3 +567,5 @@ const watcher = watch(() => app.store.activeCollection?.id, () => {
         watcher?.unwatch?.();
     }
 });
+
+

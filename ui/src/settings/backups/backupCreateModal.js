@@ -1,4 +1,4 @@
-export function openBackupCreateModal(settings = {
+﻿export function openBackupCreateModal(settings = {
     oncreated: null,
 }) {
     const modal = backupCreateModal(settings);
@@ -149,3 +149,5 @@ function backupCreateModal(settings) {
 
     return modal;
 }
+
+

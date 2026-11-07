@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 // FindAllOTPsByRecord returns all OTP models linked to the provided auth record.

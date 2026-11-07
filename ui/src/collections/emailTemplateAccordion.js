@@ -1,4 +1,4 @@
-export function emailTemplateAccordion(collection, key, propsArg = {}) {
+﻿export function emailTemplateAccordion(collection, key, propsArg = {}) {
     const uniqueId = "emailTemplate" + app.utils.randomString();
 
     const props = store({
@@ -111,3 +111,5 @@ export function emailTemplateAccordion(collection, key, propsArg = {}) {
         ),
     );
 }
+
+

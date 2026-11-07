@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { settings } from "./settings";
 import { view } from "./view";
 
@@ -17,3 +17,5 @@ window.app.fieldTypes.text = {
         return f.primaryKey ? app.utils.randomString(15) : "example text";
     },
 };
+
+

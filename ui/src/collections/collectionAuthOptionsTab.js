@@ -1,4 +1,4 @@
-import { emailTemplateAccordion } from "./emailTemplateAccordion";
+﻿import { emailTemplateAccordion } from "./emailTemplateAccordion";
 import { mfaAccordion } from "./mfaAccordion";
 import { oauth2Accordion } from "./oauth2Accordion";
 import { otpAccordion } from "./otpAccordion";
@@ -87,3 +87,5 @@ export function collectionAuthOptionsTab(upsertData) {
         ),
     );
 }
+
+

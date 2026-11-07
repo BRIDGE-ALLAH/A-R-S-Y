@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -121,3 +121,5 @@ window.app.components.dragline = function(propsArg = {}) {
 
     return elem;
 };
+
+

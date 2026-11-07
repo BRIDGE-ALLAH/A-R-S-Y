@@ -6,8 +6,8 @@ import (
 	"slices"
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 func init() {

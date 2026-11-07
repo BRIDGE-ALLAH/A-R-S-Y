@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openProviderPicker = function(settings = {
@@ -173,3 +173,5 @@ function providerPickerModal(settings = {}) {
 
     return modal;
 }
+
+

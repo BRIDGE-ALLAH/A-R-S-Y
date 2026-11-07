@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 /**
@@ -155,3 +155,5 @@ const confirmElem = t.div(
         ),
     ),
 );
+
+

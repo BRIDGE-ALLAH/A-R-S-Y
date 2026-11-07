@@ -1,4 +1,4 @@
-export function expandInfo() {
+﻿export function expandInfo() {
     return t.div(
         { className: "api-expand-info" },
         t.p(null, "Auto expand record relations. For example:"),
@@ -23,3 +23,5 @@ export function expandInfo() {
         ),
     );
 }
+
+

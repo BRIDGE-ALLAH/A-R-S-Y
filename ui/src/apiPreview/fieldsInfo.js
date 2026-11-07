@@ -1,4 +1,4 @@
-export function fieldsInfo() {
+﻿export function fieldsInfo() {
     return t.div(
         { className: "api-fields-info" },
         t.p(
@@ -23,3 +23,5 @@ export function fieldsInfo() {
         ),
     );
 }
+
+

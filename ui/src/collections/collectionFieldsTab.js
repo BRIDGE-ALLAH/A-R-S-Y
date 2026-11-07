@@ -1,4 +1,4 @@
-export function collectionFieldsTab(upsertData) {
+﻿export function collectionFieldsTab(upsertData) {
     return t.div(
         { className: "collection-tab-content collection-fields-tab-content" },
         t.div(
@@ -80,3 +80,5 @@ export function collectionFieldsTab(upsertData) {
         }),
     );
 }
+
+

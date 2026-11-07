@@ -1,4 +1,4 @@
-.record-file-picker-collection-select-btn {
+﻿.record-file-picker-collection-select-btn {
     padding-left: var(--smSpacing);
     padding-right: calc(var(--smSpacing) - 5px);
     width: 27%;
@@ -54,3 +54,4 @@
         }
     }
 }
+

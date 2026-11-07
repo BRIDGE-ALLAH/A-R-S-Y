@@ -1,4 +1,4 @@
-export function backupUploadButton(onSuccess = null) {
+﻿export function backupUploadButton(onSuccess = null) {
     const uniqueId = "backup_upload_" + app.utils.randomString();
 
     const data = store({
@@ -87,3 +87,5 @@ export function backupUploadButton(onSuccess = null) {
         fileInput,
     );
 }
+
+

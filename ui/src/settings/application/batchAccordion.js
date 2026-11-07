@@ -1,4 +1,4 @@
-export function batchAccordion(pageData) {
+﻿export function batchAccordion(pageData) {
     return t.details(
         {
             pbEvent: "batchApiAccordion",
@@ -119,3 +119,5 @@ export function batchAccordion(pageData) {
         ),
     );
 }
+
+

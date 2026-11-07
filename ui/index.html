@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="manga">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>PocketBase</title>
+    <title>A-R-S-Y</title>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.png" />
     <script id="shablon-script" src="/libs/shablon/shablon.iife.js"></script>
 
     <!-- uplot -->
@@ -13,8 +14,20 @@
 
     <!-- prism -->
     <script src="/libs/prism/prism.js" data-manual></script>
+
+    <style>
+        body {
+            margin: 0;
+            background: #fdf5e6;
+            background-image:
+                radial-gradient(#0a0a0a 1px, transparent 1px),
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(10,10,10,0.08) 2px, rgba(10,10,10,0.08) 4px);
+            background-size: 12px 12px, 30px 30px;
+            overflow-x: hidden;
+        }
+    </style>
 </head>
-<body>
+<body class="speed-lines">
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

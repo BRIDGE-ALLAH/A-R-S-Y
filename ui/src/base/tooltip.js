@@ -1,4 +1,4 @@
-// @todo consider replacing with pure css once there is better support for anchor positioning
+﻿// @todo consider replacing with pure css once there is better support for anchor positioning
 
 const tolerance = 5;
 
@@ -161,3 +161,5 @@ function tooltipAction(textOrFunc, position = "top", styleClass = "") {
 window.app = window.app || {};
 window.app.attrs = window.app.attrs || {};
 window.app.attrs.tooltip = tooltipAction;
+
+

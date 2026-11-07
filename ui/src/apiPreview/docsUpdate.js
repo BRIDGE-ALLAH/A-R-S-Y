@@ -1,4 +1,4 @@
-import { fullDummyPayload, primitivesDummyPayload, replaceDummyPayloadPlaceholder } from "./docsCreate";
+﻿import { fullDummyPayload, primitivesDummyPayload, replaceDummyPayloadPlaceholder } from "./docsCreate";
 import { expandInfo } from "./expandInfo";
 import { fieldsInfo } from "./fieldsInfo";
 
@@ -109,9 +109,9 @@ export function docsUpdate(collection) {
                     language: "js",
                     // dprint-ignore
                     value: `
-import PocketBase from 'pocketbase';
+import ARSY from 'pocketbase';
 
-const pb = new PocketBase('${baseURL}');
+const pb = new ARSY('${baseURL}');
 
 ...
 
@@ -135,9 +135,9 @@ const record = await pb.collection('${collection.name}').update('RECORD_ID', bod
                     language: "dart",
                     // dprint-ignore
                     value: `
-import 'package:pocketbase/pocketbase.dart';
+import 'package:ARSY/ARSY.dart';
 
-final pb = PocketBase('${baseURL}');
+final pb = ARSY('${baseURL}');
 
 ...
 
@@ -240,3 +240,5 @@ final record = await pb.collection('${collection.name}').update(
         }),
     );
 }
+
+

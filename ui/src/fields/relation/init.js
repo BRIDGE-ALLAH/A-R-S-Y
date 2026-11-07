@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { settings } from "./settings";
 import { view } from "./view";
 
@@ -17,3 +17,5 @@ window.app.fieldTypes.relation = {
         return f.maxSelect > 1 ? ["RECORD_ID1", "RECORD_ID2"] : "RECORD_ID";
     },
 };
+
+

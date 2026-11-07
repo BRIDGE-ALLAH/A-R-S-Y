@@ -1,4 +1,4 @@
-/* PrismJS 1.30.0 theme based on prism-solarized-light */
+﻿/* PrismJS 1.30.0 theme based on prism-solarized-light */
 code[class*="language-"],
 pre[class*="language-"] {
     color: var(--surfaceTxtHintColor);
@@ -72,3 +72,4 @@ pre[class*="language-"] {
 .token.entity {
     cursor: help;
 }
+

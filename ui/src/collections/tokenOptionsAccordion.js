@@ -1,4 +1,4 @@
-export function tokenOptionsAccordion(collection) {
+﻿export function tokenOptionsAccordion(collection) {
     const uniqueId = "token_" + app.utils.randomString();
 
     const data = store({
@@ -76,3 +76,5 @@ export function tokenOptionsAccordion(collection) {
         }),
     );
 }
+
+

@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     collection: undefined,
 //     originalRecord: undefined,
 //     record: undefined,
@@ -120,3 +120,5 @@ function isValidStringifiedJSON(val) {
         return false;
     }
 }
+
+

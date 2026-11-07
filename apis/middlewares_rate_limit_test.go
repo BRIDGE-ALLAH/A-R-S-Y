@@ -7,10 +7,10 @@ import (
 	"testing/synctest"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/apis"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/apis"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
 
 func TestDefaultRateLimitMiddleware(t *testing.T) {

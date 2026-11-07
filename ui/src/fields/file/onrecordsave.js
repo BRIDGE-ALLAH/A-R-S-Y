@@ -1,4 +1,4 @@
-export const filesToDeleteProp = "@@filesToDelete"; // symbols are not used because they are not reactive
+﻿export const filesToDeleteProp = "@@filesToDelete"; // symbols are not used because they are not reactive
 
 // {
 //     collection: undefined,
@@ -21,3 +21,5 @@ export function onrecordsave(props) {
 
     props.payload[props.field.name] = files;
 }
+
+

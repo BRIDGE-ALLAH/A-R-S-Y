@@ -1,4 +1,4 @@
-export function logLevel(log) {
+﻿export function logLevel(log) {
     return t.div(
         { className: () => `label log-level-label level-${log.level}` },
         t.span({ className: "txt" }, () => {
@@ -6,3 +6,5 @@ export function logLevel(log) {
         }),
     );
 }
+
+

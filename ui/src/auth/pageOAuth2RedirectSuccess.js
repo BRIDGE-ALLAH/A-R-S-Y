@@ -1,4 +1,4 @@
-export function pageOAuth2RedirectSuccess(route) {
+﻿export function pageOAuth2RedirectSuccess(route) {
     app.store.title = "OAuth2 auth completed";
 
     window.close();
@@ -15,3 +15,5 @@ export function pageOAuth2RedirectSuccess(route) {
         ),
     );
 }
+
+

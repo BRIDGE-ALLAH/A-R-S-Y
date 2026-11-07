@@ -1,4 +1,4 @@
-.tabs-header {
+﻿.tabs-header {
     position: relative;
     z-index: 0;
     display: flex;
@@ -55,4 +55,5 @@
         padding: max(10px, calc(var(--smSpacing) - 5px)) max(10px, var(--smSpacing));
     }
 }
+
 

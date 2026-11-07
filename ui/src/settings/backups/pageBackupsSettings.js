@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 import { backupsForm } from "./backupsForm";
 import { backupsList } from "./backupsList";
 import { backupUploadButton } from "./backupUploadButton";
@@ -37,7 +37,7 @@ export function pageBackupsSettings(route) {
                         { className: "col-lg-12" },
                         t.div(
                             { className: "flex gap-10 m-b-sm" },
-                            t.div({ className: "txt-lg" }, "Backup and restore your PocketBase data"),
+                            t.div({ className: "txt-lg" }, "Backup and restore your ARSY data"),
                             app.components.refreshButton({
                                 className: "btn sm transparent secondary circle tooltip-bottom",
                                 onclick: resetBackupsList,
@@ -60,3 +60,5 @@ export function pageBackupsSettings(route) {
         ),
     );
 }
+
+

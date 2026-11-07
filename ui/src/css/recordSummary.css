@@ -1,4 +1,4 @@
-.record-summary {
+﻿.record-summary {
     padding: 3px 5px;
     flex-shrink: 1;
     justify-content: flex-start;
@@ -69,3 +69,4 @@ td .record-summary {
         scrollbar-width: thin;
     }
 }
+

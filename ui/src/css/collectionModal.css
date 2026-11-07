@@ -1,4 +1,4 @@
-.collection-upsert-modal {
+﻿.collection-upsert-modal {
     width: 720px;
     .modal-content {
         scrollbar-gutter: stable both-edges;
@@ -106,3 +106,4 @@
     background: none;
     border: 1px solid var(--surfaceAlt2Color);
 }
+

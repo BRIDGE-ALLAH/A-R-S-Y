@@ -1,4 +1,4 @@
-.list {
+﻿.list {
     --borderColor: var(--surfaceAlt3Color);
 
     position: relative;
@@ -142,3 +142,4 @@
         }
     }
 }
+

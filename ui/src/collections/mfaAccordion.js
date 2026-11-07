@@ -1,4 +1,4 @@
-export function mfaAccordion(collection) {
+﻿export function mfaAccordion(collection) {
     const uniqueId = "mfa_" + app.utils.randomString();
 
     const data = store({
@@ -138,3 +138,5 @@ export function mfaAccordion(collection) {
         ),
     );
 }
+
+

@@ -5,6 +5,7 @@
 
 # goreleaser builds folder
 /.builds/
+/dashboard/node_modules/
 
 # tests coverage
 coverage.out

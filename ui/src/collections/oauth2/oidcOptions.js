@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.oauth2 = window.app.oauth2 || {};
 
 // note: data is the providerSettingsModal form store
@@ -232,3 +232,5 @@ window.app.oauth2.oidc = function(providerInfo, namePrefix, data) {
 
 window.app.oauth2.oidc2 = window.app.oauth2.oidc;
 window.app.oauth2.oidc3 = window.app.oauth2.oidc;
+
+

@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/inflector"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/inflector"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"github.com/spf13/cast"
 )
 

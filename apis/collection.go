@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/auth"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/router"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/auth"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 )
 
 // bindCollectionApi registers the collection api endpoints and the corresponding handlers.

@@ -1,7 +1,7 @@
-import{t as e}from"./expandInfo-CJ9aeAaN.js";import{t as n}from"./fieldsInfo-CiLcXgNq.js";function r(e){let n=app.utils.getApiExampleURL(),r=[{title:`OTP request`,content:i},{title:`OTP auth`,content:a}],o=store({activeActionIndex:0});return t.div({pbEvent:`apiPreviewAuthWithOTP`,className:`content`},t.p(null,`Authenticate with an one-time/short-lived password (OTP).`),t.p(null,`On successful authentication the user will be also marked as verified (if the OTP source is email and the user is not verified already).`),t.p(null,`Note that when requesting an OTP we return an `,t.code(null,`otpId`),` even if a user with the provided email doesn't exist as a very basic enumeration protection.`),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
-                        import PocketBase from 'pocketbase';
+﻿import{t as e}from"./expandInfo-CJ9aeAaN.js";import{t as n}from"./fieldsInfo-CiLcXgNq.js";function r(e){let n=app.utils.getApiExampleURL(),r=[{title:`OTP request`,content:i},{title:`OTP auth`,content:a}],o=store({activeActionIndex:0});return t.div({pbEvent:`apiPreviewAuthWithOTP`,className:`content`},t.p(null,`Authenticate with an one-time/short-lived password (OTP).`),t.p(null,`On successful authentication the user will be also marked as verified (if the OTP source is email and the user is not verified already).`),t.p(null,`Note that when requesting an OTP we return an `,t.code(null,`otpId`),` even if a user with the provided email doesn't exist as a very basic enumeration protection.`),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${n}');
+                        const pb = new ARSY('${n}');
 
                         ...
 
@@ -23,10 +23,10 @@ import{t as e}from"./expandInfo-CJ9aeAaN.js";import{t as n}from"./fieldsInfo-CiL
 
                         // "logout"
                         pb.authStore.clear();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
-                        import 'package:pocketbase/pocketbase.dart';
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${n}');
+                        final pb = ARSY('${n}');
 
                         ...
 
@@ -48,7 +48,7 @@ import{t as e}from"./expandInfo-CJ9aeAaN.js";import{t as n}from"./fieldsInfo-CiL
 
                         // "logout"
                         pb.authStore.clear();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
                         # OTP request (sends email to the user if exists)
                         curl -X POST \\
                           -H 'Content-Type:application/json' \\
@@ -93,3 +93,4 @@ import{t as e}from"./expandInfo-CJ9aeAaN.js";import{t as n}from"./fieldsInfo-CiL
                   }
                 }
             `}];return[t.div(null,t.strong(null,`API details`)),t.div({className:`alert success api-preview-alert`},t.span({className:`label method`},`POST`),t.span({className:`path`},`/api/collections/${r.name}/auth-with-otp`)),t.table({className:`api-preview-table body-params`},t.thead(null,t.tr(null,t.th({className:`min-width txt-primary`},`Body params`),t.th({className:`min-width`},`Type`),t.th(null,`Description`))),t.tbody(null,t.tr(null,t.td({className:`min-width`},`otpId `,t.em(null,`(required)`)),t.td({className:`min-width`},t.span({className:`label`},`String`)),t.td(null,`The id of the OTP request.`)),t.tr(null,t.td({className:`min-width`},`password `,t.em(null,`(required)`)),t.td({className:`min-width`},t.span({className:`label`},`String`)),t.td(null,`The one-time/short-lived password from the OTP request.`)))),t.table({className:`api-preview-table query-params`},t.thead(null,t.tr(null,t.th({className:`min-width txt-primary`},`?query params`),t.th({className:`min-width`},`Type`),t.th(null,`Description`))),t.tbody(null,t.tr(null,t.td({className:`min-width`},`expand`),t.td({className:`min-width`},t.span({className:`label`},`String`)),t.td(null,e())),t.tr(null,t.td({className:`min-width`},`fields`),t.td({className:`min-width`},t.span({className:`label`},`String`)),t.td(null,n())))),t.div({className:`m-t-base m-b-sm`},t.strong(null,`Example responses`)),app.components.codeBlockTabs({tabs:a})]}export{r as docsAuthWithOTP};
+

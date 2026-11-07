@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/picker"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/picker"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
 )
 
 var ErrUnsupportedContentType = NewBadRequestError("Unsupported Content-Type", nil)
@@ -290,7 +290,7 @@ func (e *Event) NoContent(status int) error {
 }
 
 // Redirect writes a redirect response to the specified url.
-// The status code must be in between 300 – 399 range.
+// The status code must be in between 300 â€“ 399 range.
 func (e *Event) Redirect(status int, url string) error {
 	if status < 300 || status > 399 {
 		return ErrInvalidRedirectStatusCode

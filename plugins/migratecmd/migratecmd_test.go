@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/plugins/migratecmd"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/list"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/plugins/migratecmd"
+	"github.com/bridge-allah/a-r-s-y/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/list"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 func TestAutomigrateCollectionCreate(t *testing.T) {
@@ -202,8 +202,8 @@ package _test_migrations
 import (
 	"encoding/json/v2"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	m "ganigeorgiev.com/pocketbase/pocketbase/migrations"
+	"github.com/bridge-allah/a-r-s-y/core"
+	m "github.com/bridge-allah/a-r-s-y/migrations"
 )
 
 func init() {
@@ -651,8 +651,8 @@ package _test_migrations
 import (
 	"encoding/json/v2"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	m "ganigeorgiev.com/pocketbase/pocketbase/migrations"
+	"github.com/bridge-allah/a-r-s-y/core"
+	m "github.com/bridge-allah/a-r-s-y/migrations"
 )
 
 func init() {
@@ -1043,8 +1043,8 @@ package _test_migrations
 import (
 	"encoding/json/v2"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	m "ganigeorgiev.com/pocketbase/pocketbase/migrations"
+	"github.com/bridge-allah/a-r-s-y/core"
+	m "github.com/bridge-allah/a-r-s-y/migrations"
 )
 
 func init() {

@@ -1,4 +1,4 @@
-.field.sql-console-field {
+﻿.field.sql-console-field {
     .input {
         resize: vertical;
         height: 250px;
@@ -30,3 +30,4 @@
         }
     }
 }
+

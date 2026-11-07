@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.utils = window.app.utils || {};
 
 const defaultOptions = {
@@ -244,3 +244,5 @@ function collectionJoinAutocomplete(word, collections) {
 
     return result;
 }
+
+

@@ -9,8 +9,8 @@ import (
 	"encoding/pem"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/forms"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
+	"github.com/bridge-allah/a-r-s-y/forms"
+	"github.com/bridge-allah/a-r-s-y/tests"
 	"github.com/golang-jwt/jwt/v5"
 )
 

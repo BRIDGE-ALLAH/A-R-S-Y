@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 const (

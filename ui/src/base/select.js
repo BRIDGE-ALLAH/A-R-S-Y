@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -347,3 +347,5 @@ window.app.components.select = function(propsArg = {}) {
         dropdown,
     );
 };
+
+

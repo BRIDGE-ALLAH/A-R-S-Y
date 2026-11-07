@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { settings } from "./settings";
 import { view } from "./view";
 
@@ -14,3 +14,5 @@ window.app.fieldTypes.bool = {
         return [true, false][Math.floor(Math.random() * 2)];
     },
 };
+
+

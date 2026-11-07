@@ -1,4 +1,4 @@
-export function pageSuperuserLogin(route) {
+﻿export function pageSuperuserLogin(route) {
     app.store.title = "Superuser login";
 
     const data = store({
@@ -415,3 +415,5 @@ function authWithOTPForm(data) {
         ),
     );
 }
+
+

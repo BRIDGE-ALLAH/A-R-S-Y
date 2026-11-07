@@ -1,4 +1,4 @@
-export function docsRealtime(collection) {
+﻿export function docsRealtime(collection) {
     const baseURL = app.utils.getApiExampleURL();
 
     const dummyRecord = Object.assign({
@@ -48,9 +48,9 @@ export function docsRealtime(collection) {
                     title: "JS SDK",
                     language: "js",
                     value: `
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${baseURL}');
+                        const pb = new ARSY('${baseURL}');
 
                         ...
 
@@ -94,9 +94,9 @@ export function docsRealtime(collection) {
                     title: "Dart SDK",
                     language: "dart",
                     value: `
-                        import 'package:pocketbase/pocketbase.dart';
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${baseURL}');
+                        final pb = ARSY('${baseURL}');
 
                         ...
 
@@ -188,3 +188,5 @@ export function docsRealtime(collection) {
         }),
     );
 }
+
+

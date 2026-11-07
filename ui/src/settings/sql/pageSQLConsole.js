@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 
 const SQL_HISTORY_STORAGE_KEY = "pbSQLConsoleHistory";
 
@@ -482,3 +482,5 @@ export function pageSQLConsole(route) {
         ),
     );
 }
+
+

@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/auth/internal/jwk"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/auth/internal/jwk"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cast"
 	"golang.org/x/oauth2"

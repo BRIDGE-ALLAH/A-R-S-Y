@@ -1,4 +1,4 @@
-const optionClass = "dropdown-item";
+﻿const optionClass = "dropdown-item";
 
 document.addEventListener(
     "toggle",
@@ -102,3 +102,5 @@ function firstActiveSibling(el, dir = -1) {
 
     return sibling;
 }
+
+

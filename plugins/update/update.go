@@ -37,9 +37,9 @@ import (
 	"strconv"
 	"strings"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/archive"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/archive"
+	"github.com/bridge-allah/a-r-s-y/tools/osutils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )

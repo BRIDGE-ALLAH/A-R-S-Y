@@ -1,4 +1,4 @@
-export function docsVerification(collection) {
+﻿export function docsVerification(collection) {
     const baseURL = app.utils.getApiExampleURL();
 
     const actionTabs = [
@@ -25,9 +25,9 @@ export function docsVerification(collection) {
                     title: "JS SDK",
                     language: "js",
                     value: `
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${baseURL}');
+                        const pb = new ARSY('${baseURL}');
 
                         ...
 
@@ -53,9 +53,9 @@ export function docsVerification(collection) {
                     title: "Dart SDK",
                     language: "dart",
                     value: `
-                        import 'package:pocketbase/pocketbase.dart';
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${baseURL}');
+                        final pb = ARSY('${baseURL}');
 
                         ...
 
@@ -232,3 +232,5 @@ function confirm(collection) {
         }),
     ];
 }
+
+

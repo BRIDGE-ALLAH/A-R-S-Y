@@ -1,4 +1,4 @@
-import { basePredefinedTags, openRateLimitInfoModal } from "./rateLimitInfoModal";
+﻿import { basePredefinedTags, openRateLimitInfoModal } from "./rateLimitInfoModal";
 
 // sort the specified rules list in place
 export function sortRules(rules) {
@@ -530,3 +530,5 @@ export function rateLimitAccordion(pageData) {
         ),
     );
 }
+
+

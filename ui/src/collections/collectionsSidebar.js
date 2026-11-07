@@ -1,4 +1,4 @@
-const PINNED_STORAGE_KEY = "pbPinnedCollections";
+﻿const PINNED_STORAGE_KEY = "pbPinnedCollections";
 
 const compactThreshold = 12;
 
@@ -271,3 +271,5 @@ function collectionItem(collection, data) {
         },
     );
 }
+
+

@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 
 export function pageExportCollections(route) {
     app.store.title = "Export collections";
@@ -105,7 +105,7 @@ export function pageExportCollections(route) {
                         { className: "col-lg-12" },
                         t.div(
                             { className: "txt-lg" },
-                            "Below you'll find your current collections configuration that you could import in another PocketBase environment.",
+                            "Below you'll find your current collections configuration that you could import in another ARSY environment.",
                         ),
                     ),
                     t.div(
@@ -167,7 +167,7 @@ export function pageExportCollections(route) {
                                                 t.label({
                                                     htmlFor: checkboxId,
                                                     textContent: () => collection.name,
-                                                    // workaround https://ganigeorgiev.com/pocketbase/discussions/7771
+                                                    // workaround https://ganigeorgiev.com/ARSY/discussions/7771
                                                     onclick: (e) => {
                                                         e.preventDefault();
                                                         const input = document.getElementById(e.target.htmlFor);
@@ -211,3 +211,5 @@ export function pageExportCollections(route) {
         ),
     );
 }
+
+

@@ -1,7 +1,7 @@
-function e(e){let n=app.utils.getApiExampleURL(),r=Object.assign({collectionId:e.id,collectionName:e.name},app.utils.getDummyFieldsData(e));return t.div({pbEvent:`apiPreviewRealtime`,className:`content`},t.p(null,`Subscribe to realtime changes via Server-Sent Events (SSE).`),t.p(null,`Events are sent for `,t.strong(null,`create`),`, `,t.strong(null,`update`),` and `,t.strong(null,`delete`),` record operations (see "Event data format" below).`),t.div({className:`alert info`},t.p({className:`txt-bold`},`You could subscribe to a single record or to an entire collection.`),t.p(null,`When you subscribe to a `,t.strong(null,`single record`),`, the collection's `,t.strong(null,`View rule`),` will be used to determine whether the subscriber is allowed to receive the event message.`),t.p(null,`When you subscribe to an `,t.strong(null,`entire collection`),`, the collection's `,t.strong(null,`List/Search rule`),` will be used to determine whether the subscriber is allowed to receive the event message.`)),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
-                        import PocketBase from 'pocketbase';
+﻿function e(e){let n=app.utils.getApiExampleURL(),r=Object.assign({collectionId:e.id,collectionName:e.name},app.utils.getDummyFieldsData(e));return t.div({pbEvent:`apiPreviewRealtime`,className:`content`},t.p(null,`Subscribe to realtime changes via Server-Sent Events (SSE).`),t.p(null,`Events are sent for `,t.strong(null,`create`),`, `,t.strong(null,`update`),` and `,t.strong(null,`delete`),` record operations (see "Event data format" below).`),t.div({className:`alert info`},t.p({className:`txt-bold`},`You could subscribe to a single record or to an entire collection.`),t.p(null,`When you subscribe to a `,t.strong(null,`single record`),`, the collection's `,t.strong(null,`View rule`),` will be used to determine whether the subscriber is allowed to receive the event message.`),t.p(null,`When you subscribe to an `,t.strong(null,`entire collection`),`, the collection's `,t.strong(null,`List/Search rule`),` will be used to determine whether the subscriber is allowed to receive the event message.`)),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${n}');
+                        const pb = new ARSY('${n}');
 
                         ...
 
@@ -30,10 +30,10 @@ function e(e){let n=app.utils.getApiExampleURL(),r=Object.assign({collectionId:e
 
                         // unsubscribe - remove all collection subscriptions
                         pb.collection('${e.name}').unsubscribe();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
-                        import 'package:pocketbase/pocketbase.dart';
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${n}');
+                        final pb = ARSY('${n}');
 
                         ...
 
@@ -62,7 +62,7 @@ function e(e){let n=app.utils.getApiExampleURL(),r=Object.assign({collectionId:e
 
                         // unsubscribe - remove all collection subscriptions
                         pb.collection('${e.name}').unsubscribe();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
                         # init an SSE connection and start listening for messages
                         # (the first message is always PB_CONNECT with the connection "clientId")
                         curl -N '${n}/api/realtime'
@@ -78,4 +78,5 @@ function e(e){let n=app.utils.getApiExampleURL(),r=Object.assign({collectionId:e
                         # create/update/delete a record in the ${e.name} collection and
                         # you should see the event message(s) in the first terminal
                         # (as long as your client satisfies the topic API rule)
-                    `}]}),t.div({className:`block m-t-base`},t.strong(null,`API details`)),t.div({className:`alert api-preview-alert`},t.span({className:`label method`},`GET/POST`),t.span({className:`path`},`/api/realtime`),t.div({className:`extra`},t.a({href:`https://pocketbase.io/docs/api-realtime/`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Realtime docs`}))),t.div({className:`block m-t-base m-b-sm`},t.strong(null,`Event data format`)),app.components.codeBlock({value:JSON.stringify({action:`create`,record:r},null,2).replace(`"action": "create",`,`"action": "create", // create, update or delete`)}))}export{e as docsRealtime};
+                    `}]}),t.div({className:`block m-t-base`},t.strong(null,`API details`)),t.div({className:`alert api-preview-alert`},t.span({className:`label method`},`GET/POST`),t.span({className:`path`},`/api/realtime`),t.div({className:`extra`},t.a({href:`https://ARSY.io/docs/api-realtime/`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Realtime docs`}))),t.div({className:`block m-t-base m-b-sm`},t.strong(null,`Event data format`)),app.components.codeBlock({value:JSON.stringify({action:`create`,record:r},null,2).replace(`"action": "create",`,`"action": "create", // create, update or delete`)}))}export{e as docsRealtime};
+

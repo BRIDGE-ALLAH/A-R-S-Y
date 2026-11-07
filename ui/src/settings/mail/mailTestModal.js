@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openMailTest = function(preselectedCollectionIdOrName = "", template = "") {
@@ -201,3 +201,5 @@ function mailTestModal(preselectedCollectionIdOrName = "", template = "") {
         ),
     );
 }
+
+

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"runtime/debug"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
+	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/fatih/color"
 )
 

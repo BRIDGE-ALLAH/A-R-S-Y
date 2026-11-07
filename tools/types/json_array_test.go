@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 func TestJSONArrayMarshalJSON(t *testing.T) {
@@ -18,7 +18,7 @@ func TestJSONArrayMarshalJSON(t *testing.T) {
 		{types.JSONArray[any]{}, `[]`},
 		{types.JSONArray[int]{1, 2, 3}, `[1,2,3]`},
 		{types.JSONArray[string]{"test1", "test2", "test3"}, `["test1","test2","test3"]`},
-		{types.JSONArray[any]{1, "test\xc3" /* invalid utf8 char to test mangling */}, `[1,"test�"]`},
+		{types.JSONArray[any]{1, "test\xc3" /* invalid utf8 char to test mangling */}, `[1,"testï¿½"]`},
 	}
 
 	for i, s := range scenarios {

@@ -28,7 +28,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
 )
 
 // NewRegistry creates and initializes a new templates registry with

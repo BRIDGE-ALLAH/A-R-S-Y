@@ -1,4 +1,4 @@
-const TEST_REQUEST_KEY = "test_view_query";
+﻿const TEST_REQUEST_KEY = "test_view_query";
 
 export function collectionViewQueryTab(upsertData) {
     const uniqueId = "query_" + app.utils.randomString();
@@ -192,3 +192,5 @@ export function collectionViewQueryTab(upsertData) {
         ),
     );
 }
+
+

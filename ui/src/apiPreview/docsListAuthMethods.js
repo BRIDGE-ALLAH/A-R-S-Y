@@ -1,4 +1,4 @@
-import { fieldsInfo } from "./fieldsInfo";
+﻿import { fieldsInfo } from "./fieldsInfo";
 
 export function docsListAuthMethods(collection) {
     const baseURL = app.utils.getApiExampleURL();
@@ -58,9 +58,9 @@ export function docsListAuthMethods(collection) {
                     title: "JS SDK",
                     language: "js",
                     value: `
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${baseURL}');
+                        const pb = new ARSY('${baseURL}');
 
                         ...
 
@@ -80,9 +80,9 @@ export function docsListAuthMethods(collection) {
                     title: "Dart SDK",
                     language: "dart",
                     value: `
-                        import 'package:pocketbase/pocketbase.dart';
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${baseURL}');
+                        final pb = ARSY('${baseURL}');
 
                         ...
 
@@ -142,3 +142,5 @@ export function docsListAuthMethods(collection) {
         }),
     );
 }
+
+

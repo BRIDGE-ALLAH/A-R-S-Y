@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem/blob"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem/internal/s3blob"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem/internal/s3blob/s3"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem/internal/s3blob/s3/tests"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem/blob"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem/internal/s3blob"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem/internal/s3blob/s3"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem/internal/s3blob/s3/tests"
 )
 
 func TestNew(t *testing.T) {

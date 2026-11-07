@@ -1,4 +1,4 @@
-import { getTokenPayload, isTokenExpired } from "pocketbase";
+﻿import { getTokenPayload, isTokenExpired } from "pocketbase";
 
 export function pageInstaller(route) {
     const token = route.params?.token || "";
@@ -10,7 +10,7 @@ export function pageInstaller(route) {
         return;
     }
 
-    app.store.title = "Setup your PocketBase instance";
+    app.store.title = "Setup your A-R-S-Y instance";
 
     const data = store({
         email: "",
@@ -266,3 +266,5 @@ export function pageInstaller(route) {
         }),
     );
 }
+
+

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/apis"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
+	"github.com/bridge-allah/a-r-s-y/apis"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
 )
 
 func TestBodyLimitMiddleware(t *testing.T) {

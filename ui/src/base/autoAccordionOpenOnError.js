@@ -1,4 +1,4 @@
-// auto open accordions if there is an invalid item
+﻿// auto open accordions if there is an invalid item
 document.addEventListener(
     "invalid",
     (e) => {
@@ -12,3 +12,5 @@ document.addEventListener(
     },
     true,
 );
+
+

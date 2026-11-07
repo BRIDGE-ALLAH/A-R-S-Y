@@ -1,4 +1,4 @@
-import { toDeleteProp } from "@/base/fieldSettings";
+﻿import { toDeleteProp } from "@/base/fieldSettings";
 
 window.app = window.app || {};
 window.app.modals = window.app.modals || {};
@@ -348,3 +348,5 @@ window.app.modals.openCollectionChangesConfirmation = async function(
         },
     );
 };
+
+

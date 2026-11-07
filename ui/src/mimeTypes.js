@@ -1,4 +1,4 @@
-// List of supported mime types and their extensions.
+﻿// List of supported mime types and their extensions.
 //
 // https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md
 window.app = window.app || {};
@@ -195,3 +195,5 @@ window.app.utils.mimeTypes = [
     { ext: ".ppm", mimeType: "image/x-portable-pixmap" },
     { ext: ".eml", mimeType: "message/rfc822" },
 ];
+
+

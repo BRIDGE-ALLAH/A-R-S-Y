@@ -1,4 +1,4 @@
-export function passwordAuthAccordion(collection) {
+﻿export function passwordAuthAccordion(collection) {
     const uniqueId = "passwordAuth_" + app.utils.randomString();
 
     const data = store({
@@ -110,3 +110,5 @@ export function passwordAuthAccordion(collection) {
         ),
     );
 }
+
+

@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openProviderSettings = function(
@@ -198,3 +198,5 @@ function providerSettingsModal(providerConfig, settings) {
 
     return modal;
 }
+
+

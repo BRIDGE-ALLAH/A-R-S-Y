@@ -1,4 +1,4 @@
-export function openBackupRestoreModal(key) {
+﻿export function openBackupRestoreModal(key) {
     const modal = backupRestoreModal(key);
 
     document.body.appendChild(modal);
@@ -179,3 +179,5 @@ function backupRestoreModal(key) {
         ),
     );
 }
+
+

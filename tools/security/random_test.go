@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 )
 
 func TestRandomString(t *testing.T) {

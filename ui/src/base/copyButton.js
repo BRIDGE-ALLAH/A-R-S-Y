@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 // @todo consider normalizing and changing args to props
@@ -59,3 +59,5 @@ window.app.components.copyButton = function(textOrFunc, ...children) {
         ...children,
     );
 };
+
+

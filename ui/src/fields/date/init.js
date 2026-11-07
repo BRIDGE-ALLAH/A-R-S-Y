@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { settings } from "./settings";
 import { view } from "./view";
 
@@ -14,3 +14,5 @@ window.app.fieldTypes.date = {
         return new Date().toISOString().replaceAll("T", " ");
     },
 };
+
+

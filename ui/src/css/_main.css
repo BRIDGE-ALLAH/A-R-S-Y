@@ -1,4 +1,4 @@
-@import "./fonts.css";
+﻿@import "./fonts.css";
 @import "./remixicon.css";
 @import "./vars.css";
 @import "./animations.css";
@@ -36,3 +36,4 @@
 @import "./erd.css";
 @import "./hideControls.css";
 @import "./sqlConsole.css";
+

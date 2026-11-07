@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -52,3 +52,5 @@ window.app.components.formattedDate = function(propsArg = {}) {
         },
     );
 };
+
+

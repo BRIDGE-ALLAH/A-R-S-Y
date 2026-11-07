@@ -1,4 +1,4 @@
-import { pageSuperuserLogin } from "@/auth/pageSuperuserLogin";
+﻿import { pageSuperuserLogin } from "@/auth/pageSuperuserLogin";
 import { pageCollections } from "@/collections/pageCollections";
 import { pageLogs } from "@/logs/pageLogs";
 import { pageApplicationSettings } from "@/settings/application/pageApplicationSettings";
@@ -172,3 +172,5 @@ app.routes.superuserOnly("#/settings/crons", pageCronsSettings);
 app.routes.superuserOnly("#/settings/export-collections", pageExportCollections);
 app.routes.superuserOnly("#/settings/import-collections", pageImportCollections);
 app.routes.superuserOnly("#/settings/sql", pageSQLConsole);
+
+

@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"strings"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/inflector"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/inflector"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 	"github.com/gabriel-vasile/mimetype"
 )
 

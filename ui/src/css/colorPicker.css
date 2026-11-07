@@ -1,4 +1,4 @@
-.color-picker {
+﻿.color-picker {
     display: flex;
     width: 100%;
     align-items: stretch;
@@ -95,3 +95,4 @@
         margin-top: 6px;
     }
 }
+

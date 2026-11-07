@@ -1,4 +1,4 @@
-import L from "leaflet";
+﻿import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 // manually load the markers so that they can be embedded in the prod bundle
@@ -312,3 +312,5 @@ function initSearch(selectFunc = null) {
         reset,
     ];
 }
+
+

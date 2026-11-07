@@ -1,4 +1,4 @@
-.provider-logo {
+﻿.provider-logo {
     --size: 40px;
     display: flex;
     flex-shrink: 0;
@@ -93,3 +93,4 @@
     line-height: var(--lineHeight);
     height: 100%;
 }
+

@@ -1,4 +1,4 @@
-function getChartHeight() {
+﻿function getChartHeight() {
     return document.body.clientWidth > 600 && document.body.clientHeight >= 720 ? 150 : 100;
 }
 
@@ -503,3 +503,5 @@ function dateHour(date) {
 
     return hours + ampm;
 }
+
+

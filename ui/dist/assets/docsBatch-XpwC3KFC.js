@@ -1,4 +1,4 @@
-function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collectionName:e.name},i=[{title:200,value:JSON.stringify([{status:200,body:Object.assign(r,app.utils.getDummyFieldsData(e))},{status:200,body:Object.assign(r,app.utils.getDummyFieldsData(e))}],null,2)},{title:400,value:`
+﻿function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collectionName:e.name},i=[{title:200,value:JSON.stringify([{status:200,body:Object.assign(r,app.utils.getDummyFieldsData(e))},{status:200,body:Object.assign(r,app.utils.getDummyFieldsData(e))}],null,2)},{title:400,value:`
                 {
                   "status": 400,
                   "message": "Batch transaction failed.",
@@ -29,9 +29,9 @@ function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collection
                   "data": {}
                 }
             `}];return t.div({pbEvent:`apiPreviewBatch`,className:`content`},t.p(null,`Batch and transactional create/update/upsert/delete of multiple records in a single request.`),t.div({className:`alert warning`},t.p({className:`txt-bold`},`The batch Web API need to be explicitly enabled and configured from the `,t.a({href:`#/settings`,target:`_blank`,title:`Open in new tab`,textContent:`App settings`}),`.`),t.p(null,`Because this endpoint process the requests in a single DB transaction it could degrade the performance of your application if not used with proper care and configuration (use smaller max processing and body size limits, avoid large file uploads over slow S3 networks and custom hooks that communicate with slow external APIs).`)),app.components.codeBlockTabs({className:`sdk-examples m-t-sm`,historyKey:`pbLastSDK`,tabs:[{title:`JS SDK`,language:`js`,value:`
-                        import PocketBase from 'pocketbase';
+                        import ARSY from 'pocketbase';
 
-                        const pb = new PocketBase('${n}');
+                        const pb = new ARSY('${n}');
 
                         ...
 
@@ -43,10 +43,10 @@ function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collection
                         batch.collection('${e.name}').upsert({ ... });
 
                         const result = await batch.send();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
-                        import 'package:pocketbase/pocketbase.dart';
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/js-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`JS SDK docs`}))},{title:`Dart SDK`,language:`dart`,value:`
+                        import 'package:ARSY/ARSY.dart';
 
-                        final pb = PocketBase('${n}');
+                        final pb = ARSY('${n}');
 
                         ...
 
@@ -58,7 +58,7 @@ function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collection
                         batch.collection('${e.name}').upsert(body: { ... });
 
                         final result = await batch.send();
-                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/pocketbase/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
+                    `,footnote:t.div({className:`txt-right`},t.a({href:`https://ganigeorgiev.com/ARSY/dart-sdk`,target:`_blank`,rel:`noopener noreferrer`,textContent:`Dart SDK docs`}))},{title:`curl`,language:`bash`,value:`
                         curl -X POST \\
                           -H 'Authorization:TOKEN' \\
                           -H 'Content-Type:application/json' \\
@@ -90,3 +90,4 @@ function e(e){let n=app.utils.getApiExampleURL(),r={collectionId:e.id,collection
                         // bind file to the second request
                         batchBody.append("requests.1.someFileField", new File(...))
                     `}))),t.div({className:`block m-t-base m-b-sm`},t.strong(null,`Example responses`)),app.components.codeBlockTabs({tabs:i}))}export{e as docsBatch};
+

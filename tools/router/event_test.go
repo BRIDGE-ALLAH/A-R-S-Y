@@ -20,9 +20,9 @@ import (
 	"testing"
 
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/picker"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/router"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/picker"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 )
 
 type unwrapTester struct {
@@ -434,7 +434,7 @@ func TestEventJSON(t *testing.T) {
 		"e": types.JSONRaw(`{"a":1,"a":2}`), // duplicated keys to ensure compliance with old data
 	}
 	expectedPickedBody := `{"a":123,"c":"test"}`
-	expectedFullBody := `{"a":123,"b":true,"c":"test","d":"�","e":{"a":2}}`
+	expectedFullBody := `{"a":123,"b":true,"c":"test","d":"ï¿½","e":{"a":2}}`
 
 	scenarios := []testResponseWriteScenario[any]{
 		{

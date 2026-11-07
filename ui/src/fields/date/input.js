@@ -1,4 +1,4 @@
-const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+﻿const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 // {
 //     collection: undefined,
@@ -27,7 +27,7 @@ export function input(props) {
                 value: () => app.utils.toDatetimeLocalInputValue(props.record[props.field.name]),
                 onchange: (e) => {
                     // don't clear until blur
-                    // https://ganigeorgiev.com/pocketbase/discussions/7726
+                    // https://ganigeorgiev.com/ARSY/discussions/7726
                     if (!e.target.value) {
                         return;
                     }
@@ -46,3 +46,5 @@ export function input(props) {
         },
     );
 }
+
+

@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 /**
@@ -1468,3 +1468,5 @@ function authProvidersTab(collection, data) {
         ),
     ];
 }
+
+

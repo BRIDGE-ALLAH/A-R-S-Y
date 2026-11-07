@@ -1,4 +1,4 @@
-// {
+﻿// {
 //     record: undefined,
 //     field: undefined,
 //     short: false,
@@ -9,3 +9,5 @@ export function view(props) {
         t.span({ className: "txt" }, () => props.record[props.field.name]),
     );
 }
+
+

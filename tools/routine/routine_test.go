@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
 )
 
 func TestFireAndForget(t *testing.T) {

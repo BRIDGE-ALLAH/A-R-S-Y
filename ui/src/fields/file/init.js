@@ -1,4 +1,4 @@
-import { input } from "./input";
+﻿import { input } from "./input";
 import { onrecordduplicate } from "./onrecordduplicate";
 import { onrecordsave } from "./onrecordsave";
 import { settings } from "./settings";
@@ -49,3 +49,5 @@ function dummyFileObject(name) {
         },
     };
 }
+
+

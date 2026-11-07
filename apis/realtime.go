@@ -12,13 +12,13 @@ import (
 
 	"ganigeorgiev.com/pocketbase/dbx"
 	validation "ganigeorgiev.com/pocketbase/ozzo-validation/v4"
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/picker"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/router"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/search"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/subscriptions"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/picker"
+	"github.com/bridge-allah/a-r-s-y/tools/router"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/tools/search"
+	"github.com/bridge-allah/a-r-s-y/tools/subscriptions"
 	"golang.org/x/sync/errgroup"
 )
 

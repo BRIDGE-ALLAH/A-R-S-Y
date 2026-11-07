@@ -3,7 +3,7 @@ package subscriptions_test
 import (
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/subscriptions"
+	"github.com/bridge-allah/a-r-s-y/tools/subscriptions"
 )
 
 func TestNewBroker(t *testing.T) {

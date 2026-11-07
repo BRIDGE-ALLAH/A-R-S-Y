@@ -1,4 +1,4 @@
-import { logLevel } from "./logLevel";
+﻿import { logLevel } from "./logLevel";
 
 window.app = window.app || {};
 window.app.modals = window.app.modals || {};
@@ -275,3 +275,5 @@ function logPreviewModal(logIdOrModel, settings) {
 
     return modal;
 }
+
+

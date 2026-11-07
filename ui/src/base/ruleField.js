@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 /**
@@ -163,3 +163,5 @@ window.app.components.ruleField = function(propsArg = {}) {
 
     return ruleField;
 };
+
+

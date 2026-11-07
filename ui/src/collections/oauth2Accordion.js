@@ -1,4 +1,4 @@
-const excludedFieldNames = ["id", "email", "emailVisibility", "verified", "tokenKey", "password"];
+﻿const excludedFieldNames = ["id", "email", "emailVisibility", "verified", "tokenKey", "password"];
 const allowedRegularTypes = ["text", "editor", "url", "email", "json"];
 
 export function oauth2Accordion(collection) {
@@ -314,3 +314,5 @@ export function oauth2Accordion(collection) {
         ),
     );
 }
+
+

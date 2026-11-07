@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.oauth2 = window.app.oauth2 || {};
 
 // note: data is the providerSettingsModal form store
@@ -58,7 +58,7 @@ window.app.oauth2.lark = function(providerInfo, namePrefix, data) {
                     { className: "alert info" },
                     "Note that the Lark user's ",
                     t.strong(null, "Union ID"),
-                    " will be used for the association with the PocketBase user (see ",
+                    " will be used for the association with the ARSY user (see ",
                     t.a({
                         href:
                             "https://open.feishu.cn/document/platform-overveiw/basic-concepts/user-identity-introduction/introduction#3f2d4b63",
@@ -72,3 +72,5 @@ window.app.oauth2.lark = function(providerInfo, namePrefix, data) {
         ),
     );
 };
+
+

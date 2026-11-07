@@ -1,4 +1,4 @@
-import { defaultLogLevels } from "./defaultLogLevels";
+﻿import { defaultLogLevels } from "./defaultLogLevels";
 
 window.app = window.app || {};
 window.app.modals = window.app.modals || {};
@@ -318,3 +318,5 @@ function logsSettingsModal(modalSettings) {
 
     return modal;
 }
+
+

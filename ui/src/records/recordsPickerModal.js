@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 const recordsPerPage = 50;
@@ -483,3 +483,5 @@ function recordsPickerModal(settings = defaultSettings) {
 
     return modal;
 }
+
+

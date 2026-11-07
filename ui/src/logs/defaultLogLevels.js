@@ -1,4 +1,4 @@
-export function defaultLogLevels() {
+﻿export function defaultLogLevels() {
     return t.div(
         { className: "inline-flex gap-5" },
         t.span(null, "Default log levels:"),
@@ -14,3 +14,5 @@ export function defaultLogLevels() {
         },
     );
 }
+
+

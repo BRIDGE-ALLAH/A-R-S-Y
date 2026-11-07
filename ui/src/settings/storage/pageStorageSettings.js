@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 
 export function pageStorageSettings() {
     app.store.title = "File storage";
@@ -104,7 +104,7 @@ export function pageStorageSettings() {
                             { className: "col-lg-12 txt-lg" },
                             t.p(
                                 null,
-                                "By default PocketBase uses and recommends the local file system to store uploaded files because it is more performant, easier to manage and backup.",
+                                "By default ARSY uses and recommends the local file system to store uploaded files because it is more performant, easier to manage and backup.",
                             ),
                             t.p(
                                 null,
@@ -185,3 +185,5 @@ export function pageStorageSettings() {
         ),
     );
 }
+
+

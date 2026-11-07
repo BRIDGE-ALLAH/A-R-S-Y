@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 import { batchAccordion } from "./batchAccordion";
 import { rateLimitAccordion, sortRules } from "./rateLimitAccordion";
 import { superuserAccordion } from "./superuserAccordion";
@@ -213,7 +213,7 @@ export function pageApplicationSettings() {
                                     id: "meta.appURL",
                                     name: "meta.appURL",
                                     // note: text for compatibility with older versions
-                                    // (https://ganigeorgiev.com/pocketbase/discussions/7681)
+                                    // (https://ganigeorgiev.com/ARSY/discussions/7681)
                                     //
                                     // @todo consider reverting back to "url" once enforced on the backend too
                                     type: "text",
@@ -364,3 +364,5 @@ function accentColorField(pageData) {
         }),
     );
 }
+
+

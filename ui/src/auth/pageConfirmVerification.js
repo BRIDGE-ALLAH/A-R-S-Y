@@ -1,4 +1,4 @@
-import PocketBase, { getTokenPayload } from "pocketbase";
+﻿import ARSY, { getTokenPayload } from "pocketbase";
 
 export function pageConfirmVerification(route) {
     const token = route.params?.token || "";
@@ -30,7 +30,7 @@ export function pageConfirmVerification(route) {
         data.isConfirming = true;
 
         // init a custom client to avoid interfering with the superuser state
-        const client = new PocketBase(app.pb.baseURL);
+        const client = new ARSY(app.pb.baseURL);
 
         try {
             await client.collection(tokenPayload.collectionId).confirmVerification(token);
@@ -50,7 +50,7 @@ export function pageConfirmVerification(route) {
         data.isResending = true;
 
         // init a custom client to avoid interfering with the superuser state
-        const client = new PocketBase(import.meta.env.PB_BACKEND_URL);
+        const client = new ARSY(import.meta.env.PB_BACKEND_URL);
 
         try {
             await client.collection(tokenPayload.collectionId).requestVerification(tokenPayload.email);
@@ -110,3 +110,5 @@ export function pageConfirmVerification(route) {
         },
     );
 }
+
+

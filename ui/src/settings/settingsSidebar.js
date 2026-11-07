@@ -1,4 +1,4 @@
-export function settingsSidebar() {
+﻿export function settingsSidebar() {
     return app.components.pageSidebar(
         {
             pbEvent: "settingsSidebar",
@@ -52,3 +52,5 @@ export function settingsSidebar() {
         ),
     );
 }
+
+

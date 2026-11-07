@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/security"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/tools/security"
 	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 )

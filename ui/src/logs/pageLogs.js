@@ -1,4 +1,4 @@
-import { logsChart } from "./logsChart";
+﻿import { logsChart } from "./logsChart";
 import { logsList } from "./logsList";
 
 export function pageLogs(route) {
@@ -179,3 +179,5 @@ export function pageLogs(route) {
         ),
     ];
 }
+
+

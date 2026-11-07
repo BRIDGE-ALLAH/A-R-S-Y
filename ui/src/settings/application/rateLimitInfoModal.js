@@ -1,4 +1,4 @@
-export let basePredefinedTags = [
+﻿export let basePredefinedTags = [
     { value: "*:list" },
     { value: "*:view" },
     { value: "*:create" },
@@ -150,3 +150,5 @@ function rateLimitInfoModal() {
         ),
     );
 }
+
+

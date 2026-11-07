@@ -1,4 +1,4 @@
-export function filterSyntax() {
+﻿export function filterSyntax() {
     const data = store({
         show: false,
     });
@@ -163,3 +163,5 @@ export function filterSyntax() {
         ),
     );
 }
+
+

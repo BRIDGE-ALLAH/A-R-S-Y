@@ -1,19 +1,23 @@
 version: 2
 
-project_name: pocketbase
+project_name: arsy
 
 dist: .builds
 
 before:
   hooks:
     - go mod tidy
+    - cmd: npm ci
+      dir: dashboard
+    - cmd: npm run build
+      dir: dashboard
 
 builds:
   - id: build_noncgo
     main: ./examples/base
-    binary: pocketbase
+    binary: arsy
     ldflags:
-      - -s -w -X ganigeorgiev.com/pocketbase/pocketbase.Version={{ .Version }}
+      - -s -w -X github.com/bridge-allah/a-r-s-y.Version={{ .Version }}
     env:
       - CGO_ENABLED=0
     goos:

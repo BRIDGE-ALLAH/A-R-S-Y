@@ -16,15 +16,15 @@ import (
 	"time"
 
 	"ganigeorgiev.com/pocketbase/dbx"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/cron"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/hook"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/logger"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/mailer"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/routine"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/subscriptions"
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/types"
+	"github.com/bridge-allah/a-r-s-y/tools/cron"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem"
+	"github.com/bridge-allah/a-r-s-y/tools/hook"
+	"github.com/bridge-allah/a-r-s-y/tools/logger"
+	"github.com/bridge-allah/a-r-s-y/tools/mailer"
+	"github.com/bridge-allah/a-r-s-y/tools/routine"
+	"github.com/bridge-allah/a-r-s-y/tools/store"
+	"github.com/bridge-allah/a-r-s-y/tools/subscriptions"
+	"github.com/bridge-allah/a-r-s-y/tools/types"
 	"github.com/fatih/color"
 	"github.com/spf13/cast"
 	"golang.org/x/sync/semaphore"
@@ -691,18 +691,18 @@ func (app *BaseApp) NewMailClient() mailer.Mailer {
 						mailLog := new(strings.Builder)
 						mailLog.WriteString(strings.TrimSpace(logDate.String()))
 						mailLog.WriteString(" Mail sent\n")
-						fmt.Fprintf(mailLog, "├─ From: %v\n", ae.Message.From)
-						fmt.Fprintf(mailLog, "├─ To: %v\n", ae.Message.To)
-						fmt.Fprintf(mailLog, "├─ Cc: %v\n", ae.Message.Cc)
-						fmt.Fprintf(mailLog, "├─ Bcc: %v\n", ae.Message.Bcc)
-						fmt.Fprintf(mailLog, "├─ Subject: %v\n", ae.Message.Subject)
+						fmt.Fprintf(mailLog, "â”œâ”€ From: %v\n", ae.Message.From)
+						fmt.Fprintf(mailLog, "â”œâ”€ To: %v\n", ae.Message.To)
+						fmt.Fprintf(mailLog, "â”œâ”€ Cc: %v\n", ae.Message.Cc)
+						fmt.Fprintf(mailLog, "â”œâ”€ Bcc: %v\n", ae.Message.Bcc)
+						fmt.Fprintf(mailLog, "â”œâ”€ Subject: %v\n", ae.Message.Subject)
 
 						if len(ae.Message.Attachments) > 0 {
 							attachmentKeys := make([]string, 0, len(ae.Message.Attachments))
 							for k := range ae.Message.Attachments {
 								attachmentKeys = append(attachmentKeys, k)
 							}
-							fmt.Fprintf(mailLog, "├─ Attachments: %v\n", attachmentKeys)
+							fmt.Fprintf(mailLog, "â”œâ”€ Attachments: %v\n", attachmentKeys)
 						}
 
 						if len(ae.Message.InlineAttachments) > 0 {
@@ -710,18 +710,18 @@ func (app *BaseApp) NewMailClient() mailer.Mailer {
 							for k := range ae.Message.InlineAttachments {
 								attachmentKeys = append(attachmentKeys, k)
 							}
-							fmt.Fprintf(mailLog, "├─ InlineAttachments: %v\n", attachmentKeys)
+							fmt.Fprintf(mailLog, "â”œâ”€ InlineAttachments: %v\n", attachmentKeys)
 						}
 
 						const indentation = "        "
 						if ae.Message.Text != "" {
 							textParts := strings.Split(strings.TrimSpace(ae.Message.Text), "\n")
 							textIndented := indentation + strings.Join(textParts, "\n"+indentation)
-							fmt.Fprintf(mailLog, "└─ Text:\n%s", textIndented)
+							fmt.Fprintf(mailLog, "â””â”€ Text:\n%s", textIndented)
 						} else {
 							htmlParts := strings.Split(strings.TrimSpace(ae.Message.HTML), "\n")
 							htmlIndented := indentation + strings.Join(htmlParts, "\n"+indentation)
-							fmt.Fprintf(mailLog, "└─ HTML:\n%s", htmlIndented)
+							fmt.Fprintf(mailLog, "â””â”€ HTML:\n%s", htmlIndented)
 						}
 
 						color.HiBlack("%s", mailLog.String())

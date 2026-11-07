@@ -1,4 +1,4 @@
-import { collectionsSidebar } from "./collectionsSidebar";
+﻿import { collectionsSidebar } from "./collectionsSidebar";
 
 const SORT_QUERY_KEY = "sort";
 const FILTER_QUERY_KEY = "filter";
@@ -347,3 +347,5 @@ export function pageCollections(route) {
         ),
     );
 }
+
+

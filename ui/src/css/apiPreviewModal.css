@@ -1,4 +1,4 @@
-.api-preview-content {
+﻿.api-preview-content {
     flex-grow: 1;
     overflow: auto;
     scrollbar-width: thin;
@@ -126,3 +126,4 @@ code.filter-op {
         }
     }
 }
+

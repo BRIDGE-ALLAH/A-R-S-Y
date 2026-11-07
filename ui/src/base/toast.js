@@ -1,4 +1,4 @@
-const toasts = new Map();
+﻿const toasts = new Map();
 
 const toastsContainer = t.div({ className: "toasts-container" });
 
@@ -157,3 +157,5 @@ window.app.toasts.error = errorToast;
 window.app.toasts.success = successToast;
 window.app.toasts.remove = removeToast;
 window.app.toasts.removeAll = removeAllToasts;
+
+

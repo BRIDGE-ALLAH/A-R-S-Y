@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 // @todo events for the generated token
@@ -125,9 +125,9 @@ function recordImpersonateModal(record) {
                         title: "JS SDK",
                         language: "js",
                         value: `
-                            import PocketBase from 'pocketbase';
+                            import ARSY from 'pocketbase';
 
-                            const pb = new PocketBase('${baseURL}');
+                            const pb = new ARSY('${baseURL}');
 
                             // load the token into the store
                             const token = '...';
@@ -147,9 +147,9 @@ function recordImpersonateModal(record) {
                         title: "Dart SDK",
                         language: "dart",
                         value: `
-                            import 'package:pocketbase/pocketbase.dart';
+                            import 'package:ARSY/ARSY.dart';
 
-                            final pb = PocketBase('${baseURL}');
+                            final pb = ARSY('${baseURL}');
 
                             // load the token into the store
                             final token = '...';
@@ -201,3 +201,5 @@ function recordImpersonateModal(record) {
         ),
     );
 }
+
+

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/core"
-	"ganigeorgiev.com/pocketbase/pocketbase/tests"
+	"github.com/bridge-allah/a-r-s-y/core"
+	"github.com/bridge-allah/a-r-s-y/tests"
 )
 
 func TestTextFieldBaseMethods(t *testing.T) {
@@ -289,7 +289,7 @@ func TestTextFieldValidateValue(t *testing.T) {
 			&core.TextField{Name: "test", Min: 4},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", "абв") // multi-byte
+				record.SetRaw("test", "Ð°Ð±Ð²") // multi-byte
 				return record
 			},
 			true,
@@ -299,7 +299,7 @@ func TestTextFieldValidateValue(t *testing.T) {
 			&core.TextField{Name: "test", Min: 3},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", "абв") // multi-byte
+				record.SetRaw("test", "Ð°Ð±Ð²") // multi-byte
 				return record
 			},
 			false,
@@ -329,7 +329,7 @@ func TestTextFieldValidateValue(t *testing.T) {
 			&core.TextField{Name: "test", Max: 2},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", "абв") // multi-byte
+				record.SetRaw("test", "Ð°Ð±Ð²") // multi-byte
 				return record
 			},
 			true,
@@ -339,7 +339,7 @@ func TestTextFieldValidateValue(t *testing.T) {
 			&core.TextField{Name: "test", Min: 3},
 			func() *core.Record {
 				record := core.NewRecord(collection)
-				record.SetRaw("test", "абв") // multi-byte
+				record.SetRaw("test", "Ð°Ð±Ð²") // multi-byte
 				return record
 			},
 			false,

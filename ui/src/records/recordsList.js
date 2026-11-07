@@ -1,4 +1,4 @@
-import { fieldsWithExcerpt } from "@/fields/relation/view";
+﻿import { fieldsWithExcerpt } from "@/fields/relation/view";
 
 window.app = window.app || {};
 window.app.components = window.app.components || {};
@@ -130,7 +130,7 @@ window.app.components.recordsList = function(propsArg = {}) {
                     ?.join(",");
 
                 // no explicit presentable -> try to utilize the first found implicit presentable field
-                // (https://ganigeorgiev.com/pocketbase/discussions/7735)
+                // (https://ganigeorgiev.com/ARSY/discussions/7735)
                 if (normalizedSort == "") {
                     for (let name of app.utils.fallbackPresentableProps) {
                         if (sortCollection?.fields?.find((f) => f.name == name)) {
@@ -632,7 +632,7 @@ window.app.components.recordsList = function(propsArg = {}) {
                                     }),
                                     t.label({
                                         htmlFor: uniqueId + record.id,
-                                        // workaround https://ganigeorgiev.com/pocketbase/discussions/7771
+                                        // workaround https://ganigeorgiev.com/ARSY/discussions/7771
                                         onclick: (e) => {
                                             e.preventDefault();
                                             const input = document.getElementById(e.target.htmlFor);
@@ -838,3 +838,5 @@ function columnsDropdown(props, data) {
         dropdown,
     );
 }
+
+

@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.modals = window.app.modals || {};
 
 window.app.modals.openCollectionsOverview = function(settings = {
@@ -282,3 +282,5 @@ function rules(data) {
         ),
     );
 }
+
+

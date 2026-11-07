@@ -1,4 +1,4 @@
-const maxNestedLazyExpand = 10;
+﻿const maxNestedLazyExpand = 10;
 const lazyLoadBatchSize = 500;
 const LAZY_EXPAND_EVENT_NAME = "pb:lazyExpandSummaryRels";
 
@@ -212,3 +212,5 @@ export function fieldsWithExcerpt(collectionId, expandedRelFields = [], maxLengt
 
     return undefined;
 }
+
+

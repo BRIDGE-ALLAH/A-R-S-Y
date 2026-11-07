@@ -1,4 +1,4 @@
-export function otpAccordion(collection) {
+﻿export function otpAccordion(collection) {
     const uniqueId = "otp_" + app.utils.randomString();
 
     const data = store({
@@ -124,3 +124,5 @@ export function otpAccordion(collection) {
         ),
     );
 }
+
+

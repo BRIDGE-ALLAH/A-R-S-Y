@@ -1,4 +1,4 @@
-import { settingsSidebar } from "../settingsSidebar";
+﻿import { settingsSidebar } from "../settingsSidebar";
 import { cronsList } from "./cronsList";
 
 export function pageCronsSettings(route) {
@@ -61,3 +61,5 @@ export function pageCronsSettings(route) {
         ),
     );
 }
+
+

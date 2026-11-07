@@ -5,7 +5,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"ganigeorgiev.com/pocketbase/pocketbase/tools/filesystem/internal/s3blob/s3"
+	"github.com/bridge-allah/a-r-s-y/tools/filesystem/internal/s3blob/s3"
 )
 
 func TestResponseErrorSerialization(t *testing.T) {

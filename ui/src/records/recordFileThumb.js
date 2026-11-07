@@ -1,4 +1,4 @@
-window.app = window.app || {};
+﻿window.app = window.app || {};
 window.app.components = window.app.components || {};
 
 // rudimentary semaphore to resolve the images url on batches to prevent
@@ -148,3 +148,5 @@ window.app.components.recordFileThumb = function(propsArg = {}) {
         },
     );
 };
+
+

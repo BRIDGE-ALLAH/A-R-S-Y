@@ -1,4 +1,4 @@
-.pb-tooltip {
+﻿.pb-tooltip {
     position: fixed;
     z-index: 99999;
     max-width: 300px;
@@ -35,3 +35,4 @@
         font-family: var(--monospaceFontFamily);
     }
 }
+
