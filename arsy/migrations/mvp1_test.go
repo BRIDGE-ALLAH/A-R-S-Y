@@ -47,6 +47,10 @@ func TestMVP1CollectionsAreCreatedWithPrivateRules(t *testing.T) {
 	if !ok || !credential.Hidden {
 		t.Fatal("server credential ciphertext must be a hidden text field")
 	}
+	pendingFingerprint, ok := servers.Fields.AsMap()["pending_host_key_fingerprint"].(*core.TextField)
+	if !ok || !pendingFingerprint.Hidden {
+		t.Fatal("pending SSH host-key fingerprint must be hidden")
+	}
 
 	applications, err := app.FindCollectionByNameOrId("arsy_applications")
 	if err != nil {
