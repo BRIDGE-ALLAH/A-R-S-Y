@@ -155,4 +155,3 @@ func (r *InMemoryRegistry) Snapshot() []Descriptor {
 
 // Ensure the concrete implementation satisfies the public contract.
 var _ ModelRegistry = (*InMemoryRegistry)(nil)
-
