@@ -46,6 +46,7 @@ func registerServerRoutes(api *router.RouterGroup[*core.RequestEvent], cfg confi
 	api.POST("/servers/{id}/test", requireSuperuser(testServerConnection(cfg)))
 	api.POST("/servers/{id}/host-key/confirm", requireSuperuser(confirmServerHostKey))
 	api.POST("/servers/{id}/readiness", requireSuperuser(checkServerReadiness(cfg)))
+	api.POST("/servers/{id}/rotate-credential", requireSuperuser(rotateServerCredential(cfg)))
 }
 
 func listServers(e *core.RequestEvent) error {

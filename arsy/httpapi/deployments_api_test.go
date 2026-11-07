@@ -92,14 +92,7 @@ func TestCreateDeploymentQueuesApplication(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rec = httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("expected 201 on second deploy, got %d: %s", rec.Code, rec.Body.String())
-	}
-	var second map[string]any
-	if err := json.Unmarshal(rec.Body.Bytes(), &second); err != nil {
-		t.Fatal(err)
-	}
-	// Second deployment should fail (409) due to overlap prevention
+	// Second deploy for same application rejected (409) due to overlap prevention
 	if rec.Code != http.StatusConflict {
 		t.Fatalf("second concurrent deploy: expected 409 (overlap prevention), got %d: %s", rec.Code, rec.Body.String())
 	}

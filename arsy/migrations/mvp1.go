@@ -91,7 +91,7 @@ func up(app core.App) error {
 		)
 		c.Indexes = types.JSONArray[string]{
 			"CREATE UNIQUE INDEX idx_arsy_deployments_id ON arsy_deployments (deployment_id)",
-			"CREATE UNIQUE INDEX idx_arsy_deployments_idempotency ON arsy_deployments (idempotency_key) WHERE idempotency_key IS NOT NULL",
+			"CREATE UNIQUE INDEX idx_arsy_deployments_idempotency ON arsy_deployments (idempotency_key) WHERE idempotency_key != ''",
 		}
 	})
 	if err != nil {
