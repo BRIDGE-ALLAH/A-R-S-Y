@@ -31,6 +31,8 @@ func Register(app core.App, cfg config.Config, version string) {
 				}
 				return re.JSON(http.StatusOK, map[string]any{"status": "ready"})
 			}))
+			registerServerRoutes(api, cfg)
+
 			api.GET("/onboarding", func(re *core.RequestEvent) error {
 				superusers, err := re.App.CountRecords(core.CollectionNameSuperusers)
 				if err != nil {
