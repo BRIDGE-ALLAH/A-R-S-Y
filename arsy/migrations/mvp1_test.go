@@ -1,10 +1,11 @@
 package migrations_test
 
 import (
+	"strings"
 	"testing"
 
-	"github.com/bridge-allah/a-r-s-y/core"
 	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
+	"github.com/bridge-allah/a-r-s-y/core"
 	"github.com/bridge-allah/a-r-s-y/tests"
 )
 
@@ -59,4 +60,16 @@ func TestMVP1CollectionsAreCreatedWithPrivateRules(t *testing.T) {
 	if !ok || serverRelation.CollectionId != servers.Id {
 		t.Fatal("application server relation is invalid")
 	}
+	if !containsMigrationIndex(applications.Indexes, "idx_arsy_applications_server") {
+		t.Fatal("applications.server must be unique for the MVP-1 one-application-per-server constraint")
+	}
+}
+
+func containsMigrationIndex(indexes []string, name string) bool {
+	for _, index := range indexes {
+		if strings.Contains(index, name) {
+			return true
+		}
+	}
+	return false
 }

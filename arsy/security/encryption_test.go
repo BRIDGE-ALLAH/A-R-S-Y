@@ -61,14 +61,16 @@ func TestDecryptRejectsTamperingAndWrongKey(t *testing.T) {
 	}
 
 	parts := strings.Split(ciphertext, ":")
-	last := parts[3][len(parts[3])-1]
-	if last == 'A' {
-		parts[3] = parts[3][:len(parts[3])-1] + "B"
-	} else {
-		parts[3] = parts[3][:len(parts[3])-1] + "A"
+	sealed, err := base64.RawURLEncoding.DecodeString(parts[3])
+	if err != nil {
+		t.Fatal(err)
 	}
-	if _, err := Decrypt(strings.Join(parts, ":"), key); err == nil {
-		t.Fatal("tampered ciphertext was accepted")
+	// Mutate an actual ciphertext byte. Changing only unused trailing base64
+	// bits can decode to the original bytes and is not a ciphertext mutation.
+	sealed[0] ^= 0x01
+	parts[3] = base64.RawURLEncoding.EncodeToString(sealed)
+	if _, err := Decrypt(strings.Join(parts, ":"), key); !errors.Is(err, ErrAuthenticationFailed) {
+		t.Fatalf("tampered ciphertext error = %v, want authentication failure", err)
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 func TestRequireSuperuserRejectsMissingAndRegularAuth(t *testing.T) {
 	regularUser := core.NewRecord(&core.Collection{Name: "users"})
 	for name, auth := range map[string]*core.Record{
-		"missing": nil,
+		"missing":      nil,
 		"regular user": regularUser,
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -31,8 +31,12 @@ func TestRequireSuperuserRejectsMissingAndRegularAuth(t *testing.T) {
 			if called {
 				t.Fatal("protected handler was called")
 			}
-			if rec.Code != http.StatusUnauthorized {
-				t.Fatalf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
+			wantStatus := http.StatusUnauthorized
+			if name == "regular user" {
+				wantStatus = http.StatusForbidden
+			}
+			if rec.Code != wantStatus {
+				t.Fatalf("status = %d, want %d", rec.Code, wantStatus)
 			}
 		})
 	}
