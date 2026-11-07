@@ -25,6 +25,27 @@ func TestCommandForOperationIsClosedAndFixed(t *testing.T) {
 	}
 }
 
+func TestComposeValidationCommandUsesOnlyGeneratedReleasePaths(t *testing.T) {
+	manifestPath := "/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml"
+	got, err := composeValidationCommand(manifestPath)
+	want := "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' config --quiet"
+	if err != nil || got != want {
+		t.Fatalf("composeValidationCommand() = %q, %v; want %q", got, err, want)
+	}
+	for _, invalid := range []string{
+		"/tmp/compose.yaml",
+		"/opt/arsy/apps/../etc/releases/0123456789abcdef0123456789abcdef/compose.yaml",
+		"/opt/arsy/apps/demo/releases/../../etc/compose.yaml",
+	} {
+		if _, err := composeValidationCommand(invalid); err == nil {
+			t.Fatalf("unsafe manifest path %q was accepted", invalid)
+		}
+	}
+	if _, err := commandForOperation(RemoteComposeValidate); err == nil {
+		t.Fatal("dynamic validation operation must not be callable without a validated manifest path")
+	}
+}
+
 func TestBoundedBufferTruncatesWithoutFailingWriter(t *testing.T) {
 	buffer := &boundedBuffer{limit: 5}
 	n, err := buffer.Write([]byte("abcdefgh"))
