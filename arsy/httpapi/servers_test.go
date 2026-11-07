@@ -125,4 +125,3 @@ func testAPIPrivateKey(t *testing.T) []byte {
 	}
 	return pem.EncodeToMemory(block)
 }
-
