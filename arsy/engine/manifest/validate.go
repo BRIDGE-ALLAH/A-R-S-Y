@@ -74,12 +74,26 @@ func (m *Manifest) Validate() error {
 	return nil
 }
 
+func isAbsoluteLike(p string) bool {
+	if filepath.IsAbs(p) {
+		return true
+	}
+	// Reject Windows drive/volume paths even on non-Windows platforms.
+	if len(p) >= 2 && p[1] == ':' && ((p[0] >= 'A' && p[0] <= 'Z') || (p[0] >= 'a' && p[0] <= 'z')) {
+		return true
+	}
+	if strings.HasPrefix(p, "\\\\") || strings.HasPrefix(p, "//") {
+		return true
+	}
+	return false
+}
+
 func validatePaths(field string, paths []string) error {
 	for i, p := range paths {
 		if p == "" {
 			return fmt.Errorf("%s[%d]: path cannot be empty", field, i)
 		}
-		if filepath.IsAbs(p) {
+		if isAbsoluteLike(p) {
 			return fmt.Errorf("%s[%d]: path %q must be relative", field, i, p)
 		}
 		clean := filepath.ToSlash(filepath.Clean(p))
