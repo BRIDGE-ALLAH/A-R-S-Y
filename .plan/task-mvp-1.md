@@ -173,11 +173,14 @@ For each completed task, append a short note to the task entry or its linked iss
   - Avoid mass-renaming internal PocketBase types and symbols.
   - **Done when:** `arsy version` or the existing version command identifies the product as A-R-S-Y and displays the build version.
 
-- [ ] **MVP1-005 — Disable the PocketBase upstream updater registration**
+- [x] **MVP1-005 — Disable the PocketBase upstream updater registration**
   - Remove the upstream PocketBase updater registration from the A-R-S-Y executable entry point.
   - Do not delete the reusable PocketBase updater package.
   - Do not point the updater at A-R-S-Y until a compatible A-R-S-Y release feed exists.
   - **Done when:** the A-R-S-Y binary cannot accidentally replace itself with a PocketBase release.
+  - **Changed:** removed the PocketBase updater import and registration from `examples/base/main.go`.
+  - **Verified:** re-fetched the updated entry point and confirmed it no longer registers or imports the updater; commit `4c2dcf3`.
+  - **Remaining:** local Go build/test execution is not available in this session.
 
 - [ ] **MVP1-006 — Replace the inherited root README with A-R-S-Y project documentation**
   - Explain the A-R-S-Y purpose, current MVP status, Go-native runtime, and build/run commands.
