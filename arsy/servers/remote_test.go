@@ -32,6 +32,17 @@ func TestComposeValidationCommandUsesOnlyGeneratedReleasePaths(t *testing.T) {
 	if err != nil || got != want {
 		t.Fatalf("composeValidationCommand() = %q, %v; want %q", got, err, want)
 	}
+	for action, want := range map[string]string{
+		"config --quiet": "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' config --quiet",
+		"up -d":           "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' up -d",
+		"ps --format json": "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' ps --format json",
+		"down":            "docker compose -f '/opt/arsy/apps/demo-app/releases/0123456789abcdef0123456789abcdef/compose.yaml' down",
+	} {
+		got, err := composeManifestCommand(manifestPath, action)
+		if err != nil || got != want {
+			t.Fatalf("composeManifestCommand(%q) = %q, %v; want %q", action, got, err, want)
+		}
+	}
 	for _, invalid := range []string{
 		"/tmp/compose.yaml",
 		"/opt/arsy/apps/../etc/releases/0123456789abcdef0123456789abcdef/compose.yaml",
@@ -41,8 +52,10 @@ func TestComposeValidationCommandUsesOnlyGeneratedReleasePaths(t *testing.T) {
 			t.Fatalf("unsafe manifest path %q was accepted", invalid)
 		}
 	}
-	if _, err := commandForOperation(RemoteComposeValidate); err == nil {
-		t.Fatal("dynamic validation operation must not be callable without a validated manifest path")
+	for _, operation := range []RemoteOperation{RemoteComposeValidate, RemoteComposeDeploy, RemoteComposeInspect, RemoteComposeStop} {
+		if _, err := commandForOperation(operation); err == nil {
+			t.Fatalf("dynamic operation %q must require a validated manifest path", operation)
+		}
 	}
 }
 
