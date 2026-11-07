@@ -14,7 +14,7 @@ func TestValidateComposeAcceptsSupportedManifest(t *testing.T) {
       - "8080:80"
     environment:
       APP_MODE: production
-      - FEATURE_FLAG=enabled
+      FEATURE_FLAG: enabled
     volumes:
       - data:/var/lib/app
     networks:
