@@ -66,13 +66,7 @@ func UploadComposeManifest(ctx context.Context, client *ssh.Client, applicationS
 	if client == nil {
 		return errors.New("SSH client is required")
 	}
-	if len(content) == 0 || len(content) > maxComposeManifestBytes {
-		return fmt.Errorf("Compose manifest must be between 1 byte and %d bytes", maxComposeManifestBytes)
-	}
-	if _, err := ValidateCompose(string(content)); err != nil {
-		return fmt.Errorf("validate Compose manifest: %w", err)
-	}
-	remotePath, err := ManifestPath(applicationSlug, deploymentID)
+	remotePath, err := validateComposeUpload(applicationSlug, deploymentID, content)
 	if err != nil {
 		return err
 	}
@@ -82,6 +76,16 @@ func UploadComposeManifest(ctx context.Context, client *ssh.Client, applicationS
 	}
 	defer sftpConnection.Close()
 	return uploadComposeManifest(ctx, pkgSFTPClient{client: sftpConnection}, remotePath, content)
+}
+
+func validateComposeUpload(applicationSlug, deploymentID string, content []byte) (string, error) {
+	if len(content) == 0 || len(content) > maxComposeManifestBytes {
+		return "", fmt.Errorf("Compose manifest must be between 1 byte and %d bytes", maxComposeManifestBytes)
+	}
+	if _, err := ValidateCompose(string(content)); err != nil {
+		return "", fmt.Errorf("validate Compose manifest: %w", err)
+	}
+	return ManifestPath(applicationSlug, deploymentID)
 }
 
 func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath string, content []byte) error {
@@ -123,6 +127,7 @@ func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath st
 	}
 	for offset := 0; offset < len(content); {
 		if err := ctx.Err(); err != nil {
+			_ = client.Close()
 			_ = file.Close()
 			return err
 		}
@@ -142,6 +147,7 @@ func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath st
 		offset += n
 	}
 	if err := ctx.Err(); err != nil {
+		_ = client.Close()
 		_ = file.Close()
 		return err
 	}
@@ -164,6 +170,9 @@ func uploadComposeManifest(ctx context.Context, client sftpClient, remotePath st
 
 // UploadComposeManifestWithTimeout applies a bounded SFTP transfer window.
 func UploadComposeManifestWithTimeout(ctx context.Context, client *ssh.Client, applicationSlug, deploymentID string, content []byte, timeout time.Duration) error {
+	if ctx == nil {
+		return errors.New("deployment context is required")
+	}
 	if timeout <= 0 {
 		timeout = 30 * time.Second
 	}
