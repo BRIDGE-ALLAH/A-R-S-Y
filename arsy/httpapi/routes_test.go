@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/bridge-allah/a-r-s-y/tests"
 	"github.com/bridge-allah/a-r-s-y/tools/router"
 	"github.com/bridge-allah/a-r-s-y/ui"
-	"regexp"
 )
 
 func newTestMux(t *testing.T, authenticated bool) (*tests.TestApp, http.Handler) {
