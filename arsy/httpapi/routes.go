@@ -21,14 +21,15 @@ func Register(app core.App, cfg config.Config, version string) {
 				return re.JSON(http.StatusOK, map[string]any{
 					"product": "A-R-S-Y",
 					"version": version,
-					"status": "alive",
+					"status":  "alive",
 				})
 			})
 			api.GET("/ready", requireSuperuser(func(re *core.RequestEvent) error {
-				if !re.App.IsBootstrapped() {
-					return re.JSON(http.StatusServiceUnavailable, map[string]any{"status": "not_ready"})
-				}
-				return re.JSON(http.StatusOK, map[string]any{"status": "ready"})
+				statusCode, status := readinessStatus(re.App.IsBootstrapped(), func() error {
+					_, err := re.App.DB().NewQuery("SELECT 1").Execute()
+					return err
+				})
+				return re.JSON(statusCode, map[string]any{"status": status})
 			}))
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {

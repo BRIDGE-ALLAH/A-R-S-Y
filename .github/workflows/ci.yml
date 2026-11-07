@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -29,6 +31,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Check Go formatting for changed files
+        shell: bash
+        run: |
+          mapfile -t go_files < <(git diff --name-only HEAD^1 HEAD -- '*.go')
+          if (("${#go_files[@]}")); then
+            unformatted="$(gofmt -l "${go_files[@]}")"
+            if [ -n "$unformatted" ]; then
+              printf 'Changed Go files need gofmt:\n%s\n' "$unformatted"
+              exit 1
+            fi
+          fi
       - name: Build A-R-S-Y dashboard assets
         working-directory: dashboard
         run: npm install --no-audit --no-fund && npm run build
@@ -37,11 +50,35 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Verify A-R-S-Y migrations
+        if: always()
         run: go test ./arsy/migrations
       - name: Build standalone server
+        if: always()
         run: mkdir -p .builds && CGO_ENABLED=0 go build -o .builds/arsy ./examples/base
       - name: Run A-R-S-Y diagnostics
-        run: ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY="ci-only-diagnostic-key" .builds/arsy doctor
+        if: always()
+        shell: bash
+        run: |
+          output="$(ARSY_DATA_DIR="$(mktemp -d)/arsy" ARSY_SECRET_KEY="ci-only-diagnostic-key" .builds/arsy doctor 2>&1)"
+          printf '%s\n' "$output"
+          if grep -Fq "ci-only-diagnostic-key" <<< "$output"; then
+            echo "doctor leaked the configured secret value"
+            exit 1
+          fi
+      - name: Verify diagnostics reject missing secret
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          output="$(ARSY_DATA_DIR="$(mktemp -d)/arsy" env -u ARSY_SECRET_KEY .builds/arsy doctor 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo "doctor unexpectedly succeeded without the secret key"
+            exit 1
+          fi
+          grep -Fq "Secret key: not configured" <<< "$output"
 
   frontend:
     name: Frontend build
