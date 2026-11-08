@@ -1,9 +1,9 @@
 package httpapi
 
 import (
-	"errors"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
@@ -27,16 +27,39 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 	if strings.TrimSpace(engine.TenantsRoot) == "" {
 		return
 	}
-	api.GET("/tenants", requireSuperuser(func(e *core.RequestEvent) error {
-		records, err := e.App.FindRecordsByFilter("baas_tenants", "1=1", "slug", 200, 0)
+	api.GET("/tenants", requireAuthenticated(func(e *core.RequestEvent) error {
+		limit, offset := tenantPagination(e, 50, 200)
+		if e.HasSuperuserAuth() {
+			records, err := e.App.FindRecordsByFilter("baas_tenants", "1=1", "slug", limit, offset)
+			if err != nil {
+				return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "failed to list tenants"})
+			}
+			return e.JSON(http.StatusOK, map[string]any{"items": tenantSummaries(records), "limit": limit, "offset": offset})
+		}
+		members, err := e.App.FindRecordsByFilter("baas_tenant_memberships", "principal = {:p} && status = {:s}", "", 500, 0, map[string]any{"p": e.Auth.Id, "s": string(tenancy.MembershipActive)})
 		if err != nil {
 			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "failed to list tenants"})
 		}
-		items := make([]tenantSummary, 0, len(records))
-		for _, r := range records {
+		items := make([]tenantSummary, 0, len(members))
+		for _, m := range members {
+			r, err := e.App.FindRecordById("baas_tenants", m.GetString("tenant"))
+			if err != nil {
+				continue
+			}
+			status := tenancy.Status(r.GetString("status"))
+			if status == tenancy.StatusSuspended || status == tenancy.StatusDeleting {
+				continue
+			}
 			items = append(items, tenantSummary{ID: r.Id, Slug: r.GetString("slug"), DisplayName: r.GetString("display_name"), Status: r.GetString("status"), Plan: r.GetString("plan")})
 		}
-		return e.JSON(http.StatusOK, map[string]any{"items": items})
+		if offset > len(items) {
+			offset = len(items)
+		}
+		end := offset + limit
+		if end > len(items) {
+			end = len(items)
+		}
+		return e.JSON(http.StatusOK, map[string]any{"items": items[offset:end], "limit": limit, "offset": offset})
 	}))
 
 	api.POST("/tenants", requireSuperuser(func(e *core.RequestEvent) error {
@@ -105,10 +128,48 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 		}
 		return e.JSON(http.StatusOK, map[string]any{"status": "provisioned", "item": tenantSummary{ID: record.Id, Slug: record.GetString("slug"), DisplayName: record.GetString("display_name"), Status: record.GetString("status"), Plan: record.GetString("plan")}})
 	}))
+
+	api.GET("/tenants/{slug}", requireAuthenticated(func(e *core.RequestEvent) error { return getTenant(e, engine) }))
+	api.PATCH("/tenants/{slug}", requireAuthenticated(func(e *core.RequestEvent) error { return updateTenant(e, engine) }))
+	api.GET("/tenants/{slug}/memberships", requireAuthenticated(func(e *core.RequestEvent) error { return listMemberships(e, engine) }))
+	api.POST("/tenants/{slug}/memberships", requireAuthenticated(func(e *core.RequestEvent) error { return addMembership(e, engine) }))
+	api.PATCH("/tenants/{slug}/memberships/{principal}", requireAuthenticated(func(e *core.RequestEvent) error { return updateMembership(e, engine) }))
+	api.DELETE("/tenants/{slug}/memberships/{principal}", requireAuthenticated(func(e *core.RequestEvent) error { return deleteMembership(e, engine) }))
 }
 
-var _ = errors.New
+func tenantPagination(e *core.RequestEvent, def, max int) (int, int) {
+	limit := def
+	offset := 0
+	if raw := strings.TrimSpace(e.Request.URL.Query().Get("limit")); raw != "" {
+		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+			limit = v
+		}
+	}
+	if raw := strings.TrimSpace(e.Request.URL.Query().Get("perPage")); raw != "" {
+		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+			limit = v
+		}
+	}
+	if limit > max {
+		limit = max
+	}
+	if raw := strings.TrimSpace(e.Request.URL.Query().Get("offset")); raw != "" {
+		if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
+			offset = v
+		}
+	}
+	if raw := strings.TrimSpace(e.Request.URL.Query().Get("page")); raw != "" {
+		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+			offset = (v - 1) * limit
+		}
+	}
+	return limit, offset
+}
 
-var _ = errors.New
-
-var _ = errors.New
+func tenantSummaries(records []*core.Record) []tenantSummary {
+	items := make([]tenantSummary, 0, len(records))
+	for _, r := range records {
+		items = append(items, tenantSummary{ID: r.Id, Slug: r.GetString("slug"), DisplayName: r.GetString("display_name"), Status: r.GetString("status"), Plan: r.GetString("plan")})
+	}
+	return items
+}
