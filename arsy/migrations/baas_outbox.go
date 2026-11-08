@@ -22,11 +22,11 @@ func upBaaSOutbox(app core.App) error {
 			&core.TextField{Name: "tenant_id", Required: true, Max: 64},
 			&core.TextField{Name: "idempotency_key", Max: 128},
 			&core.TextField{Name: "state", Required: true, Max: 32, Pattern: `^(pending|in_progress|success|failed_retryable|failed_permanent)$`},
-			&core.NumberField{Name: "attempt_count", Min: 0},
+			&core.NumberField{Name: "attempt_count"},
 			&core.TextField{Name: "result_summary", Max: 500},
 		)
 		c.Indexes = types.JSONArray[string]{
-			"CREATE INDEX idx_baas_outbox_state ON arsy_outbox (state, created)",
+			"CREATE INDEX idx_baas_outbox_state ON arsy_outbox (state)",
 			"CREATE INDEX idx_baas_outbox_tenant ON arsy_outbox (tenant_id)",
 		}
 	})
