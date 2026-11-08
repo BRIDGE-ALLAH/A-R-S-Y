@@ -6,10 +6,20 @@ import (
 	"fmt"
 	"path/filepath"
 	"sync"
+	"time"
 
 	_ "modernc.org/sqlite" // register sqlite driver used by PocketBase
 
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
+)
+
+const (
+	// defaultMaxHandles bounds how many tenant database handles a provider keeps
+	// cached. Eviction is least-recently-used.
+	defaultMaxHandles = 64
+	// defaultIdleTimeout is how long a cached handle may sit unused before
+	// it is evicted on the next Open/CloseIdle call.
+	defaultIdleTimeout = 30 * time.Minute
 )
 
 // sqliteDatastore implements Datastore for a SQLite file.
@@ -18,9 +28,12 @@ type sqliteDatastore struct {
 	db       *sql.DB
 	once     sync.Once
 	closeErr error
+
+	// lastUsed is guarded by the owning SQLiteProvider mutex.
+	lastUsed time.Time
 }
 
-func (s *sqliteDatastore) DB() *sql.DB                    { return s.db }
+func (s *sqliteDatastore) DB() *sql.DB                     { return s.db }
 func (s *sqliteDatastore) TenantID() string               { return s.tenantID }
 func (s *sqliteDatastore) Ping(ctx context.Context) error { return s.db.PingContext(ctx) }
 func (s *sqliteDatastore) Close() error {
@@ -29,21 +42,41 @@ func (s *sqliteDatastore) Close() error {
 }
 
 // SQLiteProvider is a Provider that opens one SQLite file per tenant under a
-// shared directory managed by config.BaaSDirectories.
+// shared directory managed by config.BaaSDirectories. Handles are cached by
+// immutable tenant ID, bounded by maxHandles, and idle-evicted.
 type SQLiteProvider struct {
 	dirs config.BaaSDirectories
 
-	mu     sync.RWMutex
-	store  map[string]*sqliteDatastore
-	closed bool
+	mu          sync.Mutex
+	store       map[string]*sqliteDatastore
+	closed      bool
+	maxHandles  int
+	idleTimeout time.Duration
 }
 
 // NewSQLiteProvider constructs a provider rooted at dirs.TenantsRoot.
 func NewSQLiteProvider(dirs config.BaaSDirectories) *SQLiteProvider {
 	return &SQLiteProvider{
-		dirs:  dirs,
-		store: make(map[string]*sqliteDatastore),
+		dirs:        dirs,
+		store:       make(map[string]*sqliteDatastore),
+		maxHandles:  defaultMaxHandles,
+		idleTimeout: defaultIdleTimeout,
 	}
+}
+
+// SetMaxHandles bounds the number of cached tenant handles. n <= 0 means
+// unbounded (not recommended for production).
+func (p *SQLiteProvider) SetMaxHandles(n int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.maxHandles = n
+}
+
+// SetIdleTimeout sets how long an unused cached handle is retained.
+func (p *SQLiteProvider) SetIdleTimeout(d time.Duration) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.idleTimeout = d
 }
 
 // Open returns or creates the SQLite datastore for tenantID.
@@ -55,25 +88,20 @@ func (p *SQLiteProvider) Open(ctx context.Context, tenantID string) (Datastore, 
 		return nil, fmt.Errorf("%w: path components not allowed in tenant ID %q", ErrInvalidTenantID, tenantID)
 	}
 
-	p.mu.RLock()
-	if p.closed {
-		p.mu.RUnlock()
-		return nil, ErrDatastoreClosed
-	}
-	if ds, ok := p.store[tenantID]; ok {
-		p.mu.RUnlock()
-		return ds, nil
-	}
-	p.mu.RUnlock()
-
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.closed {
 		return nil, ErrDatastoreClosed
 	}
-	// Double-check after acquiring write lock.
+	now := time.Now()
 	if ds, ok := p.store[tenantID]; ok {
+		ds.lastUsed = now
 		return ds, nil
+	}
+	// Bounded cache: evict idle handles, then the least-recently-used handle.
+	p.evictIdleLocked(now.Add(-p.idleTimeout))
+	if p.maxHandles > 0 && len(p.store) >= p.maxHandles {
+		p.evictOldestLocked()
 	}
 
 	dbPath, err := p.dirs.TenantDBPath(tenantID)
@@ -92,13 +120,13 @@ func (p *SQLiteProvider) Open(ctx context.Context, tenantID string) (Datastore, 
 		return nil, fmt.Errorf("tenancy: ping sqlite for tenant %q: %w", tenantID, err)
 	}
 
-	ds := &sqliteDatastore{tenantID: tenantID, db: db}
+	ds := &sqliteDatastore{tenantID: tenantID, db: db, lastUsed: now}
 	p.store[tenantID] = ds
 	return ds, nil
 }
 
 // CloseTenant closes and evicts the Datastore for tenantID if present.
-func (p *SQLiteProvider) CloseTenant(ctx context.Context, tenantID string) error {
+func (p *SQLiteProvider) CloseTenant(_ context.Context, tenantID string) error {
 	if tenantID == "" {
 		return nil
 	}
@@ -114,6 +142,47 @@ func (p *SQLiteProvider) CloseTenant(ctx context.Context, tenantID string) error
 	err := ds.Close()
 	delete(p.store, tenantID)
 	return err
+}
+
+// CloseIdle evicts tenant handles unused for longer than idleAfter.
+func (p *SQLiteProvider) CloseIdle(_ context.Context, idleAfter time.Duration) error {
+	if idleAfter <= 0 {
+		return nil
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.closed {
+		return ErrDatastoreClosed
+	}
+	return p.evictIdleLocked(time.Now().Add(-idleAfter))
+}
+
+func (p *SQLiteProvider) evictIdleLocked(cutoff time.Time) error {
+	var firstErr error
+	for id, ds := range p.store {
+		if ds.lastUsed.Before(cutoff) {
+			if err := ds.Close(); err != nil && firstErr == nil {
+				firstErr = fmt.Errorf("tenancy: close idle tenant %q: %w", id, err)
+			}
+			delete(p.store, id)
+		}
+	}
+	return firstErr
+}
+
+func (p *SQLiteProvider) evictOldestLocked() {
+	var oldestID string
+	var oldest time.Time
+	for id, ds := range p.store {
+		if oldestID == "" || ds.lastUsed.Before(oldest) {
+			oldestID, oldest = id, ds.lastUsed
+		}
+	}
+	if oldestID == "" {
+		return
+	}
+	_ = p.store[oldestID].Close()
+	delete(p.store, oldestID)
 }
 
 // Close closes all open datastores.
@@ -142,3 +211,23 @@ func (p *SQLiteProvider) Health(ctx context.Context, tenantID string) HealthStat
 	}
 	return HealthStatus{TenantID: tenantID, Healthy: true}
 }
+
+// ProviderStats reports bounded-cache state without exposing paths or secrets.
+type ProviderStats struct {
+	OpenHandles int
+	MaxHandles  int
+	Closed      bool
+}
+
+// Stats returns a snapshot of the provider's handle cache.
+func (p *SQLiteProvider) Stats() ProviderStats {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return ProviderStats{OpenHandles: len(p.store), MaxHandles: p.maxHandles, Closed: p.closed}
+}
+
+var _ Provider = (*SQLiteProvider)(nil)
+var _ HealthChecker = (*SQLiteProvider)(nil)
+var _ IdleCloser = (*SQLiteProvider)(nil)
+
+

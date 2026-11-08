@@ -3,6 +3,7 @@ package tenancy
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 // Datastore is the engine-neutral handle for a single tenant's database.
@@ -36,6 +37,12 @@ type Provider interface {
 	// Close closes all open datastores and releases internal resources.
 	// After Close, Open must return an error.
 	Close() error
+}
+
+// IdleCloser is implemented by providers that bound the lifetime of cached
+// tenant handles by evicting handles unused for longer than idleAfter.
+type IdleCloser interface {
+	CloseIdle(ctx context.Context, idleAfter time.Duration) error
 }
 
 // HealthStatus summarises the result of a health probe.
