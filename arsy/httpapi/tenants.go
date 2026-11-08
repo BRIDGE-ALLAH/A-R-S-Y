@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -67,42 +68,24 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 			Slug        string `json:"slug"`
 			DisplayName string `json:"display_name"`
 			Plan        string `json:"plan"`
+			IdempotencyKey string `json:"idempotency_key"`
 		}
 		if err := decodeServerRequest(e, &req); err != nil {
 			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid request"})
 		}
 		req.Slug = strings.ToLower(strings.TrimSpace(req.Slug))
 		req.DisplayName = strings.TrimSpace(req.DisplayName)
+		req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
+		if req.IdempotencyKey != "" && (len(req.IdempotencyKey) > 128 || !regexp.MustCompile(`^[a-zA-Z0-9._:-]+$`).MatchString(req.IdempotencyKey)) {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid idempotency key"})
+		}
 		if !tenantSlugPattern.MatchString(req.Slug) || req.Slug == "" || len(req.Slug) > 63 {
 			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid tenant slug"})
 		}
 		if req.DisplayName == "" || len(req.DisplayName) > 120 {
 			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "invalid display name"})
 		}
-		if _, err := e.App.FindFirstRecordByData("baas_tenants", "slug", req.Slug); err == nil {
-			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "tenant slug already exists"})
-		}
-		collection, err := e.App.FindCollectionByNameOrId("baas_tenants")
-		if err != nil {
-			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "tenant store unavailable"})
-		}
-		record := core.NewRecord(collection)
-		record.Set("slug", req.Slug)
-		record.Set("display_name", req.DisplayName)
-		record.Set("status", string(tenancy.StatusActive))
-		record.Set("plan", strings.TrimSpace(req.Plan))
-		if err := e.App.Save(record); err != nil {
-			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "failed to create tenant"})
-		}
-		if engine.Registry != nil {
-			dirs := config.BaaSDirectories{TenantsRoot: engine.TenantsRoot}
-			if err := bootstrap.ApplySchema(e.Request.Context(), dirs, record.Id, engine.Registry); err != nil {
-				record.Set("status", string(tenancy.StatusFailed))
-				_ = e.App.Save(record)
-				return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "tenant provisioning failed"})
-			}
-		}
-		return e.JSON(http.StatusCreated, map[string]any{"item": tenantSummary{ID: record.Id, Slug: record.GetString("slug"), DisplayName: record.GetString("display_name"), Status: record.GetString("status"), Plan: record.GetString("plan")}})
+		return provisionTenantCreate(e, engine, req.Slug, req.DisplayName, req.Plan, req.IdempotencyKey)
 	}))
 
 	api.POST("/tenants/{slug}/provision", requireSuperuser(func(e *core.RequestEvent) error {
@@ -111,22 +94,11 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 		if err != nil {
 			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "tenant not found"})
 		}
-		status := tenancy.Status(record.GetString("status"))
-		if status == tenancy.StatusDeleting {
-			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "tenant unavailable"})
+		var req struct {
+			IdempotencyKey string `json:"idempotency_key"`
 		}
-		if engine.Registry == nil {
-			return e.JSON(http.StatusServiceUnavailable, map[string]any{"status": "error", "message": "engine registry unavailable"})
-		}
-		dirs := config.BaaSDirectories{TenantsRoot: engine.TenantsRoot}
-		if err := bootstrap.ApplySchema(e.Request.Context(), dirs, record.Id, engine.Registry); err != nil {
-			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "tenant provisioning failed"})
-		}
-		if status == tenancy.StatusProvisioning || status == tenancy.StatusFailed {
-			record.Set("status", string(tenancy.StatusActive))
-			_ = e.App.Save(record)
-		}
-		return e.JSON(http.StatusOK, map[string]any{"status": "provisioned", "item": tenantSummary{ID: record.Id, Slug: record.GetString("slug"), DisplayName: record.GetString("display_name"), Status: record.GetString("status"), Plan: record.GetString("plan")}})
+		_ = decodeServerRequest(e, &req) // optional body
+		return provisionExistingTenant(e, engine, record, strings.TrimSpace(req.IdempotencyKey))
 	}))
 
 	api.GET("/tenants/{slug}", requireAuthenticated(func(e *core.RequestEvent) error { return getTenant(e, engine) }))
@@ -136,6 +108,101 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 	api.PATCH("/tenants/{slug}/memberships/{principal}", requireAuthenticated(func(e *core.RequestEvent) error { return updateMembership(e, engine) }))
 	api.DELETE("/tenants/{slug}/memberships/{principal}", requireAuthenticated(func(e *core.RequestEvent) error { return deleteMembership(e, engine) }))
 }
+
+func provisionTenantCreate(e *core.RequestEvent, engine EngineConfig, slug, displayName, plan, idempotencyKey string) error {
+	// Idempotent retry by slug: if an active tenant already exists with the same request shape, return it.
+	if existing, err := e.App.FindFirstRecordByData("baas_tenants", "slug", slug); err == nil {
+		st := tenancy.Status(existing.GetString("status"))
+		switch st {
+		case tenancy.StatusActive:
+			return e.JSON(http.StatusOK, map[string]any{"status": "already_exists", "item": tenantSummary{ID: existing.Id, Slug: existing.GetString("slug"), DisplayName: existing.GetString("display_name"), Status: existing.GetString("status"), Plan: existing.GetString("plan")}})
+		case tenancy.StatusProvisioning, tenancy.StatusFailed:
+			return provisionExistingTenant(e, engine, existing, idempotencyKey)
+		default:
+			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "tenant slug already exists"})
+		}
+	}
+	collection, err := e.App.FindCollectionByNameOrId("baas_tenants")
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "tenant store unavailable"})
+	}
+	record := core.NewRecord(collection)
+	record.Set("slug", slug)
+	record.Set("display_name", displayName)
+	record.Set("status", string(tenancy.StatusProvisioning))
+	record.Set("plan", strings.TrimSpace(plan))
+	if err := e.App.Save(record); err != nil {
+		// Retry race: another request created the slug.
+		if existing, ferr := e.App.FindFirstRecordByData("baas_tenants", "slug", slug); ferr == nil {
+			return provisionExistingTenant(e, engine, existing, idempotencyKey)
+		}
+		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "failed to create tenant"})
+	}
+	item, status, err := applyProvisioning(e, engine, record)
+	if err != nil {
+		return writeProvisionError(e, err)
+	}
+	return e.JSON(http.StatusCreated, map[string]any{"status": status, "item": item})
+}
+
+func provisionExistingTenant(e *core.RequestEvent, engine EngineConfig, record *core.Record, _ string) error {
+	item, status, err := applyProvisioning(e, engine, record)
+	if err != nil {
+		return writeProvisionError(e, err)
+	}
+	return e.JSON(http.StatusOK, map[string]any{"status": status, "item": item})
+}
+
+func writeProvisionError(e *core.RequestEvent, err error) error {
+	var ae *apiStatusError
+	if errors.As(err, &ae) {
+		return e.JSON(ae.code, map[string]any{"status": "error", "message": ae.message})
+	}
+	return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "tenant provisioning failed"})
+}
+
+func applyProvisioning(e *core.RequestEvent, engine EngineConfig, record *core.Record) (tenantSummary, string, error) {
+	status := tenancy.Status(record.GetString("status"))
+	if status == tenancy.StatusDeleting {
+		return tenantSummary{}, "", &apiStatusError{code: http.StatusConflict, message: "tenant unavailable"}
+	}
+	if engine.Registry == nil {
+		if status != tenancy.StatusActive {
+			record.Set("status", string(tenancy.StatusFailed))
+			_ = e.App.Save(record)
+		}
+		return tenantSummary{}, "", &apiStatusError{code: http.StatusServiceUnavailable, message: "engine registry unavailable"}
+	}
+	if status == tenancy.StatusSuspended {
+		return tenantSummary{}, "", &apiStatusError{code: http.StatusConflict, message: "tenant unavailable"}
+	}
+	if status != tenancy.StatusProvisioning {
+		record.Set("status", string(tenancy.StatusProvisioning))
+		if err := e.App.Save(record); err != nil {
+			return tenantSummary{}, "", &apiStatusError{code: http.StatusInternalServerError, message: "tenant provisioning failed"}
+		}
+	}
+	dirs := config.BaaSDirectories{TenantsRoot: engine.TenantsRoot}
+	if err := bootstrap.ApplySchema(e.Request.Context(), dirs, record.Id, engine.Registry); err != nil {
+		record.Set("status", string(tenancy.StatusFailed))
+		_ = e.App.Save(record)
+		return tenantSummary{}, "", &apiStatusError{code: http.StatusInternalServerError, message: "tenant provisioning failed"}
+	}
+	record.Set("status", string(tenancy.StatusActive))
+	if err := e.App.Save(record); err != nil {
+		record.Set("status", string(tenancy.StatusFailed))
+		_ = e.App.Save(record)
+		return tenantSummary{}, "", &apiStatusError{code: http.StatusInternalServerError, message: "tenant provisioning failed"}
+	}
+	return tenantSummary{ID: record.Id, Slug: record.GetString("slug"), DisplayName: record.GetString("display_name"), Status: record.GetString("status"), Plan: record.GetString("plan")}, "provisioned", nil
+}
+
+type apiStatusError struct {
+	code    int
+	message string
+}
+
+func (e *apiStatusError) Error() string { return e.message }
 
 func tenantPagination(e *core.RequestEvent, def, max int) (int, int) {
 	limit := def
