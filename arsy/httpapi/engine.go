@@ -63,7 +63,11 @@ func resolveAuthorizedTenantDatastore(e *core.RequestEvent, engine EngineConfig)
 		return nil, tenancy.ErrTenantNotFound
 	}
 	tenant := tenancy.Tenant{ID: record.Id, Slug: record.GetString("slug"), Status: tenancy.Status(record.GetString("status"))}
-	if err := authorizeEngineTenant(e, record); err != nil {
+	role, err := authorizeEngineTenant(e, record)
+	if err != nil {
+		return nil, err
+	}
+	if err := authorizeEngineMethod(e.Request.Method, role, e); err != nil {
 		return nil, err
 	}
 	switch tenant.Status {
@@ -93,18 +97,49 @@ func resolveAuthorizedTenantDatastore(e *core.RequestEvent, engine EngineConfig)
 
 var errEngineTenantForbidden = errors.New("engine tenant access denied")
 
-func authorizeEngineTenant(e *core.RequestEvent, tenant *core.Record) error {
+func authorizeEngineTenant(e *core.RequestEvent, tenant *core.Record) (tenancy.Role, error) {
 	if e == nil || e.Auth == nil {
-		return errors.New("unauthorized")
+		return "", errors.New("unauthorized")
 	}
 	if e.HasSuperuserAuth() {
-		return nil
+		return tenancy.RoleOwner, nil
+	}
+	registry := tenancy.NewPBMembershipRegistry(e.App)
+	member, err := registry.Membership(e.Request.Context(), tenant.Id, e.Auth.Id)
+	if err == nil {
+		return member.Role, nil
 	}
 	owner := strings.TrimSpace(tenant.GetString("owner"))
 	if owner != "" && owner == e.Auth.Id {
+		return tenancy.RoleOwner, nil
+	}
+	return "", errEngineTenantForbidden
+}
+
+func authorizeEngineMethod(method string, role tenancy.Role, e *core.RequestEvent) error {
+	// Query/read endpoints allow viewer+; mutating record endpoints require write role.
+	if e != nil && e.HasSuperuserAuth() {
 		return nil
 	}
-	// Membership table is optional/future; owner is the minimal implemented grant.
+	switch method {
+	case http.MethodGet, http.MethodHead:
+		return nil
+	case http.MethodPost:
+		if e != nil && strings.HasSuffix(e.Request.URL.Path, "/query") {
+			return nil
+		}
+		if tenancy.RoleAllowsWrite(role) {
+			return nil
+		}
+	case http.MethodPatch, http.MethodPut, http.MethodDelete:
+		if tenancy.RoleAllowsWrite(role) {
+			return nil
+		}
+	default:
+		if tenancy.RoleAllowsWrite(role) {
+			return nil
+		}
+	}
 	return errEngineTenantForbidden
 }
 

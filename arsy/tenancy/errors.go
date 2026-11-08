@@ -19,4 +19,10 @@
 
  	// ErrInvalidTenantID is returned for malformed tenant identifiers.
  	ErrInvalidTenantID = errors.New("tenancy: invalid tenant ID")
+
+	// ErrMembershipNotFound is returned when an active tenant membership does not exist.
+	ErrMembershipNotFound = errors.New("tenancy: membership not found")
+
+	// ErrForbidden is returned when a principal is authenticated but not authorized.
+	ErrForbidden = errors.New("tenancy: forbidden")
  )
