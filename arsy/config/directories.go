@@ -24,12 +24,29 @@ type BaaSDirectories struct {
 // EnsureBaaSDirectories creates the full A-R-S-Y + BaaS directory layout.
 // tenantsRoot may be empty; if so it defaults to <root>/tenants.
 func EnsureBaaSDirectories(root, tenantsRoot string) (BaaSDirectories, error) {
-	dirs, err := EnsureDirectories(root)
+	if root == "" {
+		return BaaSDirectories{}, fmt.Errorf("A-R-S-Y data directory is empty")
+	}
+	absRoot := root
+	if !filepath.IsAbs(absRoot) {
+		resolved, err := filepath.Abs(absRoot)
+		if err != nil {
+			return BaaSDirectories{}, fmt.Errorf("resolve A-R-S-Y data directory %q: %w", root, err)
+		}
+		absRoot = resolved
+	}
+	dirs, err := EnsureDirectories(absRoot)
 	if err != nil {
 		return BaaSDirectories{}, err
 	}
 	if tenantsRoot == "" {
-		tenantsRoot = filepath.Join(root, "tenants")
+		tenantsRoot = filepath.Join(absRoot, "tenants")
+	} else if !filepath.IsAbs(tenantsRoot) {
+		resolved, err := filepath.Abs(tenantsRoot)
+		if err != nil {
+			return BaaSDirectories{}, fmt.Errorf("resolve tenant data root %q: %w", tenantsRoot, err)
+		}
+		tenantsRoot = resolved
 	}
 	tenantsRoot = filepath.Clean(tenantsRoot)
 	if !filepath.IsAbs(tenantsRoot) {

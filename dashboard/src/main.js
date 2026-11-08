@@ -48,7 +48,7 @@ function renderLogin() {
         <div class="brand"><span class="brand-mark">A</span><span>A-R-S-Y</span></div>
         <div class="eyebrow">CONTROL PLANE</div>
         <h1>Sign in</h1>
-        <p class="subtitle">Use your existing PocketBase superuser account.</p>
+        <p class="subtitle">Use your A-R-S-Y superuser account.</p>
         <form id="login-form" class="login-form">
           <label for="identity">Email</label>
           <input id="identity" name="identity" type="email" autocomplete="username" required />

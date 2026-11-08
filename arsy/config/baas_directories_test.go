@@ -37,13 +37,19 @@
  	}
  }
 
- func TestEnsureBaaSDirectories_RelativePathRejected(t *testing.T) {
- 	root := t.TempDir()
- 	_, err := config.EnsureBaaSDirectories(root, "relative/path")
- 	if err == nil {
- 		t.Fatal("expected error for relative tenant root, got nil")
- 	}
- }
+func TestEnsureBaaSDirectories_RelativeTenantRootResolved(t *testing.T) {
+	root := t.TempDir()
+	d, err := config.EnsureBaaSDirectories(root, "relative-tenants")
+	if err != nil {
+		t.Fatalf("unexpected error for relative tenant root: %v", err)
+	}
+	if !filepath.IsAbs(d.TenantsRoot) {
+		t.Fatalf("expected resolved absolute tenants root, got %q", d.TenantsRoot)
+	}
+	if filepath.Base(d.TenantsRoot) != "relative-tenants" {
+		t.Fatalf("unexpected resolved tenants root: %q", d.TenantsRoot)
+	}
+}
 
  func TestTenantDBPath_Valid(t *testing.T) {
  	root := t.TempDir()

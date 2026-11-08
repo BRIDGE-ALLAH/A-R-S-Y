@@ -42,14 +42,19 @@ func main() {
 			absDataDir = resolved
 		}
 	}
+	baasDirs, err := config.EnsureBaaSDirectories(arsyConfig.DataDir, "")
+	if err != nil {
+		log.Fatal(err)
+	}
 	httpapi.RegisterWithEngine(app, arsyConfig, pocketbase.Version, httpapi.EngineConfig{
 		Registry:    engineReg,
-		TenantsRoot: filepath.Join(filepath.Clean(absDataDir), "tenants"),
+		TenantsRoot: baasDirs.TenantsRoot,
 	})
 
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
 		Id: "arsy_data_directories",
 		Func: func(e *core.ServeEvent) error {
+			_ = absDataDir
 			if _, err := config.EnsureBaaSDirectories(arsyConfig.DataDir, ""); err != nil {
 				return err
 			}
