@@ -23,8 +23,8 @@ import (
 
 var _ core.App = (*PocketBase)(nil)
 
-// Version of A-R-S-Y
-var Version = "(untracked)"
+// Version of A-R-S-Y. Set by release commits; build tooling may override via ldflags.
+var Version = "0.1.0-dev.20261108"
 
 // PocketBase defines a PocketBase app launcher.
 //

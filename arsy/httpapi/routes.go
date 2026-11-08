@@ -11,7 +11,9 @@ import (
 	"github.com/bridge-allah/a-r-s-y/tools/hook"
 )
 
-func Register(app core.App, cfg config.Config, version string) {
+// RegisterWithEngine registers the standard A-R-S-Y API and, when configured,
+// the tenant-scoped engine CRUD routes.
+func RegisterWithEngine(app core.App, cfg config.Config, version string, engine EngineConfig) {
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
 		Id: "arsy_http_api",
 		Func: func(e *core.ServeEvent) error {
@@ -47,6 +49,9 @@ func Register(app core.App, cfg config.Config, version string) {
 
 			registerDeploymentRoutes(e, api, cfg)
 			registerProjectAndAppRoutes(api, cfg)
+			registerStopApplicationRoute(api, cfg)
+			registerEngineRoutes(api, cfg, engine)
+			registerTenantRoutes(api, cfg, engine)
 
 			e.Router.GET(cfg.ConsolePath, func(re *core.RequestEvent) error {
 				return re.Redirect(http.StatusPermanentRedirect, cfg.ConsolePath+"/")
@@ -55,4 +60,8 @@ func Register(app core.App, cfg config.Config, version string) {
 			return e.Next()
 		},
 	})
+}
+
+func Register(app core.App, cfg config.Config, version string) {
+	RegisterWithEngine(app, cfg, version, EngineConfig{})
 }

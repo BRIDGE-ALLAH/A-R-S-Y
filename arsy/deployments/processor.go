@@ -68,6 +68,9 @@ func NewSSHDeploymentProcessor(app core.App, secretKeyEnv string) DeploymentProc
 		if _, err := ValidateCompose(string(manifest)); err != nil {
 			return fmt.Errorf("application Compose manifest is invalid: %w", err)
 		}
+		if err := SnapshotManifest(app, deploymentID, string(manifest), secretKeyEnv); err != nil {
+			return fmt.Errorf("store deployment manifest snapshot: %w", err)
+		}
 		manifestPath, err := ManifestPath(applicationSlug, deploymentID)
 		if err != nil {
 			return err

@@ -1,4 +1,4 @@
-﻿import "./style.css";
+import "./style.css";
 import { apiFetch, currentUser, isAuthenticated, login, logout, verifySession } from "./auth.js";
 
 const pages = {
@@ -6,6 +6,7 @@ const pages = {
   servers: ["Servers", "Manage the Linux hosts connected to this control plane."],
   projects: ["Projects", "Group related applications into projects."],
   deployments: ["Deployments", "Review deployment activity and application status."],
+  engine: ["Engine", "Create tenants and manage engine records through the live API."],
 };
 
 let onboarding = null;
@@ -140,6 +141,8 @@ function renderPage() {
     content = '<div id="server-manager"><article class="empty-card"><h2>Loading servers…</h2></article></div>';
   } else if (id === "projects") {
     content = '<div id="project-manager"><article class="empty-card"><h2>Loading projects…</h2></article></div>';
+  } else if (id === "engine") {
+    content = '<div id="engine-manager"><article class="empty-card"><h2>Loading engine console…</h2></article></div>';
   } else {
     content = '<div id="deployment-manager"><article class="empty-card"><h2>Loading deployments…</h2></article></div>';
   }
@@ -153,6 +156,7 @@ function renderPage() {
   if (id === "servers") void renderServerManager();
   if (id === "projects") void renderProjectManager();
   if (id === "deployments") void renderDeploymentManager();
+  if (id === "engine") void renderEngineManager();
 }
 
 async function render() {
@@ -562,7 +566,8 @@ async function renderDeploymentManager() {
 
   async function refreshDeployments() {
     try {
-      const deployments = await apiFetch("/api/arsy/v1/deployments");
+      const payload = await apiFetch("/api/arsy/v1/deployments");
+      const deployments = Array.isArray(payload) ? payload : (payload.items || []);
       if (!deployments || !deployments.length) {
         list.innerHTML = '<article class="empty-card"><h2>No deployments yet</h2><p>Deployments will appear here once applications are deployed.</p></article>';
         return;
@@ -583,9 +588,9 @@ async function renderDeploymentManager() {
           </div>
           <div style="margin-top:12px; display:flex; gap:8px;">
             <button class="quiet-button" data-action="view-log" data-id="${escapeHTML(d.deployment_id)}">View Logs</button>
-            <button class="quiet-button" data-action="stop" data-id="${escapeHTML(d.deployment_id)}">Stop</button>
-            <button class="quiet-button" data-action="redeploy" data-id="${escapeHTML(d.deployment_id)}">Redeploy</button>
-            <button class="quiet-button" data-action="rollback" data-id="${escapeHTML(d.deployment_id)}">Rollback</button>
+            <button class="quiet-button" data-action="stop" data-id="${escapeHTML(d.deployment_id)}" ${ACTIVE_STATES.has(d.state) ? "" : "disabled"}>Stop</button>
+            <button class="quiet-button" data-action="redeploy" data-id="${escapeHTML(d.deployment_id)}" ${ACTIVE_STATES.has(d.state) ? "disabled" : ""}>Redeploy</button>
+            <button class="quiet-button" data-action="rollback" data-id="${escapeHTML(d.deployment_id)}" ${d.state === "succeeded" && d.previous_deployment_id ? "" : "disabled"}>Rollback</button>
           </div>
           <div id="log-${escapeHTML(d.deployment_id)}" style="display:none;" class="log-output"></div>
         </article>
@@ -631,4 +636,86 @@ async function renderDeploymentManager() {
   });
 
   void refreshDeployments();
+}
+
+
+async function renderEngineManager() {
+  const root = document.querySelector("#engine-manager");
+  if (!root) return;
+  root.innerHTML = `
+    <section class="form-card">
+      <h2>Create a tenant</h2>
+      <p>Tenants use isolated databases. Creating a tenant provisions the starter engine schema.</p>
+      <form id="tenant-create-form">
+        <label for="tenant-slug">Tenant slug</label>
+        <input id="tenant-slug" name="slug" required maxlength="63" placeholder="acme-co" />
+        <label for="tenant-name">Display name</label>
+        <input id="tenant-name" name="display_name" required maxlength="120" placeholder="Acme Co" />
+        <button type="submit" class="primary-button">Create tenant</button>
+      </form>
+    </section>
+    <section class="form-card">
+      <h2>Engine records (base.company)</h2>
+      <p>This uses the live tenant-scoped engine API. Writes require explicit allowed fields.</p>
+      <form id="engine-record-form">
+        <label for="engine-tenant">Tenant slug</label>
+        <input id="engine-tenant" name="tenant" required placeholder="acme-co" />
+        <div class="form-row"><div><label for="company-id">Company ID</label><input id="company-id" name="id" required placeholder="c1" /></div><div><label for="company-code">Code</label><input id="company-code" name="code" placeholder="ACME" /></div></div>
+        <label for="company-name">Name</label>
+        <input id="company-name" name="name" required placeholder="Acme" />
+        <button type="submit" class="primary-button">Save company record</button>
+      </form>
+    </section>
+    <p id="engine-feedback" class="server-feedback" role="status"></p>
+    <div id="engine-list" class="server-list"><article class="empty-card"><p>Loading tenants…</p></article></div>
+  `;
+
+  const feedback = root.querySelector("#engine-feedback");
+  const list = root.querySelector("#engine-list");
+
+  async function refreshTenants() {
+    try {
+      const data = await apiFetch("/api/arsy/v1/tenants");
+      const items = Array.isArray(data.items) ? data.items : [];
+      list.innerHTML = items.length ? items.map((t) => `
+        <article class="server-card">
+          <div class="server-card-head"><div><h3>${escapeHTML(t.display_name || t.slug)}</h3><p><code>${escapeHTML(t.slug)}</code> · ${escapeHTML(t.status || "unknown")}</p></div></div>
+          <div class="server-actions"><button class="quiet-button" data-action="provision-tenant" data-slug="${escapeHTML(t.slug)}">Provision schema</button></div>
+        </article>`).join("") : '<article class="empty-card"><h2>No tenants yet</h2><p>Create a tenant to use the engine API.</p></article>';
+    } catch (err) { list.innerHTML = `<article class="notice-card"><p>${escapeHTML(err.message || "Unable to load tenants.")}</p></article>`; }
+  }
+
+  root.querySelector("#tenant-create-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button");
+    btn.disabled = true; feedback.textContent = "";
+    const values = new FormData(e.target);
+    try {
+      await apiFetch("/api/arsy/v1/tenants", { method: "POST", body: JSON.stringify({ slug: values.get("slug"), display_name: values.get("display_name") }) });
+      e.target.reset(); feedback.textContent = "Tenant created and provisioned."; await refreshTenants();
+    } catch (err) { feedback.textContent = err.message || "Failed to create tenant."; } finally { btn.disabled = false; }
+  });
+
+  root.querySelector("#engine-record-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button");
+    btn.disabled = true; feedback.textContent = "";
+    const values = new FormData(e.target);
+    const tenant = String(values.get("tenant") || "").trim();
+    try {
+      await apiFetch("/api/arsy/v1/engine/base.company/records", { method: "POST", headers: { "X-Arsy-Tenant": tenant }, body: JSON.stringify({ values: { id: values.get("id"), name: values.get("name"), code: values.get("code") }, allowed_fields: ["id","name","code"] }) });
+      feedback.textContent = "Company record saved for tenant " + tenant + ".";
+    } catch (err) { feedback.textContent = err.message || "Failed to save engine record."; } finally { btn.disabled = false; }
+  });
+
+  list.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action='provision-tenant']");
+    if (!btn) return;
+    btn.disabled = true; feedback.textContent = "";
+    try { await apiFetch("/api/arsy/v1/tenants/" + encodeURIComponent(btn.dataset.slug) + "/provision", { method: "POST" }); feedback.textContent = "Tenant schema provisioned."; await refreshTenants(); }
+    catch (err) { feedback.textContent = err.message || "Provisioning failed."; }
+    finally { btn.disabled = false; }
+  });
+
+  await refreshTenants();
 }

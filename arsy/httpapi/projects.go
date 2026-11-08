@@ -47,6 +47,16 @@ type createApplicationRequest struct {
 	ComposeManifest string `json:"compose_manifest"`
 }
 
+type updateProjectRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type updateApplicationRequest struct {
+	Name            *string `json:"name"`
+	ComposeManifest *string `json:"compose_manifest"`
+}
+
 func listProjects(e *core.RequestEvent) error {
 	records, err := e.App.FindAllRecords("arsy_projects")
 	if err != nil {
@@ -64,6 +74,53 @@ func listProjects(e *core.RequestEvent) error {
 		})
 	}
 	return e.JSON(http.StatusOK, map[string]any{"items": items})
+}
+
+func getProject(e *core.RequestEvent) error {
+	record, err := e.App.FindRecordById("arsy_projects", e.Request.PathValue("id"))
+	if err != nil {
+		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "project not found"})
+	}
+	return e.JSON(http.StatusOK, projectDTOFromRecord(record))
+}
+
+func updateProject(e *core.RequestEvent) error {
+	var req updateProjectRequest
+	if err := decodeServerRequest(e, &req); err != nil {
+		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+	}
+	record, err := e.App.FindRecordById("arsy_projects", e.Request.PathValue("id"))
+	if err != nil {
+		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "project not found"})
+	}
+	if name := strings.TrimSpace(req.Name); name != "" {
+		record.Set("name", name)
+	}
+	if req.Description != "" || req.Name != "" {
+		record.Set("description", strings.TrimSpace(req.Description))
+	}
+	if err := e.App.Save(record); err != nil {
+		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+	}
+	return e.JSON(http.StatusOK, projectDTOFromRecord(record))
+}
+
+func deleteProject(e *core.RequestEvent) error {
+	record, err := e.App.FindRecordById("arsy_projects", e.Request.PathValue("id"))
+	if err != nil {
+		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "project not found"})
+	}
+	apps, err := e.App.FindRecordsByFilter("arsy_applications", "project = {:project}", "", 1, 0, map[string]any{"project": record.Id})
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+	}
+	if len(apps) > 0 {
+		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "project still has applications; remove them first"})
+	}
+	if err := e.App.Delete(record); err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+	}
+	return e.JSON(http.StatusOK, map[string]any{"status": "deleted", "project_id": record.Id})
 }
 
 func createProject(e *core.RequestEvent) error {
@@ -97,14 +154,7 @@ func createProject(e *core.RequestEvent) error {
 		return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
 	}
 
-	return e.JSON(http.StatusCreated, projectDTO{
-		ID:          record.Id,
-		Name:        record.GetString("name"),
-		Slug:        record.GetString("slug"),
-		Description: record.GetString("description"),
-		Created:     record.GetDateTime("created").String(),
-		Updated:     record.GetDateTime("updated").String(),
-	})
+	return e.JSON(http.StatusCreated, projectDTOFromRecord(record))
 }
 
 func listApplications(e *core.RequestEvent) error {
@@ -122,18 +172,78 @@ func listApplications(e *core.RequestEvent) error {
 
 	items := make([]applicationDTO, 0, len(records))
 	for _, r := range records {
-		items = append(items, applicationDTO{
-			ID:             r.Id,
-			ProjectID:      r.GetString("project"),
-			ServerID:       r.GetString("server"),
-			Name:           r.GetString("name"),
-			Slug:           r.GetString("slug"),
-			LifecycleState: r.GetString("lifecycle_state"),
-			Created:        r.GetDateTime("created").String(),
-			Updated:        r.GetDateTime("updated").String(),
-		})
+		items = append(items, applicationDTOFromRecord(r))
 	}
 	return e.JSON(http.StatusOK, map[string]any{"items": items})
+}
+
+func getApplication(e *core.RequestEvent) error {
+	record, err := e.App.FindRecordById("arsy_applications", e.Request.PathValue("id"))
+	if err != nil {
+		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
+	}
+	return e.JSON(http.StatusOK, applicationDTOFromRecord(record))
+}
+
+func updateApplication(cfg config.Config) func(e *core.RequestEvent) error {
+	return func(e *core.RequestEvent) error {
+		var req updateApplicationRequest
+		if err := decodeServerRequest(e, &req); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+		}
+		record, err := e.App.FindRecordById("arsy_applications", e.Request.PathValue("id"))
+		if err != nil {
+			return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
+		}
+		active, err := deployments.HasActiveDeployment(e.App, record.Id)
+		if err != nil {
+			return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+		}
+		if active {
+			return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "cannot update application while a deployment is active"})
+		}
+		if req.Name != nil {
+			name := strings.TrimSpace(*req.Name)
+			if name == "" {
+				return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "name must not be empty"})
+			}
+			record.Set("name", name)
+		}
+		if req.ComposeManifest != nil {
+			manifest := strings.TrimSpace(*req.ComposeManifest)
+			if manifest == "" {
+				return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "compose_manifest must not be empty"})
+			}
+			ciphertext, encErr := deployments.EncryptManifest(manifest, cfg.SecretKeyEnv)
+			if encErr != nil {
+				return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "unable to encrypt application manifest; verify the secret key"})
+			}
+			record.Set("manifest_ciphertext", ciphertext)
+			record.Set("compose_manifest", "")
+		}
+		if err := e.App.Save(record); err != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
+		}
+		return e.JSON(http.StatusOK, applicationDTOFromRecord(record))
+	}
+}
+
+func deleteApplication(e *core.RequestEvent) error {
+	record, err := e.App.FindRecordById("arsy_applications", e.Request.PathValue("id"))
+	if err != nil {
+		return e.JSON(http.StatusNotFound, map[string]any{"status": "error", "message": "application not found"})
+	}
+	active, err := deployments.HasActiveDeployment(e.App, record.Id)
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+	}
+	if active {
+		return e.JSON(http.StatusConflict, map[string]any{"status": "error", "message": "cannot delete application while a deployment is active"})
+	}
+	if err := e.App.Delete(record); err != nil {
+		return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": err.Error()})
+	}
+	return e.JSON(http.StatusOK, map[string]any{"status": "deleted", "application_id": record.Id})
 }
 
 func createApplication(cfg config.Config) func(e *core.RequestEvent) error {
@@ -167,35 +277,55 @@ func createApplication(cfg config.Config) func(e *core.RequestEvent) error {
 		record.Set("lifecycle_state", "draft")
 
 		ciphertext, encErr := deployments.EncryptManifest(req.ComposeManifest, cfg.SecretKeyEnv)
-		if encErr == nil {
-			record.Set("manifest_ciphertext", ciphertext)
-			record.Set("compose_manifest", "")
-		} else {
-			record.Set("compose_manifest", req.ComposeManifest)
+		if encErr != nil {
+			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": "unable to encrypt application manifest; verify the secret key"})
 		}
+		record.Set("manifest_ciphertext", ciphertext)
+		record.Set("compose_manifest", "")
 
 		if err := e.App.Save(record); err != nil {
 			return e.JSON(http.StatusBadRequest, map[string]any{"status": "error", "message": err.Error()})
 		}
 
-		return e.JSON(http.StatusCreated, applicationDTO{
-			ID:             record.Id,
-			ProjectID:      record.GetString("project"),
-			ServerID:       record.GetString("server"),
-			Name:           record.GetString("name"),
-			Slug:           record.GetString("slug"),
-			LifecycleState: record.GetString("lifecycle_state"),
-			Created:        record.GetDateTime("created").String(),
-			Updated:        record.GetDateTime("updated").String(),
-		})
+		return e.JSON(http.StatusCreated, applicationDTOFromRecord(record))
 	}
 }
 
 func registerProjectAndAppRoutes(api *router.RouterGroup[*core.RequestEvent], cfg config.Config) {
 	api.GET("/projects", requireSuperuser(listProjects))
 	api.POST("/projects", requireSuperuser(createProject))
+	api.GET("/projects/{id}", requireSuperuser(getProject))
+	api.PATCH("/projects/{id}", requireSuperuser(updateProject))
+	api.DELETE("/projects/{id}", requireSuperuser(deleteProject))
 	api.GET("/applications", requireSuperuser(listApplications))
 	api.POST("/applications", requireSuperuser(createApplication(cfg)))
+	api.GET("/applications/{id}", requireSuperuser(getApplication))
+	api.PATCH("/applications/{id}", requireSuperuser(updateApplication(cfg)))
+	api.DELETE("/applications/{id}", requireSuperuser(deleteApplication))
+}
+
+func projectDTOFromRecord(r *core.Record) projectDTO {
+	return projectDTO{
+		ID:          r.Id,
+		Name:        r.GetString("name"),
+		Slug:        r.GetString("slug"),
+		Description: r.GetString("description"),
+		Created:     r.GetDateTime("created").String(),
+		Updated:     r.GetDateTime("updated").String(),
+	}
+}
+
+func applicationDTOFromRecord(r *core.Record) applicationDTO {
+	return applicationDTO{
+		ID:             r.Id,
+		ProjectID:      r.GetString("project"),
+		ServerID:       r.GetString("server"),
+		Name:           r.GetString("name"),
+		Slug:           r.GetString("slug"),
+		LifecycleState: r.GetString("lifecycle_state"),
+		Created:        r.GetDateTime("created").String(),
+		Updated:        r.GetDateTime("updated").String(),
+	}
 }
 
 func generateSlug(name string) string {

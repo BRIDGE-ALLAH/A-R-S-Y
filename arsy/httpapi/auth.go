@@ -20,3 +20,12 @@ func requireSuperuser(next func(*core.RequestEvent) error) func(*core.RequestEve
 		return next(e)
 	}
 }
+
+func requireAuthenticated(next func(*core.RequestEvent) error) func(*core.RequestEvent) error {
+	return func(e *core.RequestEvent) error {
+		if e.Auth == nil {
+			return e.JSON(http.StatusUnauthorized, map[string]any{"status": "unauthorized"})
+		}
+		return next(e)
+	}
+}

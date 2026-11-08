@@ -11,6 +11,7 @@ import (
 	"github.com/bridge-allah/a-r-s-y"
 	"github.com/bridge-allah/a-r-s-y/apis"
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
+	"github.com/bridge-allah/a-r-s-y/arsy/engine/bootstrap"
 	"github.com/bridge-allah/a-r-s-y/arsy/httpapi"
 	_ "github.com/bridge-allah/a-r-s-y/arsy/migrations"
 	"github.com/bridge-allah/a-r-s-y/arsy/security"
@@ -31,12 +32,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	httpapi.Register(app, arsyConfig, pocketbase.Version)
+	engineReg, err := bootstrap.DefaultRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	absDataDir := arsyConfig.DataDir
+	if !filepath.IsAbs(absDataDir) {
+		if resolved, err := filepath.Abs(absDataDir); err == nil {
+			absDataDir = resolved
+		}
+	}
+	httpapi.RegisterWithEngine(app, arsyConfig, pocketbase.Version, httpapi.EngineConfig{
+		Registry:    engineReg,
+		TenantsRoot: filepath.Join(filepath.Clean(absDataDir), "tenants"),
+	})
 
 	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
 		Id: "arsy_data_directories",
 		Func: func(e *core.ServeEvent) error {
-			if _, err := config.EnsureDirectories(arsyConfig.DataDir); err != nil {
+			if _, err := config.EnsureBaaSDirectories(arsyConfig.DataDir, ""); err != nil {
 				return err
 			}
 			return e.Next()
@@ -52,12 +66,12 @@ func main() {
 			fmt.Printf("Product: A-R-S-Y %s\n", pocketbase.Version)
 			fmt.Printf("Go runtime: %s\n", runtime.Version())
 			fmt.Printf("Data directory: %s\n", arsyConfig.DataDir)
-			dirs, err := config.EnsureDirectories(arsyConfig.DataDir)
+			dirs, err := config.EnsureBaaSDirectories(arsyConfig.DataDir, "")
 			if err != nil {
 				fmt.Printf("Data directory: error (%v)\n", err)
 				return err
 			}
-			fmt.Printf("Data directories: accessible (%s, %s)\n", dirs.Temp, dirs.Manifests)
+			fmt.Printf("Data directories: accessible (%s, %s, %s)\n", dirs.Temp, dirs.Manifests, dirs.TenantsRoot)
 			_, keyErr := security.LoadKey(arsyConfig.SecretKeyEnv)
 			secretConfigured := keyErr == nil
 			if !secretConfigured {
