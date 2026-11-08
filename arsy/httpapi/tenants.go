@@ -108,3 +108,7 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 }
 
 var _ = errors.New
+
+var _ = errors.New
+
+var _ = errors.New
