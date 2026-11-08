@@ -1,3 +1,11 @@
+## v1.0.0 (A-R-S-Y)
+
+- Added authenticated tenant-scoped engine runtime bootstrap and routes, including starter `base.company` provisioning and SQLite-per-tenant data access foundations.
+- Added project and application CRUD APIs with encrypted manifest handling, deployment snapshot/stop/redeploy/rollback wiring, and console/dashboard integration for real backend operations.
+- Added/updated A-R-S-Y HTTP API, migrations, persistence, tenancy, and deployment tests; rebuilt the embedded console assets.
+- Verification (local): `go test ./arsy/... -count=1` PASS; `cd dashboard && npm run build` PASS; `go build ./examples/base` PASS.
+- Notes: upstream PocketBase `core/` timing tests `TestAutodateRecordResave` and `TestOTPHasExpired` remain unrelated failures in this workspace and were not modified. No production deployment was executed; only local verification was run.
+
 ## v0.41.1
 
 - Added missing license info to the vendored fonts ([#8352](https://ganigeorgiev.com/pocketbase/discussions/8352)).
