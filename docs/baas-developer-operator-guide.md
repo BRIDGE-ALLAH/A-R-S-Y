@@ -85,10 +85,31 @@ handle; the control-plane record is removed by a separate cleanup step.
 ## 7. Engine policy
 
 - **Default engine is SQLite** (`modernc.org/sqlite`). No PostgreSQL service is
-  required to build, test or run the default deployment.
+  required to build, test or run the default deployment. The default build does
+  not pull in any PostgreSQL driver.
 - The datastore interface is engine-neutral. An optional PostgreSQL adapter
-  is a candidate consumer of this contract, not a dependency of the BaaS core.
+  lives in `arsy/tenancy/pgadapter` and is opt-in only:
+
+  ```go
+  import _ "github.com/bridge-allah/a-r-s-y/arsy/tenancy/pgadapter"
+  ```
+
+  It implements the same `tenancy.Provider`/`tenancy.HealthChecker` contract
+  behind `pgx`. It is a spike for a representative workload; production pooling
+  and connection management are operator responsibilities.
 - Per-tenant handles use `db.SetMaxOpenConns(1)`; SQLite serialises writers.
+
+## 7a. Engine selection criteria
+
+| Criterion | SQLite (default) | PostgreSQL (optional) |
+| --- | --- | --- |
+| Deployment footprint | Zero external service | Requires managed PostgreSQL |
+| Concurrency | Single writer, WAL reads | Multi-writer, pooled |
+| Scale ceiling | Single node, small-to-medium | Larger, multi-node |
+| Operational burden | None | Pooling, backups, extensions |
+
+Choose SQLite unless you need the PostgreSQL ceiling. The contract is the same;
+swapping the provider does not change routing, lifecycle or migration code.
 
 ## 8. Backup and restore
 
