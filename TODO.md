@@ -2,11 +2,11 @@
 
 > **Single source of truth for the product transformation backlog.** Every checkbox starts unchecked. Only check an item after its implementation is merged and its acceptance evidence is recorded.
 >
-> **Product goal:** transform the PocketBase-derived codebase into a complete, independently branded **A-R-S-Y Intelligent Enterprise ORM + Full-stack BaaS**. The shipped product must not expose PocketBase as a separate product: no PocketBase admin UI, setup wizard, installer, CLI identity, default pages, terminology, or user-facing workflow. PocketBase-derived code may remain as an internal implementation foundation where it is useful and legally permitted; preserve upstream copyright/license notices and do not perform unsafe bulk deletion.
+> **Product goal:** continue developing the already-transformed **A-R-S-Y Intelligent Enterprise ORM + Full-stack BaaS**. The current product direction is that the web experience, administration UI, setup flow and installer are already A-R-S-Y-native; this backlog must not treat them as unbuilt replacements. Verify that claim with repository/runtime evidence, then focus implementation on engine completeness, integration, security, database adapters, modules and developer experience. PocketBase-derived code may remain only as internal implementation lineage where required; do not reintroduce PocketBase as a user-facing product or blindly delete upstream-derived internals.
 
 ## 0. Product contract and non-negotiable rules
 
-- **A-R-S-Y is the product.** PocketBase is an upstream code lineage/internal foundation, not a user-facing product dependency.
+- **A-R-S-Y is the product.** The web, installer and user-facing product surfaces are considered transformed; tasks verify and harden them rather than rebuild them. PocketBase is internal code lineage only, not a user-facing product dependency.
 - **One application engine:** model metadata, schema, validation, security, queries, transactions, lifecycle, modules and APIs must have one coherent A-R-S-Y contract.
 - **Manifest-first and deterministic:** modules and apps are declared through versioned manifests. AI may draft or repair manifests, but deterministic validators and policy enforcement decide what can run.
 - **Database adapters, not database leakage:** ORM and business logic must not depend directly on SQLite-specific SQL or PocketBase collection internals.
@@ -17,13 +17,19 @@
 
 ## 1. Task format and completion policy
 
-Each task contains four mandatory checklists:
-- **SPEC** — scope and behavior are explicit.
-- **DESIGN** — implementation boundary and interfaces are explicit.
-- **RULE** — invariants and engineering constraints are explicit.
-- **ACCEPTANCE** — observable tests/evidence prove completion.
+Each task contains four mandatory, unchecked checklists:
+- **SPEC** — exact scope, behavior, inputs, outputs and explicit non-goals.
+- **DESIGN** — affected packages, data flow, interfaces, migration/compatibility strategy and implementation approach.
+- **RULE** — invariants, security constraints, failure behavior and forbidden implementation shortcuts.
+- **ACCEPTANCE** — observable, testable outcomes with named test/evidence artifacts.
 
-A task is complete only when all four sections are checked, its implementation is merged to `main`, required CI passes, and evidence is linked in the relevant PR or completion report. Subtasks are intentionally small and should be split further if an implementation cannot be reviewed independently.
+**Task metadata is mandatory:** stable ID, outcome-based title, priority (P0–P3), size (XS/S/M; split anything larger than M), dependencies, explicit non-goals and evidence location. Avoid vague tasks such as “improve”, “complete” or “support” without measurable outcomes.
+
+**Definition of Ready:** scope and non-goals are clear; dependencies are identified; design boundaries and acceptance checks are reviewable; no unresolved architecture decision blocks implementation.
+
+**Definition of Done:** all four checklists are checked; implementation/docs are merged to `main`; relevant unit, integration, security and CI checks pass; migration/compatibility impact is covered; evidence (PR, test run, screenshot, benchmark or report) is linked. Code merely written or a PR merely opened is not completion.
+
+**Granularity:** one task produces one independently reviewable outcome, normally within one focused PR. Split cross-layer work into engine/API/UI/test tasks. Do not mark a parent complete while required child work remains.
 
 ---
 
@@ -31,6 +37,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-001 — Establish the PocketBase transformation inventory
 **Depends on:** none
+**Priority:** P0 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Inventory every upstream-derived package, route, command, UI page, installer, migration, asset, configuration key and build artifact.
@@ -54,6 +62,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-002 — Define A-R-S-Y product architecture and public contract
 **Depends on:** ARSY-001
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define product layers: Application Platform, Intelligent ORM Engine, Runtime/API, Data Adapters, Web Studio, CLI/Installer.
@@ -77,6 +87,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-003 — Define release gates and transformation scorecard
 **Depends on:** ARSY-002
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define measurable completion criteria for engine, web, installer, CLI, security, tenancy and developer experience.
@@ -98,156 +110,170 @@ A task is complete only when all four sections are checked, its implementation i
 
 ---
 
-# PHASE 1 — Product identity, web surfaces and legacy experience
+# PHASE 1 — Verify transformed A-R-S-Y product surfaces
 
-## [ ] ARSY-010 — Replace the PocketBase Superuser UI with A-R-S-Y Studio
+## [ ] ARSY-010 — Verify A-R-S-Y Studio is the sole administration experience
 **Depends on:** ARSY-001, ARSY-002
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Identify all PocketBase Superuser UI routes, screens, navigation, assets, settings and API assumptions.
-- [ ] Define A-R-S-Y Studio information architecture for platform administration and app development.
-- [ ] Provide first-class screens for apps, tenants, models, records, modules, access policies, migrations and runtime health.
+- [ ] Inventory shipped Studio routes, screens, navigation, assets and API contracts.
+- [ ] Verify model, record, tenant, module, permission, migration and runtime-health workflows.
+- [ ] Record any remaining legacy admin UI or route as a reproducible defect.
 
 ### DESIGN
-- [ ] Build on the existing A-R-S-Y web stack where practical; define typed API contracts before screen implementation.
-- [ ] Separate platform administration from application data views.
-- [ ] Create a reusable design system, navigation shell, forms, tables, dialogs, notifications and error states.
+- [ ] Trace production startup to embedded web assets and API handlers.
+- [ ] Document the canonical Studio app, route ownership and typed API boundary.
+- [ ] Implement only evidenced gaps in the existing A-R-S-Y Studio.
 
 ### RULE
-- [ ] No PocketBase logo, title, copy, route label, iconography or Superuser workflow in shipped UI.
-- [ ] UI must not bypass backend authorization or call database internals.
-- [ ] Every screen must support loading, empty, error, permission-denied and responsive states.
+- [ ] Do not create a second admin console or rebuild a working Studio.
+- [ ] UI visibility never replaces backend authorization.
+- [ ] Preserve accessible, responsive loading/empty/error/denied states.
 
 ### ACCEPTANCE
-- [ ] A-R-S-Y Studio is the only shipped administration UI.
-- [ ] Core flows work end-to-end against A-R-S-Y APIs.
-- [ ] E2E tests cover login, app selection, model management, record CRUD and permission denial.
-- [ ] Browser console has no uncaught errors in supported flows.
+- [ ] Production binary serves the maintained A-R-S-Y Studio build.
+- [ ] Route and browser tests prove primary Studio workflows.
+- [ ] No PocketBase Superuser UI bundle or route is shipped or reachable.
+- [ ] Remaining gaps have linked, focused issues.
 
-## [ ] ARSY-011 — Replace default admin and setup experience
+## [ ] ARSY-011 — Verify A-R-S-Y first-run, owner bootstrap and setup lifecycle
 **Depends on:** ARSY-010, ARSY-020
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Replace legacy first-run and superuser setup flows with A-R-S-Y owner bootstrap.
-- [ ] Support secure initial owner creation, organization/workspace creation and first application creation.
-- [ ] Define recovery and re-bootstrap behavior for interrupted setup.
+- [ ] Trace clean-data-directory setup through owner, workspace and first-app creation.
+- [ ] Verify resume, recovery and already-initialized behavior.
+- [ ] Enumerate setup states and externally reachable bootstrap endpoints.
 
 ### DESIGN
-- [ ] Implement a server-owned setup state machine and idempotent setup API.
-- [ ] Provide a guided A-R-S-Y onboarding flow in Studio.
-- [ ] Persist setup completion atomically and expose readiness state.
+- [ ] Document the server-owned setup state machine and persistence boundaries.
+- [ ] Verify one-time bootstrap credentials, expiry, replay protection and audit events.
+- [ ] Implement only proven gaps in the existing A-R-S-Y flow.
 
 ### RULE
-- [ ] Never ship default credentials or publicly reachable setup endpoints after bootstrap.
-- [ ] Bootstrap secrets are one-time, short-lived and redacted from logs.
-- [ ] Setup operations must be idempotent and auditable.
+- [ ] Do not reintroduce PocketBase setup or superuser flows.
+- [ ] Never ship default credentials or leave bootstrap endpoints open after initialization.
+- [ ] Bootstrap operations must be idempotent and auditable.
 
 ### ACCEPTANCE
-- [ ] Fresh install can create the first owner and app without PocketBase UI.
-- [ ] Repeated setup requests cannot create duplicate owners or bypass authentication.
-- [ ] Interrupted setup can safely resume.
-- [ ] Security tests cover setup token expiry, replay and race conditions.
+- [ ] Clean-install E2E creates the first owner and app through A-R-S-Y APIs/UI.
+- [ ] Replay, expiry, concurrency and interrupted-setup tests pass.
+- [ ] Repeated setup cannot create duplicate owners or bypass authentication.
+- [ ] No legacy setup route or UI is shipped.
 
-## [ ] ARSY-012 — Replace PocketBase public pages, branding and terminology
-**Depends on:** ARSY-002, ARSY-010
+## [ ] ARSY-012 — Verify A-R-S-Y identity across all shipped product surfaces
+**Depends on:** ARSY-001, ARSY-010
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Audit public HTML, API errors, emails, logs, default metadata, favicon, manifest, docs and generated pages for PocketBase-facing product identity.
-- [ ] Define A-R-S-Y brand tokens, product name, icon, colors, typography and voice.
-- [ ] Define internal-only attribution language where required by licenses.
+- [ ] Scan web assets, API errors, emails, installer output, CLI help, logs, metadata and generated pages.
+- [ ] Maintain an explicit allowlist for legally required upstream attribution and internal references.
+- [ ] Classify each match as user-facing defect, legal attribution or internal-only reference.
 
 ### DESIGN
-- [ ] Centralize product metadata and assets in one brand package.
-- [ ] Replace UI strings and templates through localization/resource files.
-- [ ] Add a build-time scan for prohibited user-facing legacy labels.
+- [ ] Centralize product metadata and brand assets where duplication exists.
+- [ ] Add a repeatable CI scan with a reviewed allowlist.
+- [ ] Fix findings at source rather than fragile output-time replacement.
 
 ### RULE
-- [ ] Never remove legally required copyright or license attribution.
-- [ ] Do not expose upstream product names in user-facing product flows except required attribution/security disclosures.
-- [ ] Avoid hard-coded duplicate brand values.
+- [ ] Never remove legally required copyright/license notices.
+- [ ] Do not expose PocketBase as the product name or reproduce its original user workflow.
+- [ ] Do not blindly rename internal symbols in ways that damage compatibility.
 
 ### ACCEPTANCE
-- [ ] Shipped pages, emails, installer output and CLI help consistently identify A-R-S-Y.
-- [ ] Branding scan passes with an explicit allowlist for legal notices and internal developer docs.
-- [ ] Screenshots and smoke tests verify first-run and admin experiences.
+- [ ] Brand scan passes for release artifacts and user-facing surfaces.
+- [ ] Every allowlisted match has a documented reason.
+- [ ] Screenshots/smoke tests verify A-R-S-Y identity in Studio, installer and CLI.
+- [ ] No unexplained legacy product surface remains.
 
-## [ ] ARSY-013 — Consolidate web applications and remove duplicate admin entry points
+## [ ] ARSY-013 — Verify one canonical web application and production asset pipeline
 **Depends on:** ARSY-010, ARSY-011
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Decide the final relationship between `dashboard/` and `ui/`.
-- [ ] Ensure there is one supported web application and one supported build/embedding path.
-- [ ] Identify obsolete pages and assets only after confirming no runtime or packaging references.
+- [ ] Identify frontend apps, packages, lockfiles, build scripts and embedded bundles.
+- [ ] Confirm the canonical web app and whether duplicate admin entry points remain active.
+- [ ] Verify development, production and release builds use the intended source.
 
 ### DESIGN
-- [ ] Move reusable dashboard features into the canonical Studio app.
-- [ ] Define one frontend package manager, lockfile, build command and embed contract.
-- [ ] Add route ownership and fallback rules.
+- [ ] Document the canonical frontend package, build command and embed contract.
+- [ ] Remove duplicate paths only after import, runtime, CI and packaging evidence.
+- [ ] Expose embedded frontend version/commit in build metadata.
 
 ### RULE
-- [ ] Do not maintain two competing administration consoles.
-- [ ] Do not delete files until static imports, dynamic loading, CI and packaging have been checked.
-- [ ] Keep generated build output out of source control unless explicitly required by release policy.
+- [ ] Do not rebuild the already-transformed web application.
+- [ ] Do not delete files based only on directory names.
+- [ ] Keep frontend/backend API contracts versioned and testable.
 
 ### ACCEPTANCE
 - [ ] One documented command builds the canonical Studio.
-- [ ] One embedded web asset is served by the production binary.
-- [ ] No dead PocketBase UI bundle is packaged or reachable.
-- [ ] Clean checkout build and browser smoke tests pass.
+- [ ] Production binary embeds and serves that build.
+- [ ] Clean-checkout build and browser smoke tests pass.
+- [ ] No obsolete PocketBase web bundle is packaged or reachable.
 
----
+# PHASE 2 — Installer, CLI and runtime bootstrap verification
 
-# PHASE 2 — Installer, CLI and runtime bootstrap
-
-## [ ] ARSY-020 — Design the A-R-S-Y installation and upgrade contract
+## [ ] ARSY-020 — Verify and document the A-R-S-Y install/upgrade contract
 **Depends on:** ARSY-001, ARSY-002
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Define supported installation modes: single binary, container image and source/developer install.
-- [ ] Define install, configure, start, health-check, upgrade, rollback, backup and uninstall behavior.
-- [ ] Define data directory, configuration, secrets, service user, ports and persistent volumes.
+- [ ] Inventory the existing installer, deployment modes, configuration, data paths and supported platforms.
+- [ ] Document install, configure, start, health-check, upgrade, rollback, backup and uninstall behavior.
+- [ ] Define supported artifact types and platform/database compatibility.
 
 ### DESIGN
-- [ ] Document an installation state machine and artifact layout.
-- [ ] Define installer interfaces shared by platform-specific packages.
-- [ ] Define upgrade preflight, backup and migration sequencing.
+- [ ] Map installer flow to runtime bootstrap, migrations and service lifecycle.
+- [ ] Document install/upgrade state transitions and recovery points.
+- [ ] Identify only missing contracts that require implementation.
 
 ### RULE
-- [ ] Installer must never silently overwrite user data or secrets.
-- [ ] Installation must run with least privilege and explicit filesystem permissions.
-- [ ] Network downloads and release artifacts must be integrity-verified.
+- [ ] Do not replace a working A-R-S-Y installer without evidence of a concrete defect.
+- [ ] Never overwrite user data or secrets silently.
+- [ ] Destructive operations require explicit confirmation and a safe backup strategy.
 
 ### ACCEPTANCE
-- [ ] Install/upgrade/rollback/uninstall contracts are documented.
-- [ ] Fresh install and upgrade test matrices are defined for supported platforms.
-- [ ] Destructive operations require explicit confirmation and backup evidence.
+- [ ] Installation and upgrade contract matches actual code.
+- [ ] Fresh install, upgrade, rollback and uninstall test matrices exist.
+- [ ] Unsupported platforms and adapters are stated explicitly.
+- [ ] Every gap links to a focused implementation task.
 
-## [ ] ARSY-021 — Build a first-party A-R-S-Y installer
+## [ ] ARSY-021 — Verify and harden the existing first-party A-R-S-Y installer
 **Depends on:** ARSY-020
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Replace the legacy PocketBase installer and all PocketBase setup references.
-- [ ] Support guided configuration for data storage, database adapter, owner bootstrap and service startup.
-- [ ] Provide unattended installation for automation with explicit flags/config file.
+- [ ] Trace installer from launch/download through configuration, owner bootstrap and service startup.
+- [ ] Verify interactive and unattended modes, supported OS targets and upgrade behavior.
+- [ ] Capture reproducible installer failures and missing safety checks.
 
 ### DESIGN
-- [ ] Implement installer as a versioned A-R-S-Y command/workflow, not an embedded legacy admin page.
-- [ ] Separate platform detection, config generation, directory setup, service registration and bootstrap.
-- [ ] Add dry-run and structured install report.
+- [ ] Preserve the existing installer architecture where it is sound.
+- [ ] Add integrity verification, preflight checks, dry-run/reporting or recovery only where missing.
+- [ ] Keep platform detection, config generation, filesystem setup, service registration and bootstrap testable.
 
 ### RULE
-- [ ] Never print secrets or place them in shell history/process arguments.
-- [ ] Validate paths, permissions, ports and adapter configuration before writing.
-- [ ] Installer reruns must be safe and idempotent.
+- [ ] Do not build a second installer or restore PocketBase installation flows.
+- [ ] Never expose secrets in logs, shell history or process arguments.
+- [ ] Reruns must be safe; existing data must not be silently replaced.
 
 ### ACCEPTANCE
-- [ ] Clean machine can install and launch A-R-S-Y without any PocketBase installer/UI.
-- [ ] Unattended install works from a non-interactive shell.
-- [ ] Failure leaves a clear report and does not corrupt existing data.
-- [ ] Installer tests cover Linux and the other officially supported platforms.
+- [ ] Clean-machine install launches A-R-S-Y without PocketBase UI/setup dependencies.
+- [ ] Unattended install and safe-rerun tests pass on supported platforms.
+- [ ] Failure produces an actionable report and preserves existing data.
+- [ ] Installer artifact and product identity checks pass.
 
 ## [ ] ARSY-022 — Create the A-R-S-Y CLI command tree
 **Depends on:** ARSY-020
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define commands for `serve`, `install`, `doctor`, `config`, `owner`, `app`, `module`, `model`, `migration`, `tenant`, `backup` and `version`.
@@ -272,6 +298,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-023 — Implement doctor, diagnostics and recovery commands
 **Depends on:** ARSY-022
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Diagnose config, storage, database connectivity, schema version, permissions, ports, secrets and embedded assets.
@@ -295,6 +323,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-024 — Unify executable startup and embedded web/runtime boot
 **Depends on:** ARSY-010, ARSY-021, ARSY-022
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Establish one production entry point for API, Studio, workers, modules and database lifecycle.
@@ -322,6 +352,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-030 — Finalize the canonical model descriptor
 **Depends on:** ARSY-002
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define stable model identity, namespace, version, labels, fields, relations, indexes, constraints, hooks and security metadata.
@@ -345,6 +377,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-031 — Integrate field types, defaults and validators into model registration
 **Depends on:** ARSY-030
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define built-in scalar, temporal, numeric, enum, JSON, file, relation and computed field types.
@@ -368,6 +402,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-032 — Integrate relation metadata and relation lifecycle
 **Depends on:** ARSY-030, ARSY-031
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support belongs-to, has-one, has-many and many-to-many relations.
@@ -391,6 +427,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-033 — Implement ORM validation/default/normalization pipeline
 **Depends on:** ARSY-031, ARSY-032
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define the ordered pipeline: authorize, normalize, apply defaults, validate, persist, emit lifecycle events.
@@ -414,6 +452,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-034 — Integrate Unit of Work and lifecycle hooks into persistence
 **Depends on:** ARSY-033
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support transaction-scoped create/update/delete and multi-model operations.
@@ -437,6 +477,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-035 — Implement a complete repository and persistence mapper
 **Depends on:** ARSY-033, ARSY-034, ARSY-040
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support typed CRUD, query, count, exists, bulk, upsert and soft-delete operations.
@@ -464,6 +506,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-040 — Define the database adapter contract
 **Depends on:** ARSY-002
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define interfaces for connection/pool, transactions, query execution, schema introspection, migrations and dialect capabilities.
@@ -487,6 +531,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-041 — Route every A-R-S-Y data operation through tenant-aware providers
 **Depends on:** ARSY-040
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Identify and replace direct database opens in HTTP handlers, workers, CLI and provisioning.
@@ -510,6 +556,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-042 — Implement deterministic schema planner and executor
 **Depends on:** ARSY-030, ARSY-040
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Convert registered model descriptors into tables, columns, indexes, foreign keys and constraints.
@@ -533,6 +581,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-043 — Build versioned migration lifecycle and recovery
 **Depends on:** ARSY-042
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support migration dependencies, checksums, applied state, retries and per-tenant progress.
@@ -556,6 +606,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-044 — Complete PostgreSQL production adapter and isolation strategy
 **Depends on:** ARSY-040, ARSY-041, ARSY-042
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Choose and document a supported isolation model: database-per-tenant, schema-per-tenant or shared schema with enforced RLS.
@@ -583,6 +635,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-050 — Enforce server-derived model and field authorization
 **Depends on:** ARSY-030, ARSY-035
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define model CRUD permissions, field read/write permissions and role/policy evaluation.
@@ -606,6 +660,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-051 — Enforce record-level policies and tenant isolation
 **Depends on:** ARSY-041, ARSY-044, ARSY-050
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define row-level scope rules for read, update and delete.
@@ -629,6 +685,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-052 — Add audit trail, secret handling and security diagnostics
 **Depends on:** ARSY-050, ARSY-051
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define immutable audit events for authentication, authorization, data mutation, module changes and admin operations.
@@ -656,6 +714,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-060 — Complete validated query AST and dialect compiler
 **Depends on:** ARSY-030, ARSY-040, ARSY-050
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support filters, boolean groups, sorting, projection, pagination and relation predicates.
@@ -679,6 +739,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-061 — Implement relation-aware querying and eager loading
 **Depends on:** ARSY-032, ARSY-060
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support relation filters, nested projections, eager loading and bounded expansion.
@@ -702,6 +764,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-062 — Generate secure CRUD APIs and OpenAPI from model metadata
 **Depends on:** ARSY-035, ARSY-050, ARSY-060
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Generate versioned REST CRUD endpoints from registered models.
@@ -725,6 +789,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-063 — Add API keys, quotas, rate limits and webhook delivery
 **Depends on:** ARSY-051, ARSY-062
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support scoped API keys, rotation, revocation and usage tracking.
@@ -752,6 +818,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-070 — Define the A-R-S-Y module manifest specification
 **Depends on:** ARSY-002, ARSY-030
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define manifest schema for module identity, version, dependencies, models, fields, relations, permissions, views, actions, workflows, seeds and migrations.
@@ -775,6 +843,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-071 — Implement secure module registry and lifecycle
 **Depends on:** ARSY-070, ARSY-043
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support discover, validate, install, enable, disable, upgrade, rollback and uninstall.
@@ -798,6 +868,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-072 — Implement declarative views, actions and menu runtime
 **Depends on:** ARSY-070, ARSY-010
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define view types: form, list, detail, kanban, calendar and dashboard.
@@ -821,6 +893,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-073 — Implement module seed data and deterministic app bootstrap
 **Depends on:** ARSY-071, ARSY-033
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support ordered seed sets, references between seeded records and idempotent reruns.
@@ -848,6 +922,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-080 — Build metadata-driven form and field component system
 **Depends on:** ARSY-010, ARSY-031, ARSY-072
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Map every supported field type to a UI component and editor configuration.
@@ -871,6 +947,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-081 — Build generic list, search, filter and record detail views
 **Depends on:** ARSY-060, ARSY-062, ARSY-080
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support configurable columns, sorting, filtering, saved views and pagination.
@@ -894,6 +972,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-082 — Build kanban, calendar, dashboard and workflow UI primitives
 **Depends on:** ARSY-072, ARSY-081
+**Priority:** P3 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support configurable kanban grouping, calendar date mapping and dashboard widgets.
@@ -917,6 +997,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-083 — Create typed SDK and application developer tooling
 **Depends on:** ARSY-062, ARSY-070
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Generate TypeScript and Go clients from versioned API/OpenAPI contracts.
@@ -940,6 +1022,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-084 — Add deterministic manifest/code generation and AI assistant boundary
 **Depends on:** ARSY-070, ARSY-083
+**Priority:** P3 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Generate model, view, permission, API and test scaffolds from validated manifests.
@@ -967,6 +1051,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-090 — Implement durable tenant provisioning lifecycle
 **Depends on:** ARSY-041, ARSY-043, ARSY-044
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support create, provision, activate, suspend, resume, backup, restore and delete/retention workflows.
@@ -990,6 +1076,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-091 — Add usage metering, quotas and plan enforcement
 **Depends on:** ARSY-063, ARSY-090
+**Priority:** P3 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define usage dimensions: API requests, storage, files, bandwidth, background jobs and active users.
@@ -1013,6 +1101,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-092 — Implement backup, restore and disaster recovery
 **Depends on:** ARSY-043, ARSY-090
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Support tenant and platform backups, retention, encryption and integrity verification.
@@ -1040,6 +1130,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-100 — Establish full engine contract, integration and fuzz test suites
 **Depends on:** ARSY-035, ARSY-044, ARSY-051, ARSY-062
+**Priority:** P0 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define test pyramid for unit, adapter contract, integration, security, browser E2E, migration and performance.
@@ -1063,6 +1155,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-101 — Add performance baselines and regression budgets
 **Depends on:** ARSY-100
+**Priority:** P2 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Benchmark CRUD, filters, relations, transactions, startup, tenant routing and Studio load.
@@ -1084,8 +1178,10 @@ A task is complete only when all four sections are checked, its implementation i
 - [ ] CI flags material regressions.
 - [ ] Performance reports identify p50/p95/p99, throughput and allocations where relevant.
 
-## [ ] ARSY-102 — Replace legacy docs, quickstart and deployment guides
+## [ ] ARSY-102 — Verify and complete A-R-S-Y documentation and quickstart
 **Depends on:** ARSY-011, ARSY-022, ARSY-062
+**Priority:** P2 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Rewrite README, quickstart, API docs, configuration reference and operator guide around A-R-S-Y.
@@ -1109,6 +1205,8 @@ A task is complete only when all four sections are checked, its implementation i
 
 ## [ ] ARSY-103 — Harden release artifacts and software supply chain
 **Depends on:** ARSY-021, ARSY-022, ARSY-100
+**Priority:** P1 · **Size:** M · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
 - [ ] Define release binaries, container images, checksums, SBOM, provenance and supported upgrade paths.
@@ -1130,60 +1228,42 @@ A task is complete only when all four sections are checked, its implementation i
 - [ ] Checksums, SBOM and provenance are published with artifacts.
 - [ ] Upgrade and rollback tests pass before stable release.
 
-## [ ] ARSY-104 — Remove obsolete PocketBase product surfaces after parity
+## [ ] ARSY-104 — Prove no PocketBase product surface remains in release artifacts
 **Depends on:** ARSY-010, ARSY-011, ARSY-012, ARSY-013, ARSY-021, ARSY-022, ARSY-024
+**Priority:** P1 · **Size:** S · **Evidence:** PR description + CI/test artifacts
+**Non-goals:** No unrelated refactor, duplicate implementation, or destructive rewrite of upstream-derived internals.
 
 ### SPEC
-- [ ] Re-audit every legacy route, UI bundle, installer, command, setting, template, asset and user-facing string.
-- [ ] Remove or disable obsolete product surfaces only after A-R-S-Y parity is verified.
-- [ ] Document retained internal upstream components and reasons.
+- [ ] Audit shipped routes, UI bundles, installer, commands, settings, templates, assets and user-facing strings.
+- [ ] Separate user-facing product surfaces from internal upstream-derived implementation code.
+- [ ] Record remaining legacy surfaces with reproduction steps and remediation links.
 
 ### DESIGN
-- [ ] Use dependency graph, runtime route tests, build/package inspection and source scans to prove removal safety.
-- [ ] Remove legacy entry points in small, reviewable changes.
-- [ ] Keep migration shims only for documented compatibility windows.
+- [ ] Use dependency graph, route enumeration, source scans, binary/package inspection and runtime tests as independent evidence.
+- [ ] Maintain a legal/internal attribution allowlist with rationale.
+- [ ] Remove or disable only confirmed obsolete entry points in small changes.
 
 ### RULE
-- [ ] Never remove legal notices, security fixes, migration history or required internal infrastructure blindly.
-- [ ] No silent breaking change to stored user data or supported API contracts.
-- [ ] Every removal must include regression tests proving the replacement path.
+- [ ] Target no PocketBase product experience; do not rewrite or erase every upstream-derived line of code.
+- [ ] Never blindly remove licenses, security fixes, migration history or required infrastructure.
+- [ ] No silent breaking change to stored data or supported A-R-S-Y APIs.
 
 ### ACCEPTANCE
-- [ ] No PocketBase Superuser UI, setup wizard, installer or CLI is shipped or reachable.
-- [ ] No user-facing PocketBase product identity remains outside the documented legal attribution allowlist.
-- [ ] Package and runtime scans prove obsolete entry points are not included.
-- [ ] Full test suite, clean build, installer smoke test and Studio E2E pass.
-
----
-
-# Golden path — Definition of a transformed A-R-S-Y product
-
-The following end-to-end scenario is the product-level release acceptance. It is not complete until every step is verified on a clean installation.
-
-- [ ] Install A-R-S-Y using the first-party installer or supported container/binary workflow.
-- [ ] Create the initial owner and organization without any PocketBase setup page.
-- [ ] Create a new application from Studio or `arsy app init`.
-- [ ] Install a CRM module from a validated manifest.
-- [ ] Register Company, Contact, Lead and Opportunity models from metadata.
-- [ ] Generate and review schema migration plan; apply it to the selected adapter.
-- [ ] Seed deterministic reference data and demo data only when explicitly requested.
-- [ ] Generate secure CRUD APIs and OpenAPI from model descriptors.
-- [ ] Verify model, field, record and tenant authorization with adversarial tests.
-- [ ] Render list, form, detail and kanban screens from declarative view metadata.
-- [ ] Execute a workflow transition and verify audit trail/outbox delivery.
-- [ ] Upgrade the CRM module without data loss and with recoverable migration state.
-- [ ] Backup and restore the tenant into an isolated environment.
-- [ ] Confirm only A-R-S-Y web, installer, CLI, docs and product identity are exposed.
+- [ ] No PocketBase Superuser UI, setup wizard, installer, CLI identity or user-facing route is shipped or reachable.
+- [ ] A-R-S-Y web, installer and CLI are the only supported product experiences.
+- [ ] Package/runtime scans pass with only documented legal/internal allowlist entries.
+- [ ] Clean build, install smoke test, Studio E2E and regression suites pass.
+- [ ] Audit report links evidence for every checked surface.
 
 ## Execution order
 
-1. **First:** ARSY-001 to ARSY-003 — establish the truth and architecture.
-2. **Then:** ARSY-010 to ARSY-024 — replace the product experience, web UI, installer, CLI and runtime entry points.
-3. **Core engine:** ARSY-030 to ARSY-044 — metadata, ORM, persistence, database adapters and migrations.
-4. **Security before exposure:** ARSY-050 to ARSY-052.
-5. **Platform capabilities:** ARSY-060 to ARSY-073.
-6. **Full-stack developer experience:** ARSY-080 to ARSY-084.
-7. **BaaS operations:** ARSY-090 to ARSY-092.
-8. **Release readiness:** ARSY-100 to ARSY-104 and the Golden path.
+1. **Baseline and architecture:** ARSY-001 to ARSY-003 — inventory the transformed fork and define A-R-S-Y ownership boundaries.
+2. **Verify existing product surfaces:** ARSY-010 to ARSY-024 — prove Studio, setup, installer, CLI and startup are A-R-S-Y-native; fix only evidenced gaps.
+3. **Core engine:** ARSY-030 to ARSY-044 — canonical metadata, ORM, persistence, adapters and migrations.
+4. **Security gates:** ARSY-050 to ARSY-052 — enforce model/field/record authorization and tenant isolation.
+5. **Query and application platform:** ARSY-060 to ARSY-073 — query engine, API generation, manifests, module lifecycle and seed data.
+6. **Full-stack developer experience:** ARSY-080 to ARSY-084 — metadata-driven UI, SDK, scaffolding and bounded AI assistance.
+7. **BaaS operations:** ARSY-090 to ARSY-092 — provisioning, metering, backup and recovery.
+8. **Release proof:** ARSY-100 to ARSY-104 and the Golden path — integration, performance, docs, supply chain and proof that no legacy product surface ships.
 
 **Explicitly deferred until justified:** Kafka, Kubernetes operator, ML-based query optimizer, predictive analytics, event sourcing, GraphQL, service mesh, and large ERP module suite. Build the deterministic secure engine and complete first-party product experience first.
