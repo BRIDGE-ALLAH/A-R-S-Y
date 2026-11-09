@@ -1,6 +1,7 @@
 package servers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/bridge-allah/a-r-s-y/core"
@@ -10,7 +11,7 @@ import (
 func RevokeServerHostKey(app core.App, serverID string, changedByID string) error {
 	record, err := app.FindRecordById("arsy_servers", serverID)
 	if err != nil {
-		return err
+		return fmt.Errorf("server not found: %w", err)
 	}
 
 	// Check if already revoked (idempotent).
