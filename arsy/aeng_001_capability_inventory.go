@@ -8,22 +8,22 @@ type CapabilityInventory struct {
 
 // CollectionCapability holds per-collection metadata.
 type CollectionCapability struct {
-	Name        string
-	Fields      map[string]FieldCapability
-	Indexes     []string
-	Relations   []RelationCapability
-	APIRules    map[string] map[string]bool // action -> allowed roles
+	Name      string
+	Fields    map[string]FieldCapability
+	Indexes   []string
+	Relations []RelationCapability
+	APIRules  map[string]map[string]bool // action -> allowed roles
 }
 
 // FieldCapability documents a PocketBase field.
 type FieldCapability struct {
-	Name      string
+	Name           string
 	PocketBaseType string
-	GoType       string
-	Required   bool
-	Unique     bool
-	Max        int
-	Pattern    string
+	GoType         string
+	Required       bool
+	Unique         bool
+	Max            int
+	Pattern        string
 }
 
 // RelationCapability documents a PocketBase relation.
