@@ -1,0 +1,126 @@
+{
+  "generated": "2026-11-10",
+  "task": "ARSY-010",
+  "studioRoutes": {
+    "guestOnly": [
+      {"route": "#/pbinstall/{token}", "handler": "pageInstaller", "legacyTerminology": ["pbinstall", "PocketBase instance", "_superusers"]},
+      {"route": "#/login", "handler": "pageSuperuserLogin", "legacyTerminology": ["Superuser login", "_superusers"]},
+      {"route": "#/request-password-reset", "handler": "pageRequestSuperuserPasswordReset", "legacyTerminology": ["Superuser", "_superusers"]},
+      {"route": "#/auth/confirm-password-reset/{token}", "handler": "pageConfirmPasswordReset", "legacyTerminology": ["PocketBase SDK import"]},
+      {"route": "#/auth/confirm-verification/{token}", "handler": "pageConfirmVerification", "legacyTerminology": ["PocketBase SDK import"]},
+      {"route": "#/auth/confirm-email-change/{token}", "handler": "pageConfirmEmailChange", "legacyTerminology": ["PocketBase SDK import"]},
+      {"route": "#/auth/oauth2-redirect-success", "handler": "pageOAuth2RedirectSuccess", "legacyTerminology": []},
+      {"route": "#/auth/oauth2-redirect-failure", "handler": "pageOAuth2RedirectFailure", "legacyTerminology": []}
+    ],
+    "superuserOnly": [
+      {"route": "#/collections", "handler": "pageCollections", "legacyTerminology": []},
+      {"route": "#/logs", "handler": "pageLogs", "legacyTerminology": ["SUPERUSER_REQUESTS filter presets"]},
+      {"route": "#/settings", "handler": "pageApplicationSettings", "legacyTerminology": ["Superuser IPs", "PocketBase in trusted proxy"]},
+      {"route": "#/settings/mail", "handler": "pageMailSettings", "legacyTerminology": ["PocketBase uses sendmail"]},
+      {"route": "#/settings/storage", "handler": "pageStorageSettings", "legacyTerminology": ["PocketBase uses local FS"]},
+      {"route": "#/settings/backups", "handler": "pageBackupsSettings", "legacyTerminology": ["Backup your PocketBase data"]},
+      {"route": "#/settings/crons", "handler": "pageCronsSettings", "legacyTerminology": []},
+      {"route": "#/settings/export-collections", "handler": "pageExportCollections", "legacyTerminology": ["another PocketBase environment"]},
+      {"route": "#/settings/import-collections", "handler": "pageImportCollections", "legacyTerminology": []},
+      {"route": "#/settings/sql", "handler": "pageSQLConsole", "legacyTerminology": []}
+    ],
+    "missingRoutes": [
+      {"route": "#/tenants", "purpose": "Tenant management", "status": "MISSING"},
+      {"route": "#/modules", "purpose": "Module marketplace/management", "status": "MISSING"},
+      {"route": "#/models", "purpose": "Model designer (A-R-S-Y native)", "status": "MISSING"},
+      {"route": "#/migrations", "purpose": "Migration history/status", "status": "MISSING"},
+      {"route": "#/health", "purpose": "Runtime health dashboard", "status": "MISSING"},
+      {"route": "#/api-keys", "purpose": "API key management", "status": "MISSING"},
+      {"route": "#/audit", "purpose": "Audit log viewer", "status": "MISSING"},
+      {"route": "#/diagnostics", "purpose": "System diagnostics", "status": "MISSING"}
+    ]
+  },
+  "uiFilesRequiringReplacement": [
+    {"file": "ui/src/auth/pageInstaller.js", "lines": [13, 36, 45], "legacyTerms": ["Setup your PocketBase instance", "_superusers"], "replacement": ["Setup your A-R-S-Y instance", "_admins"]},
+    {"file": "ui/src/auth/pageSuperuserLogin.js", "lines": [1, 6, 16, 31, 38, 52], "legacyTerms": ["pageSuperuserLogin", "Superuser login", "_superusers"], "replacement": ["pageOwnerLogin", "Owner login", "_admins"]},
+    {"file": "ui/src/auth/pageRequestSuperuserPasswordReset.js", "lines": [1, 6, 11], "legacyTerms": ["pageRequestSuperuserPasswordReset", "_superusers"], "replacement": ["pageRequestOwnerPasswordReset", "_admins"]},
+    {"file": "ui/src/router.js", "lines": [1, 129, 133, 136, 165], "legacyTerms": ["pageSuperuserLogin", "pbinstall", "_superusers"], "replacement": ["pageOwnerLogin", "arsyinstall", "_admins"]},
+    {"file": "ui/src/base/appHeader.js", "legacyTerms": ["_superusers in nav"], "replacement": ["_admins"]},
+    {"file": "ui/src/base/fieldSettings.js", "legacyTerms": ["Superuser UI relation listings"], "replacement": ["Admin UI relation listings"]},
+    {"file": "ui/src/base/ruleField.js", "legacyTerms": ["(Superusers only)"], "replacement": ["(Admins only)"]},
+    {"file": "ui/src/collections/collectionsOverviewModal.js", "legacyTerms": ["Superusers only label"], "replacement": ["Admins only"]},
+    {"file": "ui/src/collections/mfaAccordion.js", "legacyTerms": ["isSuperusers", "Superusers"], "replacement": ["isAdmins", "Admins"]},
+    {"file": "ui/src/collections/otpAccordion.js", "legacyTerms": ["isSuperusers", "Superusers"], "replacement": ["isAdmins", "Admins"]},
+    {"file": "ui/src/collections/tokenOptionsAccordion.js", "legacyTerms": ["_superusers"], "replacement": ["_admins"]},
+    {"file": "ui/src/fields/text/view.js", "legacyTerms": ["_superusers"], "replacement": ["_admins"]},
+    {"file": "ui/src/logs/pageLogs.js", "legacyTerms": ["SUPERUSER_REQUESTS", "superuser"], "replacement": ["ADMIN_REQUESTS", "admin"]},
+    {"file": "ui/src/pb.js", "legacyTerms": ["PocketBase", "__pb_superusers__", "_superusers"], "replacement": ["ARSY", "__arsy_admins__", "_admins"]},
+    {"file": "ui/src/store.js", "legacyTerms": ["PocketBase ${version}"], "replacement": ["A-R-S-Y ${version}"]},
+    {"file": "ui/src/settings/application/pageApplicationSettings.js", "legacyTerms": ["superuserIPs", "Superuser IPs"], "replacement": ["adminIPs", "Admin IPs"]},
+    {"file": "ui/src/settings/application/superuserAccordion.js", "legacyTerms": ["Superuser IPs", "Superuser IPs and subnets"], "replacement": ["Admin IPs"]},
+    {"file": "ui/src/settings/application/rateLimitAccordion.js", "legacyTerms": ["Superusers are always excluded"], "replacement": ["Admins are always excluded"]},
+    {"file": "ui/src/settings/application/trustedProxyAccordion.js", "legacyTerms": ["PocketBase (5x)"], "replacement": ["A-R-S-Y"]},
+    {"file": "ui/src/settings/backups/pageBackupsSettings.js", "legacyTerms": ["Backup and restore your PocketBase data"], "replacement": ["Backup and restore your A-R-S-Y data"]},
+    {"file": "ui/src/settings/mail/pageMailSettings.js", "legacyTerms": ["PocketBase uses sendmail"], "replacement": ["A-R-S-Y uses sendmail"]},
+    {"file": "ui/src/settings/storage/pageStorageSettings.js", "legacyTerms": ["PocketBase uses local file system"], "replacement": ["A-R-S-Y uses local file system"]},
+    {"file": "ui/src/settings/sync/pageExportCollections.js", "legacyTerms": ["another PocketBase environment"], "replacement": ["another A-R-S-Y environment"]},
+    {"file": "ui/src/records/recordsList.js", "legacyTerms": ["isSuperusersCollection", "_superusers"], "replacement": ["isAdminsCollection", "_admins"]},
+    {"file": "ui/src/records/recordUpsertModal.js", "legacyTerms": ["isSuperusersCollection", "_superusers"], "replacement": ["isAdminsCollection", "_admins"]},
+    {"file": "ui/src/records/recordImpersonateModal.js", "legacyTerms": ["PocketBase SDK import"], "replacement": ["ARSY SDK import"]},
+    {"file": "ui/src/apiPreview/*.js (27 files)", "legacyTerms": ["PocketBase SDK", "_superusers", "Superusers"], "replacement": ["ARSY SDK", "_admins", "Admins"]}
+  ],
+  "apiRoutes": {
+    "superuserAuthEndpoints": [
+      {"endpoint": "/api/collections", "methods": ["GET", "POST"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/collections/*", "methods": ["GET", "PATCH", "DELETE"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/backups", "methods": ["GET", "POST", "DELETE"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/backups/upload", "methods": ["POST"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/backups/{key}/restore", "methods": ["POST"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/crons", "methods": ["GET", "POST"], "middleware": "RequireSuperuserAuth()"},
+      {"endpoint": "/api/logs", "methods": ["GET"], "middleware": "RequireSuperuserAuth()"}
+    ],
+    "terminologyReplacements": [
+      {"file": "apis/middlewares.go", "legacy": "pbSuperuserIPsWhitelist", "replacement": "arsyAdminIPsWhitelist"},
+      {"file": "apis/middlewares.go", "legacy": "pbRequireSuperuserAuth", "replacement": "arsyRequireAdminAuth"},
+      {"file": "apis/middlewares.go", "legacy": "pbRequireSuperuserOrOwnerAuth", "replacement": "arsyRequireAdminOrOwnerAuth"},
+      {"file": "apis/installer.go", "legacy": "pbinstall route", "replacement": "arsyinstall"},
+      {"file": "apis/installer.go", "legacy": "DefaultInstallerFunc, systemSuperuser", "replacement": "DefaultBootstrapFunc, systemAdmin"},
+      {"file": "apis/backup.go", "legacy": "IsSuperuser(), SuperuserIPs", "replacement": "IsAdmin(), AdminIPs"},
+      {"file": "apis/file.go", "legacy": "IsSuperuser(), SuperuserIPs", "replacement": "IsAdmin(), AdminIPs"},
+      {"file": "apis/health.go", "legacy": "HasSuperuserAuth()", "replacement": "HasAdminAuth()"},
+      {"file": "apis/collection.go", "legacy": "HasSuperuserAuth()", "replacement": "HasAdminAuth()"}
+    ]
+  },
+  "coreTerminology": [
+    {"file": "core/app.go", "legacy": "Package comment: backbone of PocketBase", "status": "ADAPT - internal"},
+    {"file": "core/base.go", "legacy": "pb_data, registerSuperuserHooks()", "status": "ADAPT - internal"},
+    {"file": "core/events.go", "legacy": "InstallerFunc, systemSuperuser", "status": "ADAPT - internal"},
+    {"file": "core/event_request.go", "legacy": "HasSuperuserAuth(), IsSuperuser()", "status": "ADAPT - internal"},
+    {"file": "core/collection_model.go", "legacy": "_superusers reference", "status": "ADAPT - internal"},
+    {"file": "core/backup.go", "legacy": "sendSystemAlertToAllSuperusers", "status": "ADAPT - internal"}
+  ],
+  "defects": [
+    {"defect": "Installer route", "location": "ui/src/router.js:129", "evidence": "#/pbinstall/{token} still registered"},
+    {"defect": "Login page", "location": "ui/src/auth/pageSuperuserLogin.js", "evidence": "\"Superuser login\" title, _superusers collection"},
+    {"defect": "Password reset", "location": "ui/src/auth/pageRequestSuperuserPasswordReset.js", "evidence": "\"Superuser\" in function name and PBEvent"},
+    {"defect": "API Preview", "location": "ui/src/apiPreview/*.js (27 files)", "evidence": "All examples use PocketBase SDK"},
+    {"defect": "Settings", "location": "ui/src/settings/application/superuserAccordion.js", "evidence": "\"Superuser IPs\" section"},
+    {"defect": "Logs", "location": "ui/src/logs/pageLogs.js", "evidence": "SUPERUSER_REQUESTS filter presets"},
+    {"defect": "Client SDK", "location": "ui/src/pb.js", "evidence": "new PocketBase(), __pb_superusers__ auth store"},
+    {"defect": "Installer API", "location": "apis/installer.go", "evidence": "/pbinstall route, systemSuperuser"},
+    {"defect": "Middleware", "location": "apis/middlewares.go", "evidence": "pbRequireSuperuserAuth middleware ID"}
+  ],
+  "canonicalStudioRoutes": {
+    "guest": ["/arsyinstall/{token}", "/login", "/auth/*"],
+    "authenticated": ["/models", "/records", "/tenants", "/modules", "/migrations", "/health", "/api-keys", "/audit", "/logs", "/settings/*", "/diagnostics"]
+  },
+  "routeOwnership": {
+    "/api/collections/*": {"owner": "apis/collection.go", "layer": "apis"},
+    "/api/records/*": {"owner": "apis/record_crud.go", "layer": "apis"},
+    "/api/backups/*": {"owner": "apis/backup.go", "layer": "apis"},
+    "/api/logs/*": {"owner": "apis/logs.go", "layer": "apis"},
+    "/api/crons/*": {"owner": "apis/cron.go", "layer": "apis"},
+    "/api/settings/*": {"owner": "apis/settings.go", "layer": "apis"},
+    "/api/tenants/*": {"owner": "arsy/tenancy + apis", "layer": "arsy/httpapi (NEW)"},
+    "/api/modules/*": {"owner": "arsy/engine/manifest + apis", "layer": "arsy/httpapi (NEW)"},
+    "/api/migrations/*": {"owner": "arsy/aeng/migration.go + apis", "layer": "arsy/httpapi (NEW)"},
+    "/api/audit/*": {"owner": "arsy/aeng/audit.go + apis", "layer": "arsy/httpapi (NEW)"},
+    "/api/keys/*": {"owner": "arsy/security + apis", "layer": "arsy/httpapi (NEW)"},
+    "/api/health/*": {"owner": "apis/health.go", "layer": "apis"}
+  }
+}
