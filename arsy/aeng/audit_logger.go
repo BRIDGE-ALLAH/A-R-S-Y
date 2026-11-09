@@ -26,6 +26,32 @@ type AuditLogEntry struct {
 	RedactedFields map[string]interface{} `json:"redacted_fields,omitempty"`
 }
 
+type AuditModel struct {
+	Data map[string]interface{}
+}
+
+func (am *AuditModel) IsNew() bool {
+	return true
+}
+
+func (am *AuditModel) MarkAsNew() {
+}
+
+func (am *AuditModel) MarkAsNotNew() {
+}
+
+func (am *AuditModel) PK() any {
+	return "audit-" + time.Now().Format("20060102150405")
+}
+
+func (am *AuditModel) LastSavedPK() any {
+	return "audit-" + time.Now().Format("20060102150405")
+}
+
+func (am *AuditModel) TableName() string {
+	return "arsy_audit_log"
+}
+
 type AsyncAuditLogger struct {
 	app           core.App
 	collection    *core.Collection
@@ -95,8 +121,39 @@ func (l *AsyncAuditLogger) saveEntry(entry *AuditLogEntry) error {
 		entry.Metadata = l.redactFields(entry.Metadata)
 	}
 
-	// For now, just log to stdout; actual persistence can be implemented later
-	fmt.Printf("Audit entry: %+v\n", entry)
+	// Build a map for saving
+	data := map[string]interface{}{
+		"event_id":        entry.EventID,
+		"timestamp":       entry.Timestamp.Format(time.RFC3339),
+		"server_id":       entry.ServerID,
+		"changed_by_id":   entry.ChangedByID,
+		"correlation_id":  entry.CorrelationID,
+		"tenant_id":       entry.TenantID,
+		"user_id":         entry.UserID,
+		"operation":       entry.Operation,
+		"resource":        entry.Resource,
+		"status_code":     entry.Status,
+		"duration_ms":     entry.Duration,
+	}
+
+	// Merge metadata if present
+	if len(entry.Metadata) > 0 {
+		var m map[string]interface{}
+		if err := json.Unmarshal(entry.Metadata, &m); err == nil {
+			for k, v := range m {
+				data[k] = v
+			}
+		}
+	}
+
+	// Create a model that implements core.Model
+	model := &AuditModel{Data: data}
+
+	// Save the record
+	if err := l.app.Save(model); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -136,7 +193,13 @@ func (l *AsyncAuditLogger) redactFields(data json.RawMessage) json.RawMessage {
 		}
 	}
 
-	return json.Marshal(redacted)
+	marshaled, err := json.Marshal(redacted)
+	if err != nil {
+		// In case of error, return the original data
+		return data
+	}
+
+	return marshaled
 }
 
 // Close shuts down the async audit logger
