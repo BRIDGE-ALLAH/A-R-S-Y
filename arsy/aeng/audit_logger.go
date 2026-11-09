@@ -11,25 +11,25 @@ import (
 
 // AuditLogEntry represents a structured audit log entry
 type AuditLogEntry struct {
-	EventID        string    `json:"event_id"`
-	Timestamp      time.Time   `json:"timestamp"`
-	ServerID       string    `json:"server_id"`
-	ChangedByID    string    `json:"changed_by_id,omitempty"`
-	CorrelationID  string    `json:"correlation_id"`
-	TenantID       string    `json:"tenant_id"`
-	UserID         string    `json:"user_id"`
-	Operation      string    `json:"operation"`
-	Resource       string    `json:"resource"`
-	Status         int         `json:"status_code"`
-	Duration       int64       `json:"duration_ms"`
-	Metadata       json.RawMessage `json:"metadata,omitempty"`
+	EventID        string                 `json:"event_id"`
+	Timestamp      time.Time              `json:"timestamp"`
+	ServerID       string                 `json:"server_id"`
+	ChangedByID    string                 `json:"changed_by_id,omitempty"`
+	CorrelationID  string                 `json:"correlation_id"`
+	TenantID       string                 `json:"tenant_id"`
+	UserID         string                 `json:"user_id"`
+	Operation      string                 `json:"operation"`
+	Resource       string                 `json:"resource"`
+	Status         int                    `json:"status_code"`
+	Duration       int64                  `json:"duration_ms"`
+	Metadata       json.RawMessage        `json:"metadata,omitempty"`
 	RedactedFields map[string]interface{} `json:"redacted_fields,omitempty"`
 }
 
 type AuditModel struct {
-	Data         map[string]interface{}
-	lastSavedPK  string
-	Id           string `db:"id" json:"id" form:"id" xml:"id"`
+	Data        map[string]interface{}
+	lastSavedPK string
+	Id          string `db:"id" json:"id" form:"id" xml:"id"`
 }
 
 func (am *AuditModel) TableName() string {
@@ -57,12 +57,12 @@ func (am *AuditModel) MarkAsNotNew() {
 }
 
 type AsyncAuditLogger struct {
-	app           core.App
-	collection    *core.Collection
-	mu            sync.RWMutex
-	queue         chan *AuditLogEntry
-	isClosed      bool
-	wg            sync.WaitGroup
+	app        core.App
+	collection *core.Collection
+	mu         sync.RWMutex
+	queue      chan *AuditLogEntry
+	isClosed   bool
+	wg         sync.WaitGroup
 }
 
 // NewAsyncAuditLogger creates a new async audit logger
@@ -73,10 +73,10 @@ func NewAsyncAuditLogger(app core.App) (*AsyncAuditLogger, error) {
 	}
 
 	logger := &AsyncAuditLogger{
-		app:           app,
-		collection:    collection,
-		queue:         make(chan *AuditLogEntry, 100),
-		isClosed:      false,
+		app:        app,
+		collection: collection,
+		queue:      make(chan *AuditLogEntry, 100),
+		isClosed:   false,
 	}
 
 	// Start processing loop
@@ -127,17 +127,17 @@ func (l *AsyncAuditLogger) saveEntry(entry *AuditLogEntry) error {
 
 	// Build a map for saving
 	data := map[string]interface{}{
-		"event_id":        entry.EventID,
-		"timestamp":       entry.Timestamp.Format(time.RFC3339),
-		"server_id":       entry.ServerID,
-		"changed_by_id":   entry.ChangedByID,
-		"correlation_id":  entry.CorrelationID,
-		"tenant_id":       entry.TenantID,
-		"user_id":         entry.UserID,
-		"operation":       entry.Operation,
-		"resource":        entry.Resource,
-		"status_code":     entry.Status,
-		"duration_ms":     entry.Duration,
+		"event_id":       entry.EventID,
+		"timestamp":      entry.Timestamp.Format(time.RFC3339),
+		"server_id":      entry.ServerID,
+		"changed_by_id":  entry.ChangedByID,
+		"correlation_id": entry.CorrelationID,
+		"tenant_id":      entry.TenantID,
+		"user_id":        entry.UserID,
+		"operation":      entry.Operation,
+		"resource":       entry.Resource,
+		"status_code":    entry.Status,
+		"duration_ms":    entry.Duration,
 	}
 
 	// Merge metadata if present
