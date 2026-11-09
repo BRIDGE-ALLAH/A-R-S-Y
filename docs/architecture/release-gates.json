@@ -1,0 +1,95 @@
+{
+  "generated": "2026-11-10",
+  "task": "ARSY-003",
+  "version": "1.0.0",
+  "completionCriteria": {
+    "engine": [
+      {"component": "Model Descriptor", "criteria": "Round-trip deterministic; invalid metadata rejected", "verification": "arsy/engine/manifest tests + golden files"},
+      {"component": "Field Types (22)", "criteria": "All built-in types validated; defaults normalized", "verification": "core/field*_test.go table-driven"},
+      {"component": "Relations (4 types)", "criteria": "belongs-to, has-one, has-many, M2M; cascade policies work", "verification": "arsy/engine/relations contract tests"},
+      {"component": "Validation Pipeline", "criteria": "Order: authorize -> normalize -> defaults -> validate -> persist -> events", "verification": "arsy/engine/validation + integration tests"},
+      {"component": "Unit of Work", "criteria": "TX-scoped CRUD; nested calls no accidental commits; hooks ordered", "verification": "arsy/engine/uow tests"},
+      {"component": "Repository Mapper", "criteria": "Typed CRUD, query, count, exists, bulk, upsert, soft-delete", "verification": "Contract tests per adapter"},
+      {"component": "Database Adapters", "criteria": "SQLite + PostgreSQL pass same contract suite", "verification": "CI matrix: sqlite, pg"},
+      {"component": "Schema Planner", "criteria": "Deterministic plans; dry-run no side effects; drift detection", "verification": "Golden tests for SQLite/PG"},
+      {"component": "Migration Executor", "criteria": "Dependencies, checksums, retries, per-tenant progress", "verification": "arsy/aeng/migration_test.go"},
+      {"component": "Model/Field Auth", "criteria": "Default deny; projection before serialization; no client allowlists", "verification": "arsy/aeng/security_test.go + adversarial tests"},
+      {"component": "Record Policies", "criteria": "Row-level scope in query AST; tenant context resolution; audited bypass", "verification": "Adversarial cross-tenant tests"},
+      {"component": "Audit Trail", "criteria": "Immutable events; correlation IDs; redaction; append-only", "verification": "arsy/aeng/audit_test.go"}
+    ],
+    "webStudio": [
+      {"component": "Studio Routes", "criteria": "All admin workflows served", "verification": "Playwright E2E"},
+      {"component": "No Legacy UI", "criteria": "Zero PocketBase Superuser UI bundle/routes shipped/reachable", "verification": "Binary scan + route enumeration"},
+      {"component": "Identity", "criteria": "A-R-S-Y branding on all user-facing surfaces", "verification": "Brand scan CI"},
+      {"component": "Responsive/Accessible", "criteria": "Mobile/desktop; keyboard nav; ARIA labels", "verification": "Axe-core + visual regression"}
+    ],
+    "installerBootstrap": [
+      {"component": "Clean Install", "criteria": "Fresh data dir -> owner + first app via A-R-S-Y APIs/UI", "verification": "E2E test"},
+      {"component": "Resume/Recovery", "criteria": "Interrupted setup resumes; no duplicate owners", "verification": "Concurrency tests"},
+      {"component": "Unattended Mode", "criteria": "Non-interactive install with env vars", "verification": "CI test"},
+      {"component": "Upgrade", "criteria": "In-place binary swap; migrations run; data preserved", "verification": "Upgrade matrix test"},
+      {"component": "Rollback", "criteria": "Failed upgrade reverts cleanly", "verification": "Rollback test"},
+      {"component": "Backup/Restore", "criteria": "Tenant + platform backups; integrity verified", "verification": "arsy/tenancy/backup_test.go"}
+    ],
+    "cli": [
+      {"component": "Command Tree", "criteria": "serve, install, doctor, config, owner, app, module, model, migration, tenant, backup, version", "verification": "arsy --help test"},
+      {"component": "JSON Output", "criteria": "All commands support --json; stable exit codes", "verification": "Contract tests"},
+      {"component": "No PocketBase CLI", "criteria": "Zero PocketBase-branded commands/output", "verification": "Binary scan"},
+      {"component": "Shell Completion", "criteria": "bash/zsh/fish completion generates", "verification": "Completion test"}
+    ],
+    "securityTenancy": [
+      {"component": "Tenant Isolation", "criteria": "Cross-tenant CRUD/query/relations/background jobs fail", "verification": "Adversarial test suite"},
+      {"component": "No Data Leaks", "criteria": "Counts, errors, logs, pagination metadata never leak tenant data", "verification": "Leak detection tests"},
+      {"component": "RLS (PG)", "criteria": "Transaction-local context; no pool leakage; superuser bypass audited", "verification": "PG isolation tests"},
+      {"component": "Secret Handling", "criteria": "No passwords/tokens/keys in logs; redaction at boundaries", "verification": "Security diagnostics test"}
+    ],
+    "developerExperience": [
+      {"component": "Module Lifecycle", "criteria": "Install/upgrade/rollback idempotent; dependency resolution; state consistent", "verification": "arsy/engine/manifest tests"},
+      {"component": "Seed Data", "criteria": "Idempotent reruns; no duplicates; demo data not in prod", "verification": "arsy/aeng/seed_test.go"},
+      {"component": "SDK Generation", "criteria": "TS/Go clients from OpenAPI; compile + contract tests", "verification": "Generated client CI"},
+      {"component": "Code Generation", "criteria": "arsy app init, module init, model generate produce working code", "verification": "Scaffold test"}
+    ]
+  },
+  "pocketbaseTracking": {
+    "userFacingRoutes": ["/_/", "/api/collections/", "/api/records/", "/pbinstall/"],
+    "uiBundles": ["PocketBase Superuser Vue app"],
+    "cliCommands": ["superuser", "migrate (PB-style)"],
+    "terminology": ["PocketBase", "Superuser", "pb_data", "_superusers"],
+    "configKeys": ["PB_* env vars"],
+    "errorMessages": ["PocketBase in user-visible errors"],
+    "migrations": ["Upstream 1717233556-1717233559 (preserve for compat)"],
+    "databaseSchema": ["_collections, _params, _superusers tables"],
+    "trackingMethod": "CI brand scan: grep -r \"PocketBase|Superuser|pb_data|_superusers\" --include=\"*.go\" --include=\"*.js\" --include=\"*.html\" | grep -v \"test|internal|license\""
+  },
+  "platformMatrix": {
+    "os": ["Linux (glibc 2.31+)", "macOS 12+", "Windows 10+"],
+    "sqlite": "3.38+ (modernc.org/sqlite v1.30+)",
+    "postgresql": "14+ (pgx v5)",
+    "go": "1.22+",
+    "node": "20+",
+    "browser": ["Chrome 120+", "Firefox 115+", "Safari 17+", "Edge 120+"],
+    "ciTested": ["ubuntu-latest", "macos-latest", "windows-latest", "PostgreSQL 16", "Go 1.22, 1.23", "Node 20 LTS", "Playwright matrix"]
+  },
+  "releaseBlockingChecks": [
+    {"check": "Go Formatting", "job": "gofmt -l", "blocksIf": "Any non-conforming file"},
+    {"check": "Go Vet", "job": "go vet ./...", "blocksIf": "Any warning"},
+    {"check": "Unit Tests", "job": "go test ./... -count=1", "blocksIf": "Any FAIL"},
+    {"check": "Race Detector", "job": "go test -race ./arsy/...", "blocksIf": "Any race"},
+    {"check": "Engine Contract Tests", "job": "go test ./arsy/engine/...", "blocksIf": "Any FAIL"},
+    {"check": "Adapter Contract Tests", "job": "go test ./arsy/tenancy/... (sqlite + pg)", "blocksIf": "Any FAIL"},
+    {"check": "Security Tests", "job": "go test ./arsy/security/...", "blocksIf": "Any FAIL"},
+    {"check": "Adversarial Tenancy", "job": "go test ./arsy/tenancy/... -run Adversarial", "blocksIf": "Any FAIL"},
+    {"check": "Migration Verification", "job": "make verify-migrations", "blocksIf": "Any drift/failure"},
+    {"check": "UI Build", "job": "cd ui && npm run build", "blocksIf": "Build error"},
+    {"check": "Playwright E2E", "job": "npx playwright test", "blocksIf": "Any FAIL"},
+    {"check": "Brand Scan", "job": "make brand-scan", "blocksIf": "Any PocketBase match (non-allowlist)"},
+    {"check": "Diagnostics", "job": "go run ./cmd/arsy doctor", "blocksIf": "Any FAIL"},
+    {"check": "Standalone Binary", "job": "go build -o arsy .", "blocksIf": "Build error"},
+    {"check": "License Check", "job": "go-licenses check", "blocksIf": "Non-compliant license"}
+  ],
+  "scorecardTemplate": {
+    "sections": ["Engine (Layer 1-3)", "Web & Studio (Layer 6)", "Installer & Bootstrap", "CLI", "Security & Tenancy", "Developer Experience"],
+    "statusValues": ["PASS", "FAIL", "NOT RUN", "BLOCKED"],
+    "overallGate": "All release-blocking checks must be PASS for release"
+  }
+}
