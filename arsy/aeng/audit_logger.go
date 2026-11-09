@@ -27,29 +27,33 @@ type AuditLogEntry struct {
 }
 
 type AuditModel struct {
-	Data map[string]interface{}
-}
-
-func (am *AuditModel) IsNew() bool {
-	return true
-}
-
-func (am *AuditModel) MarkAsNew() {
-}
-
-func (am *AuditModel) MarkAsNotNew() {
-}
-
-func (am *AuditModel) PK() any {
-	return "audit-" + time.Now().Format("20060102150405")
-}
-
-func (am *AuditModel) LastSavedPK() any {
-	return "audit-" + time.Now().Format("20060102150405")
+	Data         map[string]interface{}
+	lastSavedPK  string
+	Id           string `db:"id" json:"id" form:"id" xml:"id"`
 }
 
 func (am *AuditModel) TableName() string {
 	return "arsy_audit_log"
+}
+
+func (am *AuditModel) PK() any {
+	return am.Id
+}
+
+func (am *AuditModel) LastSavedPK() any {
+	return am.lastSavedPK
+}
+
+func (am *AuditModel) IsNew() bool {
+	return am.lastSavedPK == ""
+}
+
+func (am *AuditModel) MarkAsNew() {
+	am.lastSavedPK = ""
+}
+
+func (am *AuditModel) MarkAsNotNew() {
+	am.lastSavedPK = am.Id
 }
 
 type AsyncAuditLogger struct {
