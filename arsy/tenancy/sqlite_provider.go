@@ -181,7 +181,8 @@ func (p *SQLiteProvider) evictOldestLocked() {
 	var oldestID string
 	var oldest time.Time
 	for id, ds := range p.store {
-		if oldestID == "" || ds.lastUsed.Before(oldest) {
+		if oldestID == "" || ds.lastUsed.Before(oldest) ||
+			(ds.lastUsed.Equal(oldest) && id < oldestID) {
 			oldestID, oldest = id, ds.lastUsed
 		}
 	}
