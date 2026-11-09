@@ -28,8 +28,8 @@ import (
 
 // Sentinel errors.
 var (
-	ErrPGDSNRequired    = errors.New("pgadapter: DSN is required")
-	ErrPGClosed         = errors.New("pgadapter: provider is closed")
+	ErrPGDSNRequired     = errors.New("pgadapter: DSN is required")
+	ErrPGClosed          = errors.New("pgadapter: provider is closed")
 	ErrPGInvalidTenantID = errors.New("pgadapter: invalid tenant ID")
 )
 
@@ -54,9 +54,9 @@ type postgresDatastore struct {
 	closeErr error
 }
 
-func (d *postgresDatastore) DB() *sql.DB                       { return d.db }
-func (d *postgresDatastore) TenantID() string                 { return d.tenantID }
-func (d *postgresDatastore) Ping(ctx context.Context) error   { return d.db.PingContext(ctx) }
+func (d *postgresDatastore) DB() *sql.DB                    { return d.db }
+func (d *postgresDatastore) TenantID() string               { return d.tenantID }
+func (d *postgresDatastore) Ping(ctx context.Context) error { return d.db.PingContext(ctx) }
 func (d *postgresDatastore) Close() error {
 	d.once.Do(func() { d.closeErr = d.db.Close() })
 	return d.closeErr

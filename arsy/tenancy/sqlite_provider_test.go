@@ -2,6 +2,7 @@ package tenancy_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/bridge-allah/a-r-s-y/arsy/config"
@@ -135,5 +136,98 @@ func TestSQLiteProvider_CloseTenant_ClosedProvider(t *testing.T) {
 	err := p.CloseTenant(context.Background(), "tenant-x")
 	if err != tenancy.ErrDatastoreClosed {
 		t.Fatalf("expected ErrDatastoreClosed, got %v", err)
+	}
+}
+
+func TestSQLiteProvider_CloseIdleEvictsIdle(t *testing.T) {
+	p := newTestProvider(t)
+	defer p.Close()
+
+	ctx := context.Background()
+	// Open three tenants
+	for i := 0; i < 3; i++ {
+		ds, err := p.Open(ctx, fmt.Sprintf("tenant-idle-%d", i))
+		if err != nil {
+			t.Fatalf("Open tenant-idle-%d: %v", i, err)
+		}
+		// Touch them to set lastUsed
+		_ = ds
+	}
+
+	// CloseIdle with zero duration should evict all (all are idle)
+	if err := p.CloseIdle(ctx, 0); err != nil {
+		t.Fatalf("CloseIdle: %v", err)
+	}
+
+	// Reopening should give fresh handles
+	for i := 0; i < 3; i++ {
+		ds, err := p.Open(ctx, fmt.Sprintf("tenant-idle-%d", i))
+		if err != nil {
+			t.Fatalf("reopen tenant-idle-%d: %v", i, err)
+		}
+		if err := ds.Ping(ctx); err != nil {
+			t.Fatalf("reopened ping tenant-idle-%d: %v", i, err)
+		}
+	}
+}
+
+func TestSQLiteProvider_MaxHandlesLRUEviction(t *testing.T) {
+	p := newTestProvider(t)
+	p.SetMaxHandles(2)
+	defer p.Close()
+
+	ctx := context.Background()
+	// Open 3 tenants with maxHandles=2 => LRU eviction
+	for i := 0; i < 3; i++ {
+		ds, err := p.Open(ctx, fmt.Sprintf("tenant-lru-%d", i))
+		if err != nil {
+			t.Fatalf("Open tenant-lru-%d: %v", i, err)
+		}
+		_ = ds
+	}
+
+	// The first tenant should have been evicted (LRU)
+	// We can't directly check internal state, but reopening the first tenant
+	// should give a fresh handle (different from what we'd get if it were still cached)
+	// Actually, we just verify that we can still operate: the provider didn't crash.
+	// A stronger test: open tenant-lru-0 and tenant-lru-1, then tenant-lru-2 evicts tenant-lru-0
+	// Then open tenant-lru-0 again -> fresh handle.
+	ds0_first, _ := p.Open(ctx, "tenant-lru-0")
+	ds1, _ := p.Open(ctx, "tenant-lru-1")
+	ds2, _ := p.Open(ctx, "tenant-lru-2")
+	_ = ds1
+	_ = ds2
+
+	ds0_second, _ := p.Open(ctx, "tenant-lru-0")
+	if ds0_first == ds0_second {
+		t.Fatal("expected LRU eviction of tenant-lru-0, got same handle")
+	}
+}
+
+func TestSQLiteProvider_CloseShutdownDeterministic(t *testing.T) {
+	p := newTestProvider(t)
+	ctx := context.Background()
+
+	// Open several tenants
+	for i := 0; i < 5; i++ {
+		ds, err := p.Open(ctx, fmt.Sprintf("tenant-shutdown-%d", i))
+		if err != nil {
+			t.Fatalf("Open: %v", err)
+		}
+		_ = ds
+	}
+
+	// Close should succeed and be idempotent
+	if err := p.Close(); err != nil {
+		t.Fatalf("first Close: %v", err)
+	}
+	if err := p.Close(); err != nil {
+		t.Fatalf("second Close: %v", err)
+	}
+
+	// Open must fail after Close
+	_, err := p.Open(ctx, "tenant-after-close")
+	if err == nil {
+		t.Fatal("expected error after provider Close, got nil")
 	}
 }
