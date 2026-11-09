@@ -10,7 +10,7 @@ export function pageInstaller(route) {
         return;
     }
 
-    app.store.title = "Setup your PocketBase instance";
+    app.store.title = "Setup your A-R-S-Y instance";
 
     const data = store({
         email: "",
@@ -136,14 +136,14 @@ export function pageInstaller(route) {
                     submit(data);
                 },
             },
-            t.div({ className: "col-12 txt-center" }, "Create your first superuser account in order to continue:"),
+            t.div({ className: "col-12 txt-center" }, "Create your first admin account in order to continue:"),
             t.div(
                 { className: "col-12" },
                 t.div(
                     { className: "field" },
-                    t.label({ htmlFor: "superuser_email" }, "Email"),
+                    t.label({ htmlFor: "admin_email" }, "Email"),
                     t.input({
-                        id: "superuser_email",
+                        id: "admin_email",
                         name: "email",
                         type: "email",
                         required: true,
@@ -238,7 +238,7 @@ export function pageInstaller(route) {
                         className: () => `btn lg next block ${data.isSubmitting ? "loading" : ""}`,
                         disabled: () => data.isBusy,
                     },
-                    t.span({ className: "txt" }, "Create superuser and login"),
+                    t.span({ className: "txt" }, "Create admin and login"),
                     t.i({ className: "ri-arrow-right-line", ariaHidden: true }),
                 ),
             ),

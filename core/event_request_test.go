@@ -117,7 +117,7 @@ func TestEventRequestHasSuperUserAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	superuser, err := app.FindAuthRecordByEmail(core.CollectionNameSuperusers, "test@example.com")
+	superuser, err := app.FindAuthRecordByEmail(core.CollectionNameAdmins, "test@example.com")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func TestEventRequestHasSuperUserAuth(t *testing.T) {
 			e := core.RequestEvent{}
 			e.Auth = s.record
 
-			result := e.HasSuperuserAuth()
+			result := e.HasAdminAuth()
 
 			if result != s.expected {
 				t.Fatalf("Expected %v, got %v", s.expected, result)
@@ -230,7 +230,7 @@ func TestRequestInfoHasSuperuserAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	superuser, err := app.FindAuthRecordByEmail(core.CollectionNameSuperusers, "test@example.com")
+	superuser, err := app.FindAuthRecordByEmail(core.CollectionNameAdmins, "test@example.com")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestRequestInfoHasSuperuserAuth(t *testing.T) {
 				t.Fatalf("Failed to resolve request info: %v", err)
 			}
 
-			result := info.HasSuperuserAuth()
+			result := info.HasAdminAuth()
 
 			if result != s.expected {
 				t.Fatalf("Expected %v, got %v", s.expected, result)

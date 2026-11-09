@@ -34,7 +34,7 @@ func DefaultInstallerFunc(app core.App, systemSuperuser *core.Record, baseURL st
 	}
 
 	// launch url (ignore errors and always print a help text as fallback)
-	url := fmt.Sprintf("%s/_/#/pbinstall/%s", strings.TrimRight(baseURL, "/"), token)
+	url := fmt.Sprintf("%s/_/#/arsyinstall/%s", strings.TrimRight(baseURL, "/"), token)
 	_ = osutils.LaunchURL(url)
 	color.Magenta("\n(!) Launch the URL below in the browser if it hasn't been open already to create your first superuser account:")
 	color.New(color.Bold).Add(color.FgCyan).Println(url)

@@ -126,12 +126,12 @@ export function initRouter() {
 
 // -------------------------------------------------------------------
 
-app.routes.guestOnly("#/pbinstall/{token}", async (route) => {
+app.routes.guestOnly("#/arsyinstall/{token}", async (route) => {
     const { pageInstaller } = await import("@/auth/pageInstaller");
     return pageInstaller(route);
 });
 app.routes.guestOnly("#/login", (route) => {
-    return pageSuperuserLogin(route);
+    return pageOwnerLogin(route);
 });
 app.routes.guestOnly("#/request-password-reset", async (route) => {
     const { pageRequestSuperuserPasswordReset } = await import("@/auth/pageRequestSuperuserPasswordReset");
