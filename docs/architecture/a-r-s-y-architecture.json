@@ -1,0 +1,119 @@
+{
+  "generated": "2026-11-09",
+  "task": "ARSY-002",
+  "layers": [
+    {
+      "layer": 0,
+      "name": "Infrastructure Foundation",
+      "packages": ["tools/*"],
+      "description": "Hooks, Cron, Filesystem, Mailer, Security, Tokens, Subscriptions, Router, Store, Logger"
+    },
+    {
+      "layer": 1,
+      "name": "Intelligent ORM Engine (Core)",
+      "packages": ["arsy/engine/*", "arsy/aeng/registry.go", "arsy/aeng/mapper.go"],
+      "description": "Model Descriptor, Field Types, Relations, Validation Pipeline, Unit of Work, Repository Mapper"
+    },
+    {
+      "layer": 2,
+      "name": "Database Abstraction & Migrations",
+      "packages": ["arsy/tenancy/*", "arsy/tenancy/pgadapter/", "arsy/aeng/migration.go", "arsy/aeng/seed.go"],
+      "description": "Adapter Contract, Tenant Router, Schema Planner, Migration Executor, Seed Runner"
+    },
+    {
+      "layer": 3,
+      "name": "Security & Enterprise Tenancy",
+      "packages": ["arsy/security/", "arsy/aeng/security.go", "arsy/aeng/validate.go", "arsy/aeng/audit.go"],
+      "description": "Model/Field Auth, Record Policies, RLS, Audit Trail, Secret Handling"
+    },
+    {
+      "layer": 4,
+      "name": "Query Engine & API Platform",
+      "packages": ["arsy/engine/query/", "arsy/engine/query/compiler/", "arsy/httpapi/", "apis/"],
+      "description": "Validated Query AST, Dialect Compiler, Relation-Aware Queries, Generated CRUD + OpenAPI, API Keys/Quotas/Webhooks"
+    },
+    {
+      "layer": 5,
+      "name": "Manifest-Driven Module Runtime",
+      "packages": ["arsy/engine/manifest/", "arsy/engine/registry/", "arsy/aeng/"],
+      "description": "Module Registry, Lifecycle, Declarative Views/Actions/Workflows, Seed Data, Bootstrap"
+    },
+    {
+      "layer": 6,
+      "name": "Full-Stack App Builder",
+      "packages": ["ui/", "arsy/engine/fields/", "arsy/engine/relations/"],
+      "description": "Metadata-driven UI (Forms, Lists, Kanban, Calendar), Studio, Real-time Collaboration"
+    },
+    {
+      "layer": 7,
+      "name": "Developer Experience (DX)",
+      "packages": ["cmd/", "arsy/console/", "examples/"],
+      "description": "CLI (arsy), SDKs (Go/TS), Code Generation, AI Assistant Boundary"
+    }
+  ],
+  "publicConcepts": [
+    {"arsy": "App", "legacy": "PocketBase", "internalOnly": true},
+    {"arsy": "Module", "legacy": "(none)", "internalOnly": false},
+    {"arsy": "Model", "legacy": "Collection", "internalOnly": true},
+    {"arsy": "Field", "legacy": "Field", "internalOnly": false},
+    {"arsy": "Relation", "legacy": "Relation", "internalOnly": false},
+    {"arsy": "Record", "legacy": "Record", "internalOnly": true},
+    {"arsy": "Tenant", "legacy": "(implicit)", "internalOnly": false},
+    {"arsy": "Role/Policy", "legacy": "Rules", "internalOnly": true},
+    {"arsy": "View", "legacy": "View", "internalOnly": false},
+    {"arsy": "Action", "legacy": "(none)", "internalOnly": false},
+    {"arsy": "Workflow", "legacy": "(none)", "internalOnly": false},
+    {"arsy": "Owner/Admin", "legacy": "Superuser", "internalOnly": true},
+    {"arsy": "Bootstrap/Onboarding", "legacy": "Installer", "internalOnly": true},
+    {"arsy": "arsy_data", "legacy": "pb_data", "internalOnly": true},
+    {"arsy": "_admins", "legacy": "_superusers", "internalOnly": true},
+    {"arsy": "/arsyinstall", "legacy": "/pbinstall", "internalOnly": true}
+  ],
+  "legacyContainment": [
+    {"concept": "Collection type", "containment": "core/collection_model.go only; public API uses Model"},
+    {"concept": "Record type", "containment": "core/record_model.go only; repositories return typed structs"},
+    {"concept": "createRule/viewRule/updateRule/deleteRule", "containment": "Internal; exposed via Role/Policy metadata"},
+    {"concept": "_superusers collection", "containment": "Renamed to _admins in all user-facing APIs"},
+    {"concept": "pb_data directory", "containment": "Renamed to arsy_data in config, CLI, docs"},
+    {"concept": "pbinstall route", "containment": "Renamed to arsyinstall"},
+    {"concept": "DefaultInstallerEmail", "containment": "Renamed to DefaultBootstrapEmail"},
+    {"concept": "PocketBase in errors", "containment": "Replaced with A-R-S-Y"},
+    {"concept": "Superuser in CLI/UI", "containment": "Replaced with Owner/Admin"},
+    {"concept": "Direct dbx usage", "containment": "Wrapped in core.App.DB(); never exposed"},
+    {"concept": "Direct SQLite/PG access", "containment": "Only via Database Adapter Contract"}
+  ],
+  "dependencyRules": [
+    "Domain packages (arsy/*, apis/, ui/, cmd/) MUST NOT import concrete drivers",
+    "Domain packages MUST NOT import dbx directly — use core.App.DB()",
+    "Infrastructure packages (core/, tools/*, migrations/) MAY import drivers",
+    "Adapter packages implement DatabaseAdapter interface",
+    "One registry: arsy/engine/registry.Registry is the single metadata source of truth"
+  ],
+  "versioning": {
+    "ModuleManifest": "SemVer (v1.0.0)",
+    "PublicGoAPI": "Go module version (v1.x.y) - Semantic Import Versioning",
+    "RESTAPI": "URL versioning (/api/v1/)",
+    "OpenAPISpec": "Tied to REST API version",
+    "DatabaseAdapters": "Tied to Go module version",
+    "CLICommands": "Tied to Go module version",
+    "DatabaseMigrations": "Timestamp + semantic name (immutable once applied)",
+    "UIAssets": "Embedded in binary version"
+  },
+  "extensionPoints": {
+    "ModuleManifest": ["models", "fields", "relations", "views", "actions", "workflows", "permissions", "seeds", "migrations"],
+    "LifecycleContracts": ["Pre-Install", "Install", "Post-Install", "Enable", "Disable", "Upgrade", "Rollback", "Uninstall"],
+    "DatabaseAdapter": ["Connect", "Close", "Ping", "Introspect", "Plan", "Execute", "ProvisionTenant", "DeprovisionTenant", "SetTenantContext", "Capabilities"],
+    "QueryAST": ["Filter", "Sort", "Project", "Paginate", "Expand", "FilterRelation", "Extension"]
+  },
+  "decisions": [
+    {"decision": "Manifest-first", "rationale": "Deterministic, AI-draftable, policy-enforceable", "evidence": "ARSY-070 spec"},
+    {"decision": "Single registry", "rationale": "No competing metadata sources; validation at load", "evidence": "ARSY-030, ARSY-036"},
+    {"decision": "Adapter pattern", "rationale": "Domain independent of SQLite/PG; testable", "evidence": "ARSY-040, ARSY-044"},
+    {"decision": "Tenant-aware providers", "rationale": "Isolation at connection level; no cross-tenant leaks", "evidence": "ARSY-041, ARSY-051"},
+    {"decision": "Field-level auth", "rationale": "Default deny; projection before serialization", "evidence": "ARSY-050"},
+    {"decision": "RLS for PG", "rationale": "Database-enforced isolation; no app bypass", "evidence": "ARSY-044"},
+    {"decision": "Generated CRUD", "rationale": "No hand-written routes; consistent auth/validation", "evidence": "ARSY-062"},
+    {"decision": "Declarative UI", "rationale": "Metadata-driven; no client script execution", "evidence": "ARSY-072, ARSY-080"},
+    {"decision": "Circuit-breaker logging", "rationale": "Audit failures never block requests", "evidence": "AENG-045 (implemented)"}
+  ]
+}
