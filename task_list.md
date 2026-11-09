@@ -15,7 +15,7 @@
 - [ ] LogQL search by correlation_id/tenant_id/operation < 5s latency
 - [ ] Retention policies verified in Loki config
 - [ ] `go test ./arsy/aeng/... -run TestAuditLogging -v` passes 100%
-- [ ] No sensitive data in logs (redaction test)
+- [x] No sensitive data in logs (redaction test)
 - [ ] < 2ms overhead, < 10MB buffer
 **RULES**: R1: correlation_id mandatory. R2: Redaction via YAML config. R3: Async with circuit breaker. R4: Immutable logs.
 
