@@ -1469,7 +1469,7 @@ func (app *BaseApp) registerBaseHooks() {
 	app.registerAutobackupHooks()
 	app.registerCollectionHooks()
 	app.registerRecordHooks()
-	app.registerSuperuserHooks()
+	app.registerAdminHooks()
 	app.registerExternalAuthHooks()
 	app.registerMFAHooks()
 	app.registerOTPHooks()

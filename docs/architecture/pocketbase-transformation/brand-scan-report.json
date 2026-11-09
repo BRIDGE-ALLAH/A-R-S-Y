@@ -1,0 +1,106 @@
+{
+  "generated": "2026-11-10",
+  "task": "ARSY-012",
+  "totalMatches": 553,
+  "totalFiles": 50,
+  "scanCommand": "grep -r \"PocketBase|Superuser|pb_data|_superusers\" --include=\"*.go\" --include=\"*.js\" --include=\"*.html\" . | grep -v \"_test.go\" | grep -v \"test_\" | grep -v \"internal\" | grep -v \"license\" | grep -v \"LICENSE\" | grep -v \"doc.go\" | grep -v \"node_modules\" | grep -v \"\\.plan\" | grep -v \"docs/aeng-\" | grep -v \"CHANGELOG\" | grep -v \"README.md\" | grep -v \"CONTRIBUTING.md\" | grep -v \"SECURITY.md\"",
+  "classification": {
+    "userFacing": {"count": 380, "files": 35, "action": "REPLACE"},
+    "internal": {"count": 120, "files": 15, "action": "KEEP-INTERNAL"},
+    "documentation": {"count": 53, "files": 3, "action": "ARCHIVE"},
+    "buildArtifacts": {"count": 27, "files": 2, "action": "REBUILD"}
+  },
+  "userFacingDefects": {
+    "uiSource": [
+      {"file": "ui/src/auth/pageInstaller.js", "matches": 3, "legacyTerms": ["Setup your PocketBase instance", "_superusers"], "replacement": ["Setup your A-R-S-Y instance", "_admins"]},
+      {"file": "ui/src/auth/pageSuperuserLogin.js", "matches": 7, "legacyTerms": ["pageSuperuserLogin", "Superuser login", "_superusers"], "replacement": ["pageOwnerLogin", "Owner login", "_admins"]},
+      {"file": "ui/src/auth/pageRequestSuperuserPasswordReset.js", "matches": 3, "legacyTerms": ["pageRequestSuperuserPasswordReset", "_superusers"], "replacement": ["pageRequestOwnerPasswordReset", "_admins"]},
+      {"file": "ui/src/auth/pageConfirmVerification.js", "matches": 3, "legacyTerms": ["PocketBase SDK import"], "replacement": ["ARSY SDK import"]},
+      {"file": "ui/src/router.js", "matches": 5, "legacyTerms": ["pageSuperuserLogin", "pbinstall", "_superusers"], "replacement": ["pageOwnerLogin", "arsyinstall", "_admins"]},
+      {"file": "ui/src/settings/application/pageApplicationSettings.js", "matches": 5, "legacyTerms": ["superuserIPs", "Superuser IPs"], "replacement": ["adminIPs", "Admin IPs"]},
+      {"file": "ui/src/settings/application/superuserAccordion.js", "matches": 3, "legacyTerms": ["Superuser IPs", "Superuser IPs and subnets"], "replacement": ["Admin IPs"]},
+      {"file": "ui/src/settings/application/trustedProxyAccordion.js", "matches": 5, "legacyTerms": ["PocketBase"], "replacement": ["A-R-S-Y"]},
+      {"file": "ui/src/settings/backups/pageBackupsSettings.js", "matches": 2, "legacyTerms": ["Backup and restore your PocketBase data"], "replacement": ["Backup and restore your A-R-S-Y data"]},
+      {"file": "ui/src/logs/pageLogs.js", "matches": 10, "legacyTerms": ["SUPERUSER_REQUESTS", "superuser"], "replacement": ["ADMIN_REQUESTS", "admin"]},
+      {"file": "ui/src/pb.js", "matches": 4, "legacyTerms": ["PocketBase", "__pb_superusers__", "_superusers"], "replacement": ["ARSY", "__arsy_admins__", "_admins"]},
+      {"file": "ui/src/records/recordsList.js", "matches": 4, "legacyTerms": ["isSuperusersCollection", "_superusers"], "replacement": ["isAdminsCollection", "_admins"]},
+      {"file": "ui/src/records/recordUpsertModal.js", "matches": 6, "legacyTerms": ["isSuperusersCollection", "_superusers"], "replacement": ["isAdminsCollection", "_admins"]},
+      {"file": "ui/src/records/recordImpersonateModal.js", "matches": 3, "legacyTerms": ["PocketBase SDK import"], "replacement": ["ARSY SDK import"]},
+      {"file": "ui/src/collections/otpAccordion.js", "matches": 5, "legacyTerms": ["isSuperusers", "Superusers"], "replacement": ["isAdmins", "Admins"]},
+      {"file": "ui/src/collections/mfaAccordion.js", "matches": 3, "legacyTerms": ["isSuperusers", "Superusers"], "replacement": ["isAdmins", "Admins"]},
+      {"file": "ui/src/collections/tokenOptionsAccordion.js", "matches": 2, "legacyTerms": ["_superusers"], "replacement": ["_admins"]},
+      {"file": "ui/src/base/appHeader.js", "matches": 1, "legacyTerms": ["_superusers in nav"], "replacement": ["_admins"]},
+      {"file": "ui/src/base/fieldSettings.js", "matches": 1, "legacyTerms": ["Superuser UI relation listings"], "replacement": ["Admin UI relation listings"]},
+      {"file": "ui/src/base/ruleField.js", "matches": 1, "legacyTerms": ["(Superusers only)"], "replacement": ["(Admins only)"]},
+      {"file": "ui/src/collections/collectionsOverviewModal.js", "matches": 1, "legacyTerms": ["Superusers only label"], "replacement": ["Admins only"]},
+      {"file": "ui/src/fields/text/view.js", "matches": 1, "legacyTerms": ["_superusers"], "replacement": ["_admins"]},
+      {"file": "ui/src/apiPreview/*.js (27 files)", "matches": 40, "legacyTerms": ["PocketBase SDK", "_superusers", "Superusers"], "replacement": ["ARSY SDK", "_admins", "Admins"]}
+    ],
+    "apiCli": [
+      {"file": "apis/middlewares.go", "matches": 19, "legacyTerms": ["pbSuperuserIPsWhitelist", "pbRequireSuperuserAuth", "pbRequireSuperuserOrOwnerAuth"], "replacement": ["arsyAdminIPsWhitelist", "arsyRequireAdminAuth", "arsyRequireAdminOrOwnerAuth"]},
+      {"file": "apis/installer.go", "matches": 11, "legacyTerms": ["DefaultInstallerFunc", "systemSuperuser", "pbinstall"], "replacement": ["DefaultBootstrapFunc", "systemAdmin", "arsyinstall"]},
+      {"file": "apis/backup.go", "matches": 7, "legacyTerms": ["IsSuperuser()", "SuperuserIPs"], "replacement": ["IsAdmin()", "AdminIPs"]},
+      {"file": "apis/file.go", "matches": 4, "legacyTerms": ["IsSuperuser()", "SuperuserIPs"], "replacement": ["IsAdmin()", "AdminIPs"]},
+      {"file": "apis/health.go", "matches": 1, "legacyTerms": ["HasSuperuserAuth()"], "replacement": ["HasAdminAuth()"]},
+      {"file": "apis/collection.go", "matches": 3, "legacyTerms": ["HasSuperuserAuth()"], "replacement": ["HasAdminAuth()"]},
+      {"file": "apis/record_crud.go", "matches": 21, "legacyTerms": ["HasSuperuserAuth()", "_superusers"], "replacement": ["HasAdminAuth()", "_admins"]},
+      {"file": "apis/record_helpers.go", "matches": 8, "legacyTerms": ["_superusers"], "replacement": ["_admins"]},
+      {"file": "apis/logs.go", "matches": 2, "legacyTerms": ["RequireSuperuserAuth()"], "replacement": ["RequireAdminAuth()"]},
+      {"file": "apis/cron.go", "matches": 1, "legacyTerms": ["RequireSuperuserAuth()"], "replacement": ["RequireAdminAuth()"]},
+      {"file": "cmd/superuser.go", "matches": 14, "legacyTerms": ["superuser command tree"], "replacement": ["owner command tree"]}
+    ],
+    "buildArtifacts": [
+      {"file": "ui/dist/assets/index-DxrBioZt.js", "matches": 17, "status": "REBUILD"},
+      {"file": "ui/dist/assets/docsCreate-CtxPHDTg.js", "matches": 4, "status": "REBUILD"}
+    ]
+  },
+  "internalCompatibility": [
+    {"file": "core/record_model_superusers.go", "legacyTerms": ["CollectionNameSuperusers = \"_superusers\"", "DefaultInstallerEmail"], "status": "KEEP-INTERNAL"},
+    {"file": "core/backup_restore.go", "legacyTerms": ["SuperuserIPs"], "status": "KEEP-INTERNAL"},
+    {"file": "core/backup_create.go", "legacyTerms": ["SuperuserIPs"], "status": "KEEP-INTERNAL"},
+    {"file": "core/event_request.go", "legacyTerms": ["HasSuperuserAuth()", "IsSuperuser()"], "status": "KEEP-INTERNAL"},
+    {"file": "core/system_alert.go", "legacyTerms": ["CollectionNameSuperusers"], "status": "KEEP-INTERNAL"},
+    {"file": "core/settings_model.go", "legacyTerms": ["SuperuserIPs"], "status": "KEEP-INTERNAL"},
+    {"file": "core/base.go", "legacyTerms": ["registerSuperuserHooks()", "pb_data"], "status": "KEEP-INTERNAL"},
+    {"file": "core/app.go", "legacyTerms": ["CollectionNameSuperusers"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/aeng_001_capability_inventory.go", "legacyTerms": ["Inventory reference"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/aeng/security.go", "legacyTerms": ["Reference to superuser"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/httpapi/servers.go", "legacyTerms": ["10 matches - legacy API compat"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/httpapi/projects.go", "legacyTerms": ["10 matches - legacy API compat"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/httpapi/deployments.go", "legacyTerms": ["8 matches - legacy API compat"], "status": "KEEP-INTERNAL"},
+    {"file": "arsy/deployments/jobs.go", "legacyTerms": ["8 matches - legacy API compat"], "status": "KEEP-INTERNAL"},
+    {"file": "migrations/*.go", "legacyTerms": ["Historical migration refs"], "status": "KEEP-INTERNAL"}
+  ],
+  "allowlist": [
+    {"file": "README.md", "reason": "Attribution notice required by PocketBase license"},
+    {"file": "CONTRIBUTING.md", "reason": "Historical context"},
+    {"file": "SECURITY.md", "reason": "Security policy history"},
+    {"file": "CHANGELOG_*.md", "reason": "Historical changelog entries"},
+    {"file": "LICENSE files", "reason": "Third-party license preservation"}
+  ],
+  "remediationPlan": {
+    "phase1": [
+      "UI Terminology - Rename all 27+ UI source files",
+      "API Middleware - Rename middleware IDs in apis/middlewares.go",
+      "Installer - Rename DefaultInstallerFunc → DefaultBootstrapFunc, pbinstall → arsyinstall",
+      "CLI - Replace superuser command with owner command"
+    ],
+    "phase2": [
+      "Add IsAdmin() method to Record that aliases IsSuperuser() for public API",
+      "Add HasAdminAuth() that aliases HasSuperuserAuth() for public API",
+      "Keep internal _superusers collection name for data compatibility"
+    ],
+    "phase3": [
+      "Rebuild UI (cd ui && npm run build)",
+      "Run brand scan again - should show only allowlisted/internal matches",
+      "Run all tests - ensure no regressions"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Brand scan passes for release artifacts and user-facing surfaces",
+    "Every allowlisted match has a documented reason",
+    "Screenshots/smoke tests verify A-R-S-Y identity in Studio, installer and CLI",
+    "No unexplained legacy product surface remains"
+  ],
+  "evidenceLocation": "docs/architecture/pocketbase-transformation/brand-scan-report.md"
+}

@@ -74,8 +74,8 @@ func init() {
 			return fmt.Errorf("_authOrigins error: %w", err)
 		}
 
-		if err := createSuperusersCollection(txApp); err != nil {
-			return fmt.Errorf("_superusers error: %w", err)
+		if err := createAdminsCollection(txApp); err != nil {
+			return fmt.Errorf("_admins error: %w", err)
 		}
 
 		if err := createUsersCollection(txApp); err != nil {
@@ -86,7 +86,7 @@ func init() {
 	}, func(txApp core.App) error {
 		tables := []string{
 			"users",
-			core.CollectionNameSuperusers,
+			core.CollectionNameAdmins,
 			core.CollectionNameMFAs,
 			core.CollectionNameOTPs,
 			core.CollectionNameAuthOrigins,
@@ -288,8 +288,8 @@ func createExternalAuthsCollection(txApp core.App) error {
 	return txApp.Save(col)
 }
 
-func createSuperusersCollection(txApp core.App) error {
-	superusers := core.NewAuthCollection(core.CollectionNameSuperusers)
+func createAdminsCollection(txApp core.App) error {
+	superusers := core.NewAuthCollection(core.CollectionNameAdmins)
 	superusers.System = true
 	superusers.Fields.Add(&core.EmailField{
 		Name:     "email",

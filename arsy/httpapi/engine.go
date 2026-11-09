@@ -101,7 +101,7 @@ func authorizeEngineTenant(e *core.RequestEvent, tenant *core.Record) (tenancy.R
 	if e == nil || e.Auth == nil {
 		return "", errors.New("unauthorized")
 	}
-	if e.HasSuperuserAuth() {
+	if e.HasAdminAuth() {
 		return tenancy.RoleOwner, nil
 	}
 	registry := tenancy.NewPBMembershipRegistry(e.App)
@@ -118,7 +118,7 @@ func authorizeEngineTenant(e *core.RequestEvent, tenant *core.Record) (tenancy.R
 
 func authorizeEngineMethod(method string, role tenancy.Role, e *core.RequestEvent) error {
 	// Query/read endpoints allow viewer+; mutating record endpoints require write role.
-	if e != nil && e.HasSuperuserAuth() {
+	if e != nil && e.HasAdminAuth() {
 		return nil
 	}
 	switch method {

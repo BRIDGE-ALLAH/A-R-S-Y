@@ -14,7 +14,7 @@ func requireSuperuser(next func(*core.RequestEvent) error) func(*core.RequestEve
 		if e.Auth == nil {
 			return e.JSON(http.StatusUnauthorized, map[string]any{"status": "unauthorized"})
 		}
-		if !e.HasSuperuserAuth() {
+		if !e.HasAdminAuth() {
 			return e.JSON(http.StatusForbidden, map[string]any{"status": "forbidden"})
 		}
 		return next(e)

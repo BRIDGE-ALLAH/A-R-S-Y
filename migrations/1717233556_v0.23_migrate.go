@@ -72,7 +72,7 @@ func init() {
 
 func migrateSuperusers(txApp core.App, oldSettings *oldSettingsModel) error {
 	// create new superusers collection and table
-	err := createSuperusersCollection(txApp)
+	err := createAdminsCollection(txApp)
 	if err != nil {
 		return err
 	}

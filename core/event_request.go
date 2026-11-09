@@ -74,9 +74,9 @@ func (e *RequestEvent) RealIP() string {
 	return e.RemoteIP()
 }
 
-// HasSuperuserAuth checks whether the current RequestEvent has superuser authentication loaded.
-func (e *RequestEvent) HasSuperuserAuth() bool {
-	return e.Auth != nil && e.Auth.IsSuperuser()
+// HasAdminAuth checks whether the current RequestEvent has admin authentication loaded.
+func (e *RequestEvent) HasAdminAuth() bool {
+	return e.Auth != nil && e.Auth.IsAdmin()
 }
 
 // RequestInfo parses the current request into RequestInfo instance.
@@ -173,10 +173,10 @@ type RequestInfo struct {
 	Context string            `json:"context"`
 }
 
-// HasSuperuserAuth checks whether the current RequestInfo instance
-// has superuser authentication loaded.
-func (info *RequestInfo) HasSuperuserAuth() bool {
-	return info.Auth != nil && info.Auth.IsSuperuser()
+// HasAdminAuth checks whether the current RequestInfo instance
+// has admin authentication loaded.
+func (info *RequestInfo) HasAdminAuth() bool {
+	return info.Auth != nil && info.Auth.IsAdmin()
 }
 
 // Clone creates a new shallow copy of the current RequestInfo and its Auth record (if any).

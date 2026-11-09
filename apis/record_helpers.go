@@ -43,7 +43,7 @@ func RecordAuthResponse(e *core.RequestEvent, authRecord *core.Record, authMetho
 }
 
 func recordAuthResponse(e *core.RequestEvent, authRecord *core.Record, token string, authMethod string, meta any) error {
-	if authRecord.IsSuperuser() {
+	if authRecord.IsAdmin() {
 		allowedIPs := e.App.Settings().SuperuserIPs
 		if len(allowedIPs) > 0 && !isIPInList(allowedIPs, e.RealIP()) {
 			return e.ForbiddenError("", errors.New("superuser IP is not whitelisted"))
@@ -96,7 +96,7 @@ func recordAuthResponse(e *core.RequestEvent, authRecord *core.Record, token str
 		requestInfo.Auth = e.Record
 
 		err = triggerRecordEnrichHooks(e.App, &requestInfo, []*core.Record{e.Record}, func() error {
-			if e.Record.IsSuperuser() {
+			if e.Record.IsAdmin() {
 				e.Record.Unhide(e.Record.Collection().Fields.FieldNames()...)
 			}
 
@@ -381,7 +381,7 @@ func expandFetch(app core.App, originalRequestInfo *core.RequestInfo) core.Expan
 
 	return func(relCollection *core.Collection, relIds []string) ([]*core.Record, error) {
 		records, findErr := app.FindRecordsByIds(relCollection.Id, relIds, func(q *dbx.SelectQuery) error {
-			if requestInfoPtr.Auth != nil && requestInfoPtr.Auth.IsSuperuser() {
+			if requestInfoPtr.Auth != nil && requestInfoPtr.Auth.IsAdmin() {
 				return nil // superusers can access everything
 			}
 
@@ -439,7 +439,7 @@ func autoResolveRecordsFlags(app core.App, records []*core.Record, requestInfo *
 		return nil // nothing to resolve
 	}
 
-	if requestInfo.HasSuperuserAuth() {
+	if requestInfo.HasAdminAuth() {
 		hiddenFields := records[0].Collection().Fields.FieldNames()
 		for _, rec := range records {
 			rec.Unhide(hiddenFields...)
@@ -513,7 +513,7 @@ var superuserOnlyRuleFields = []string{"@collection.", "@request."}
 // checkForSuperuserOnlyRuleFields loosely checks and returns an error if
 // the provided RequestInfo contains rule fields that only the superuser can use.
 func checkForSuperuserOnlyRuleFields(requestInfo *core.RequestInfo) error {
-	if len(requestInfo.Query) == 0 || requestInfo.HasSuperuserAuth() {
+	if len(requestInfo.Query) == 0 || requestInfo.HasAdminAuth() {
 		return nil // superuser or nothing to check
 	}
 

@@ -25,7 +25,7 @@ func authorizeTenantAdmin(e *core.RequestEvent, tenant *core.Record) (tenancy.Ro
 	if e == nil || e.Auth == nil {
 		return "", errors.New("unauthorized")
 	}
-	if e.HasSuperuserAuth() {
+	if e.HasAdminAuth() {
 		return tenancy.RoleOwner, nil
 	}
 	reg := tenancy.NewPBMembershipRegistry(e.App)
@@ -84,7 +84,7 @@ func getTenant(e *core.RequestEvent, _ EngineConfig) error {
 	if e.Auth == nil {
 		return e.JSON(http.StatusUnauthorized, map[string]any{"status": "error", "message": "authentication required"})
 	}
-	if !e.HasSuperuserAuth() {
+	if !e.HasAdminAuth() {
 		reg := tenancy.NewPBMembershipRegistry(e.App)
 		if _, err := reg.Membership(e.Request.Context(), record.Id, e.Auth.Id); err != nil {
 			return e.JSON(http.StatusForbidden, map[string]any{"status": "error", "message": "tenant access denied"})

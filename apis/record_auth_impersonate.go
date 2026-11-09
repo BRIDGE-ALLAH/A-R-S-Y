@@ -10,7 +10,7 @@ import (
 // note: for now allow superusers but it may change in the future to allow access
 // also to users with "Manage API" rule access depending on the use cases that will arise
 func recordAuthImpersonate(e *core.RequestEvent) error {
-	if !e.HasSuperuserAuth() {
+	if !e.HasAdminAuth() {
 		return e.ForbiddenError("", nil)
 	}
 

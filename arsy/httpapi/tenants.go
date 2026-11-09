@@ -30,7 +30,7 @@ func registerTenantRoutes(api *router.RouterGroup[*core.RequestEvent], _ config.
 	}
 	api.GET("/tenants", requireAuthenticated(func(e *core.RequestEvent) error {
 		limit, offset := tenantPagination(e, 50, 200)
-		if e.HasSuperuserAuth() {
+		if e.HasAdminAuth() {
 			records, err := e.App.FindRecordsByFilter("baas_tenants", "1=1", "slug", limit, offset)
 			if err != nil {
 				return e.JSON(http.StatusInternalServerError, map[string]any{"status": "error", "message": "failed to list tenants"})

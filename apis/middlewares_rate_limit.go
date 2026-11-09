@@ -190,7 +190,7 @@ func checkRateLimit(e *core.RequestEvent, rtId string, rule core.RateLimitRule) 
 
 func skipRateLimit(e *core.RequestEvent) bool {
 	return !e.App.Settings().RateLimits.Enabled ||
-		e.HasSuperuserAuth() ||
+		e.HasAdminAuth() ||
 		isIPInList(e.App.Settings().RateLimits.ExcludedIPs, e.RealIP())
 }
 

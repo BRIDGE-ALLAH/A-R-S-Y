@@ -261,7 +261,7 @@ func oauth2Submit(e *core.RecordAuthWithOAuth2RequestEvent, optExternalAuth *cor
 			// extra check to prevent creating a superuser record via
 			// OAuth2 in case the method is used by another action
 			if e.Collection.Name == core.CollectionNameSuperusers {
-				return errors.New("superusers are not allowed to sign-up with OAuth2")
+				return errors.New("admins are not allowed to sign-up with OAuth2")
 			}
 
 			payload := maps.Clone(e.CreateData)

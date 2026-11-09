@@ -61,7 +61,7 @@ func loadInstaller(
 }
 
 func needInstallerSuperuser(app core.App) bool {
-	total, err := app.CountRecords(core.CollectionNameSuperusers, dbx.Not(dbx.HashExp{
+	total, err := app.CountRecords(core.CollectionNameAdmins, dbx.Not(dbx.HashExp{
 		"email": core.DefaultInstallerEmail,
 	}))
 
@@ -69,7 +69,7 @@ func needInstallerSuperuser(app core.App) bool {
 }
 
 func findOrCreateInstallerSuperuser(app core.App) (*core.Record, error) {
-	col, err := app.FindCachedCollectionByNameOrId(core.CollectionNameSuperusers)
+	col, err := app.FindCachedCollectionByNameOrId(core.CollectionNameAdmins)
 	if err != nil {
 		return nil, err
 	}
