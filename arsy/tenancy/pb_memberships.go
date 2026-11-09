@@ -72,4 +72,3 @@ func (r *PBMembershipRegistry) Membership(ctx context.Context, tenantID, userID 
 }
 
 var _ MembershipRegistry = (*PBMembershipRegistry)(nil)
-

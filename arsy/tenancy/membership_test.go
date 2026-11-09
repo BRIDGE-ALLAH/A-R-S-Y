@@ -24,4 +24,3 @@ func TestValidRoleAndPermissions(t *testing.T) {
 		t.Fatal("developer/viewer must not manage memberships")
 	}
 }
-

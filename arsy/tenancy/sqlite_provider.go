@@ -33,9 +33,16 @@ type sqliteDatastore struct {
 	lastUsed time.Time
 }
 
-func (s *sqliteDatastore) DB() *sql.DB                     { return s.db }
-func (s *sqliteDatastore) TenantID() string               { return s.tenantID }
+// TenantID returns the immutable tenant identifier.
+func (s *sqliteDatastore) TenantID() string { return s.tenantID }
+
+// Ping verifies connectivity to the tenant database.
 func (s *sqliteDatastore) Ping(ctx context.Context) error { return s.db.PingContext(ctx) }
+
+// DB returns the underlying connection pool. Callers must not close it.
+func (s *sqliteDatastore) DB() *sql.DB { return s.db }
+
+// Close releases the database resources.
 func (s *sqliteDatastore) Close() error {
 	s.once.Do(func() { s.closeErr = s.db.Close() })
 	return s.closeErr
@@ -212,22 +219,6 @@ func (p *SQLiteProvider) Health(ctx context.Context, tenantID string) HealthStat
 	return HealthStatus{TenantID: tenantID, Healthy: true}
 }
 
-// ProviderStats reports bounded-cache state without exposing paths or secrets.
-type ProviderStats struct {
-	OpenHandles int
-	MaxHandles  int
-	Closed      bool
-}
-
-// Stats returns a snapshot of the provider's handle cache.
-func (p *SQLiteProvider) Stats() ProviderStats {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	return ProviderStats{OpenHandles: len(p.store), MaxHandles: p.maxHandles, Closed: p.closed}
-}
-
 var _ Provider = (*SQLiteProvider)(nil)
 var _ HealthChecker = (*SQLiteProvider)(nil)
 var _ IdleCloser = (*SQLiteProvider)(nil)
-
-
