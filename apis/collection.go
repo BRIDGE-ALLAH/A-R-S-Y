@@ -261,7 +261,7 @@ func collectionListOAuth2Providers(e *core.RequestEvent) error {
 
 func collectionDryRunView(e *core.RequestEvent) error {
 	// extra precaution in case reused in custom route group
-	if !e.HasAdminAuth() {
+	if !e.HasAdminAuth() && !e.HasSuperuserAuth() {
 		return e.ForbiddenError("", nil)
 	}
 

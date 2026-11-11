@@ -108,7 +108,7 @@ func requireAuth(optCollectionNames ...string) func(*core.RequestEvent) error {
 func RequireSuperuserAuth() *hook.Handler[*core.RequestEvent] {
 	return &hook.Handler[*core.RequestEvent]{
 		Id:   DefaultRequireSuperuserAuthMiddlewareId,
-		Func: requireAuth(core.CollectionNameAdmins),
+		Func: requireAuth(core.CollectionNameAdmins, core.CollectionNameSuperusers),
 	}
 }
 
@@ -126,7 +126,7 @@ func RequireSuperuserOrOwnerAuth(ownerIdPathParam string) *hook.Handler[*core.Re
 				return e.UnauthorizedError("The request requires superuser or record authorization token.", nil)
 			}
 
-			if e.Auth.IsAdmin() {
+			if e.Auth.IsAdmin() || e.Auth.IsSuperuser() {
 				return e.Next()
 			}
 
@@ -312,7 +312,7 @@ func superuserIPsWhitelist() *hook.Handler[*core.RequestEvent] {
 		Id:       DefaultSuperuserIPsWhitelistMiddlewareId,
 		Priority: DefaultSuperuserIPsWhitelistMiddlewarePriority,
 		Func: func(e *core.RequestEvent) error {
-			if e.HasAdminAuth() {
+			if e.HasAdminAuth() || e.HasSuperuserAuth() {
 				ips := e.App.Settings().SuperuserIPs
 
 				if len(ips) > 0 && !isIPInList(ips, e.RealIP()) {

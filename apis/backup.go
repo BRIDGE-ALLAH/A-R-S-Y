@@ -66,7 +66,7 @@ func backupDownload(e *core.RequestEvent) error {
 	fileToken := e.Request.URL.Query().Get("token")
 
 	authRecord, err := e.App.FindAuthRecordByToken(fileToken, core.TokenTypeFile)
-	if err != nil || !authRecord.IsAdmin() {
+	if err != nil || !(authRecord.IsAdmin() || authRecord.IsSuperuser()) {
 		return e.ForbiddenError("Insufficient permissions to access the resource.", err)
 	}
 

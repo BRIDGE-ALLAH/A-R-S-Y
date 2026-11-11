@@ -79,6 +79,11 @@ func (e *RequestEvent) HasAdminAuth() bool {
 	return e.Auth != nil && e.Auth.IsAdmin()
 }
 
+// HasSuperuserAuth checks whether the current RequestEvent has superuser authentication loaded.
+func (e *RequestEvent) HasSuperuserAuth() bool {
+	return e.Auth != nil && e.Auth.IsSuperuser()
+}
+
 // RequestInfo parses the current request into RequestInfo instance.
 //
 // Note that the returned result is cached to avoid copying the request data multiple times
@@ -177,6 +182,12 @@ type RequestInfo struct {
 // has admin authentication loaded.
 func (info *RequestInfo) HasAdminAuth() bool {
 	return info.Auth != nil && info.Auth.IsAdmin()
+}
+
+// HasSuperuserAuth checks whether the current RequestInfo instance
+// has superuser authentication loaded.
+func (info *RequestInfo) HasSuperuserAuth() bool {
+	return info.Auth != nil && info.Auth.IsSuperuser()
 }
 
 // Clone creates a new shallow copy of the current RequestInfo and its Auth record (if any).

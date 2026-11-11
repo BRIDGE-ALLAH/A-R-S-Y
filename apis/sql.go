@@ -26,7 +26,7 @@ func bindSQLApi(app core.App, rg *router.RouterGroup[*core.RequestEvent]) {
 
 func runSQL(e *core.RequestEvent) error {
 	// extra precaution in case manually invoked from somewhere else
-	if !e.HasAdminAuth() {
+	if !e.HasAdminAuth() && !e.HasSuperuserAuth() {
 		return e.ForbiddenError("", nil)
 	}
 
