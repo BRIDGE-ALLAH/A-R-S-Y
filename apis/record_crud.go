@@ -49,7 +49,7 @@ func recordsList(e *core.RequestEvent) error {
 		return firstApiError(err, e.BadRequestError("", err))
 	}
 
-	if collection.ListRule == nil && !requestInfo.HasAdminAuth() {
+	if collection.ListRule == nil && !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() {
 		return e.ForbiddenError("Only superusers can perform this action.", nil)
 	}
 
@@ -63,7 +63,7 @@ func recordsList(e *core.RequestEvent) error {
 
 	fieldsResolver := core.NewRecordFieldResolver(e.App, collection, requestInfo, true)
 
-	if !requestInfo.HasAdminAuth() && collection.ListRule != nil && *collection.ListRule != "" {
+	if !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() && collection.ListRule != nil && *collection.ListRule != "" {
 		expr, err := search.FilterData(*collection.ListRule).BuildExpr(fieldsResolver)
 		if err != nil {
 			return err
@@ -75,7 +75,7 @@ func recordsList(e *core.RequestEvent) error {
 	}
 
 	// hidden fields are searchable only by superusers
-	fieldsResolver.SetAllowHiddenFields(requestInfo.HasAdminAuth())
+	fieldsResolver.SetAllowHiddenFields(requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth())
 
 	searchProvider := search.NewProvider(fieldsResolver).Query(query)
 
@@ -112,7 +112,7 @@ func recordsList(e *core.RequestEvent) error {
 		//
 		// In all cases it doesn't really matter that much because it doesn't affect the builtin PocketBase security sensitive fields (e.g. password and tokenKey) since they
 		// are not client-side filterable and in the few places where they need to be compared against an external value, a constant time check is used.
-		if !e.HasAdminAuth() &&
+		if !e.HasAdminAuth() && !e.HasSuperuserAuth() &&
 			(collection.ListRule != nil && *collection.ListRule != "") &&
 			(requestInfo.Query["filter"] != "") &&
 			len(e.Records) == 0 &&
@@ -162,12 +162,12 @@ func recordView(e *core.RequestEvent) error {
 		return firstApiError(err, e.BadRequestError("", err))
 	}
 
-	if collection.ViewRule == nil && !requestInfo.HasAdminAuth() {
+	if collection.ViewRule == nil && !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() {
 		return e.ForbiddenError("Only superusers can perform this action.", nil)
 	}
 
 	ruleFunc := func(q *dbx.SelectQuery) error {
-		if !requestInfo.HasAdminAuth() && collection.ViewRule != nil && *collection.ViewRule != "" {
+		if !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() && collection.ViewRule != nil && *collection.ViewRule != "" {
 			resolver := core.NewRecordFieldResolver(e.App, collection, requestInfo, true)
 
 			expr, err := search.FilterData(*collection.ViewRule).BuildExpr(resolver)
@@ -227,7 +227,7 @@ func recordCreate(responseWriteAfterTx bool, optFinalizer func(data any) error) 
 			return firstApiError(err, e.BadRequestError("", err))
 		}
 
-		hasSuperuserAuth := requestInfo.HasAdminAuth()
+		hasSuperuserAuth := requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth()
 		if !hasSuperuserAuth && collection.CreateRule == nil {
 			return e.ForbiddenError("Only superusers can perform this action.", nil)
 		}
@@ -415,7 +415,7 @@ func recordUpdate(responseWriteAfterTx bool, optFinalizer func(data any) error) 
 			return firstApiError(err, e.BadRequestError("", err))
 		}
 
-		hasSuperuserAuth := requestInfo.HasAdminAuth()
+		hasSuperuserAuth := requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth()
 
 		if !hasSuperuserAuth && collection.UpdateRule == nil {
 			return firstApiError(err, e.ForbiddenError("Only superusers can perform this action.", nil))
@@ -554,12 +554,12 @@ func recordDelete(responseWriteAfterTx bool, optFinalizer func(data any) error) 
 			return firstApiError(err, e.BadRequestError("", err))
 		}
 
-		if !requestInfo.HasAdminAuth() && collection.DeleteRule == nil {
+		if !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() && collection.DeleteRule == nil {
 			return e.ForbiddenError("Only superusers can perform this action.", nil)
 		}
 
 		ruleFunc := func(q *dbx.SelectQuery) error {
-			if !requestInfo.HasAdminAuth() && collection.DeleteRule != nil && *collection.DeleteRule != "" {
+			if !requestInfo.HasAdminAuth() && !requestInfo.HasSuperuserAuth() && collection.DeleteRule != nil && *collection.DeleteRule != "" {
 				resolver := core.NewRecordFieldResolver(e.App, collection, requestInfo, true)
 
 				expr, err := search.FilterData(*collection.DeleteRule).BuildExpr(resolver)
@@ -671,7 +671,7 @@ func recordDataFromRequest(e *core.RequestEvent, record *core.Record) (map[strin
 	isAuth := record.Collection().IsAuth()
 
 	// unset hidden fields for non-superusers
-	if !info.HasAdminAuth() {
+	if !info.HasAdminAuth() && !info.HasSuperuserAuth() {
 		for _, f := range record.Collection().Fields {
 			if f.GetHidden() {
 				// exception for the auth collection "password" field

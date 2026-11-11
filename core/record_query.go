@@ -598,7 +598,7 @@ func (app *BaseApp) FindAuthRecordByEmail(collectionModelOrIdentifier any, email
 //	if ok, _ := app.CanAccessRecord(record, requestInfo, rule); ok { ... }
 func (app *BaseApp) CanAccessRecord(record *Record, requestInfo *RequestInfo, accessRule *string) (bool, error) {
 	// superusers can access everything
-	if requestInfo.HasAdminAuth() {
+	if requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth() {
 		return true, nil
 	}
 

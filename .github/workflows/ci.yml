@@ -34,7 +34,7 @@ jobs:
       - name: Check Go formatting for changed files
         shell: bash
         run: |
-          mapfile -t go_files < <(git diff --name-only HEAD^1 HEAD -- '*.go')
+          mapfile -t go_files < <(git diff --name-only --diff-filter=d HEAD^1 HEAD -- '*.go')
           if (("${#go_files[@]}")); then
             unformatted="$(gofmt -l "${go_files[@]}")"
             if [ -n "$unformatted" ]; then

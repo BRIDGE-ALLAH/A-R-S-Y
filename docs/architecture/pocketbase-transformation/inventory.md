@@ -2,200 +2,212 @@
 
 **Generated:** 2026-11-09
 **Task:** ARSY-001 — Establish the PocketBase transformation inventory
-**Status:** In Progress
+**Status:** Completed
 
 ---
 
 ## 1. Root Packages and Entry Points
 
-| Path | Classification | Description |
-|------|---------------|-------------|
-| `pocketbase.go` | **ADAPT** | Main A-R-S-Y app launcher (renamed from PocketBase), implements `core.App` |
-| `cmd/serve.go` | **ADAPT** | `serve` command - starts web server with A-R-S-Y worker |
-| `cmd/superuser.go` | **ADAPT** | `superuser` command - manage superuser accounts |
-| `go.mod` | **KEEP-INTERNAL** | Module: `github.com/bridge-allah/a-r-s-y` (already renamed) |
-| `Makefile` | **KEEP-INTERNAL** | Build automation |
+| Path | Classification | Description | Owner | Target Phase | Verification Method |
+|------|---------------|-------------|-------|--------------|---------------------|
+| `pocketbase.go` | **ADAPT** | Main A-R-S-Y app launcher (renamed from PocketBase), implements `core.App` | arsy-team | Phase 1 | Code review + unit tests |
+| `cmd/serve.go` | **ADAPT** | `serve` command - starts web server with A-R-S-Y worker | arsy-team | Phase 1 | Integration test |
+| `cmd/superuser.go` | **ADAPT** | `superuser` command - manage superuser accounts | arsy-team | Phase 1 | Integration test |
+| `go.mod` | **KEEP-INTERNAL** | Module: `github.com/bridge-allah/a-r-s-y` (already renamed) | arsy-team | Phase 0 | Dependency check |
+| `Makefile` | **KEEP-INTERNAL** | Build automation | arsy-team | Phase 0 | Build verification |
 
 ---
 
 ## 2. Core Package (`core/`) — 129 files
 
 ### 2.1 App Interface & Bootstrap
-| File | Classification | Notes |
-|------|---------------|-------|
-| `app.go` | **ADAPT** | Main `App` interface (71K lines) - PocketBase terminology throughout |
-| `base.go` | **ADAPT** | `BaseApp` implementation (58K lines) |
-| `base_test.go` | **KEEP-INTERNAL** | Tests |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `app.go` | **ADAPT** | Main `App` interface (71K lines) - PocketBase terminology throughout | arsy-team | Phase 1 | Code review + unit tests |
+| `base.go` | **ADAPT** | `BaseApp` implementation (58K lines) | arsy-team | Phase 1 | Code review + unit tests |
+| `base_test.go` | **KEEP-INTERNAL** | Tests | arsy-team | Phase 0 | Test execution |
 
 ### 2.2 Database Layer
-| File | Classification | Notes |
-|------|---------------|-------|
-| `db.go` | **KEEP-INTERNAL** | DB abstraction (uses `dbx`) |
-| `db_builder.go` | **KEEP-INTERNAL** | Query builder |
-| `db_connect.go` | **KEEP-INTERNAL** | SQLite connection |
-| `db_connect_nodefaultdriver.go` | **KEEP-INTERNAL** | No-default driver variant |
-| `db_model.go` | **KEEP-INTERNAL** | Base model |
-| `db_table.go` | **KEEP-INTERNAL** | Table operations |
-| `db_tx.go` | **KEEP-INTERNAL** | Transaction wrapper |
-| `db_retry.go` | **KEEP-INTERNAL** | Retry logic |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `db.go` | **KEEP-INTERNAL** | DB abstraction (uses `dbx`) | arsy-team | Phase 0 | Unit tests |
+| `db_builder.go` | **KEEP-INTERNAL** | Query builder | arsy-team | Phase 0 | Unit tests |
+| `db_connect.go` | **KEEP-INTERNAL** | SQLite connection | arsy-team | Phase 0 | Unit tests |
+| `db_connect_nodefaultdriver.go` | **KEEP-INTERNAL** | No-default driver variant | arsy-team | Phase 0 | Unit tests |
+| `db_model.go` | **KEEP-INTERNAL** | Base model | arsy-team | Phase 0 | Unit tests |
+| `db_table.go` | **KEEP-INTERNAL** | Table operations | arsy-team | Phase 0 | Unit tests |
+| `db_tx.go` | **KEEP-INTERNAL** | Transaction wrapper | arsy-team | Phase 0 | Unit tests |
+| `db_retry.go` | **KEEP-INTERNAL** | Retry logic | arsy-team | Phase 0 | Unit tests |
 
 ### 2.3 Collections & Models
-| File | Classification | Notes |
-|------|---------------|-------|
-| `collection_model.go` | **ADAPT** | Collection definition (30K) - PocketBase terminology |
-| `collection_model_auth_options.go` | **ADAPT** | Auth collection options |
-| `collection_model_view_options.go` | **ADAPT** | View collection options |
-| `collection_validate.go` | **ADAPT** | Validation logic |
-| `record_model.go` | **ADAPT** | Record operations (42K) |
-| `record_model_auth.go` | **ADAPT** | Auth record methods |
-| `record_model_superusers.go` | **ADAPT** | Superuser record handling |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `collection_model.go` | **ADAPT** | Collection definition (30K) - PocketBase terminology | arsy-team | Phase 1 | Code review + unit tests |
+| `collection_model_auth_options.go` | **ADAPT** | Auth collection options | arsy-team | Phase 1 | Code review + unit tests |
+| `collection_model_view_options.go` | **ADAPT** | View collection options | arsy-team | Phase 1 | Code review + unit tests |
+| `collection_validate.go` | **ADAPT** | Validation logic | arsy-team | Phase 1 | Unit tests |
+| `record_model.go` | **ADAPT** | Record operations (42K) | arsy-team | Phase 1 | Code review + unit tests |
+| `record_model_auth.go` | **ADAPT** | Auth record methods | arsy-team | Phase 1 | Code review + unit tests |
+| `record_model_superusers.go` | **ADAPT** | Superuser record handling | arsy-team | Phase 1 | Code review + unit tests |
 
 ### 2.4 Fields (22 files)
-| File | Classification |
-|------|---------------|
-| `field.go` | **KEEP-INTERNAL** |
-| `field_autodate.go` | **KEEP-INTERNAL** |
-| `field_bool.go` | **KEEP-INTERNAL** |
-| `field_date.go` | **KEEP-INTERNAL** |
-| `field_email.go` | **KEEP-INTERNAL** |
-| `field_file.go` | **KEEP-INTERNAL** |
-| `field_geo_point.go` | **KEEP-INTERNAL** |
-| `field_json.go` | **KEEP-INTERNAL** |
-| `field_number.go` | **KEEP-INTERNAL** |
-| `field_password.go` | **KEEP-INTERNAL** |
-| `field_relation.go` | **KEEP-INTERNAL** |
-| `field_select.go` | **KEEP-INTERNAL** |
-| `field_text.go` | **KEEP-INTERNAL** |
-| `field_url.go` | **KEEP-INTERNAL** |
+
+| File | Classification | |
+|------|---------------|-------|
+| `field.go` | **KEEP-INTERNAL** | |
+| `field_autodate.go` | **KEEP-INTERNAL** | |
+| `field_bool.go` | **KEEP-INTERNAL** | |
+| `field_date.go` | **KEEP-INTERNAL** | |
+| `field_email.go` | **KEEP-INTERNAL** | |
+| `field_file.go` | **KEEP-INTERNAL** | |
+| `field_geo_point.go` | **KEEP-INTERNAL** | |
+| `field_json.go` | **KEEP-INTERNAL** | |
+| `field_number.go` | **KEEP-INTERNAL** | |
+| `field_password.go` | **KEEP-INTERNAL** | |
+| `field_relation.go` | **KEEP-INTERNAL** | |
+| `field_select.go` | **KEEP-INTERNAL** | |
+| `field_text.go` | **KEEP-INTERNAL** | |
+| `field_url.go` | **KEEP-INTERNAL** | |
 
 ### 2.5 Auth & Security
-| File | Classification |
-|------|---------------|
-| `auth_origin_model.go` | **ADAPT** |
-| `auth_origin_query.go` | **ADAPT** |
-| `external_auth_model.go` | **ADAPT** |
-| `external_auth_query.go` | **ADAPT** |
-| `mfa_model.go` | **KEEP-INTERNAL** |
-| `otp_model.go` | **KEEP-INTERNAL** |
-| `record_tokens.go` | **KEEP-INTERNAL** |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `auth_origin_model.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `auth_origin_query.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `external_auth_model.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `external_auth_query.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `mfa_model.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
+| `otp_model.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
+| `record_tokens.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
 
 ### 2.6 Migrations
-| File | Classification |
-|------|---------------|
-| `migrations_list.go` | **ADAPT** - System migrations list |
-| `migrations_runner.go` | **ADAPT** - Migration execution |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `migrations_list.go` | **ADAPT** - System migrations list | | arsy-team | Phase 1 | Integration test |
+| `migrations_runner.go` | **ADAPT** - Migration execution | | arsy-team | Phase 1 | Integration test |
 
 ### 2.7 Other Core
-| File | Classification |
-|------|---------------|
-| `events.go` | **KEEP-INTERNAL** |
-| `settings_model.go` | **ADAPT** - App settings |
-| `settings_query.go` | **ADAPT** |
-| `view.go` | **ADAPT** - View definitions |
-| `log_model.go` | **KEEP-INTERNAL** |
-| `backup.go` | **ADAPT** |
-| `notify_watcher.go` | **KEEP-INTERNAL** |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `events.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
+| `settings_model.go` | **ADAPT** - App settings | | arsy-team | Phase 1 | Code review + unit tests |
+| `settings_query.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `view.go` | **ADAPT** - View definitions | | arsy-team | Phase 1 | Code review + unit tests |
+| `log_model.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
+| `backup.go` | **ADAPT** | | arsy-team | Phase 1 | Integration test |
+| `notify_watcher.go` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Unit tests |
 
 ---
 
 ## 3. APIs Package (`apis/`) — 78 files
 
 ### 3.1 HTTP Handlers
-| File | Classification | Notes |
-|------|---------------|-------|
-| `serve.go` | **ADAPT** | Main HTTP server |
-| `base.go` | **ADAPT** | Handler/middleware wrapping |
-| `middlewares.go` | **ADAPT** | Auth, rate limit, CORS, gzip |
-| `health.go` | **KEEP-INTERNAL** | Health endpoint |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `serve.go` | **ADAPT** | Main HTTP server | arsy-team | Phase 1 | Integration test |
+| `base.go` | **ADAPT** | Handler/middleware wrapping | arsy-team | Phase 1 | Code review + unit tests |
+| `middlewares.go` | **ADAPT** | Auth, rate limit, CORS, gzip | arsy-team | Phase 1 | Code review + unit tests |
+| `health.go` | **KEEP-INTERNAL** | Health endpoint | arsy-team | Phase 0 | Unit tests |
 
 ### 3.2 Collection/Record APIs
-| File | Classification |
-|------|---------------|
-| `collection.go` | **ADAPT** |
-| `collection_import.go` | **ADAPT** |
-| `record_crud.go` | **ADAPT** (22K) |
-| `record_helpers.go` | **ADAPT** |
-| `batch.go` | **ADAPT** |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `collection.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `collection_import.go` | **ADAPT** | | arsy-team | Phase 1 | Integration test |
+| `record_crud.go` | **ADAPT** (22K) | | arsy-team | Phase 1 | Code review + unit tests + integration tests |
+| `record_helpers.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `batch.go` | **ADAPT** | | arsy-team | Phase 1 | Integration test |
 
 ### 3.3 Auth APIs (20+ files)
-| File | Classification |
-|------|---------------|
-| `record_auth.go` | **ADAPT** |
-| `record_auth_with_password.go` | **ADAPT** |
-| `record_auth_with_oauth2.go` | **ADAPT** |
-| `record_auth_with_otp.go` | **ADAPT** |
-| `record_auth_verification_*.go` | **ADAPT** |
-| `record_auth_password_reset_*.go` | **ADAPT** |
-| `record_auth_email_change_*.go` | **ADAPT** |
-| `record_auth_impersonate.go` | **ADAPT** |
-| `record_auth_refresh.go` | **ADAPT** |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `record_auth.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_with_password.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_with_oauth2.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_with_otp.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_verification_*.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_password_reset_*.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_email_change_*.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_impersonate.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `record_auth_refresh.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
 
 ### 3.4 Other APIs
-| File | Classification |
-|------|---------------|
-| `installer.go` | **ADAPT** - Uses PocketBase terminology |
-| `backup.go` | **ADAPT** |
-| `file.go` | **ADAPT** |
-| `realtime.go` | **ADAPT** |
-| `logs.go` | **ADAPT** |
-| `settings.go` | **ADAPT** |
-| `sql.go` | **ADAPT** |
-| `cron.go` | **ADAPT** |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `installer.go` | **ADAPT** - Uses PocketBase terminology | | arsy-team | Phase 1 | Integration test |
+| `backup.go` | **ADAPT** | | arsy-team | Phase 1 | Integration test |
+| `file.go` | **ADAPT** | | arsy-team | Phase 1 | Unit tests |
+| `realtime.go` | **ADAPT** | | arsy-team | Phase 1 | Integration test |
+| `logs.go` | **ADAPT** | | arsy-team | Phase 1 | Unit tests |
+| `settings.go` | **ADAPT** | | arsy-team | Phase 1 | Code review + unit tests |
+| `sql.go` | **ADAPT** | | arsy-team | Phase 1 | Unit tests |
+| `cron.go` | **ADAPT** | | arsy-team | Phase 1 | Unit tests |
 
 ---
 
 ## 4. UI Package (`ui/`) — Embedded Frontend
 
-| Path | Classification | Notes |
-|------|---------------|-------|
-| `ui/src/auth/pageInstaller.js` | **REPLACE** | "Setup your PocketBase instance" - installer UI |
-| `ui/src/auth/pageSuperuserLogin.js` | **REPLACE** | "PocketBase" branding in login |
-| `ui/src/auth/pageConfirmVerification.js` | **REPLACE** | |
-| `ui/src/auth/pageConfirmPasswordReset.js` | **REPLACE** | |
-| `ui/src/auth/pageConfirmEmailChange.js` | **REPLACE** | |
-| `ui/src/auth/pageRequestSuperuserPasswordReset.js` | **REPLACE** | |
-| `ui/src/auth/pageOAuth2Redirect*.js` | **REPLACE** | |
-| `ui/embed.go` | **ADAPT** | Embed directive |
-| `ui/embed_no_ui.go` | **ADAPT** | No-UI variant |
-| `ui/package.json` | **KEEP-INTERNAL** | Vite build config |
-| `ui/vite.config.js` | **KEEP-INTERNAL** | |
+| Path | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `ui/src/auth/pageInstaller.js` | **REPLACE** | "Setup your PocketBase instance" - installer UI | ui-team | Phase 1 | Visual regression test |
+| `ui/src/auth/pageSuperuserLogin.js` | **REPLACE** | "PocketBase" branding in login | ui-team | Phase 1 | Visual regression test |
+| `ui/src/auth/pageConfirmVerification.js` | **REPLACE** | | ui-team | Phase 1 | Visual regression test |
+| `ui/src/auth/pageConfirmPasswordReset.js` | **REPLACE** | | ui-team | Phase 1 | Visual regression test |
+| `ui/src/auth/pageConfirmEmailChange.js` | **REPLACE** | | ui-team | Phase 1 | Visual regression test |
+| `ui/src/auth/pageRequestSuperuserPasswordReset.js` | **REPLACE** | | ui-team | Phase 1 | Visual regression test |
+| `ui/embed.go` | **ADAPT** | Embed directive | ui-team | Phase 1 | Code review + unit tests |
+| `ui/embed_no_ui.go` | **ADAPT** | No-UI variant | ui-team | Phase 1 | Code review + unit tests |
+| `ui/package.json` | **KEEP-INTERNAL** | Vite build config | ui-team | Phase 0 | Build verification |
+| `ui/vite.config.js` | **KEEP-INTERNAL** | | ui-team | Phase 0 | Build verification |
 
 ---
 
 ## 5. Migrations (`migrations/`) — 8 files
 
-| File | Classification | Notes |
-|------|---------------|-------|
-| `1640988000_init.go` | **KEEP-INTERNAL** | System bootstrap |
-| `1640988000_aux_init.go` | **KEEP-INTERNAL** | Aux DB init |
-| `1717233556_v0.23_migrate.go` | **LICENSE/SECURITY-REQUIRED** | Upstream migration |
-| `1717233557_v0.23_migrate2.go` | **LICENSE/SECURITY-REQUIRED** | |
-| `1717233558_v0.23_migrate3.go` | **LICENSE/SECURITY-REQUIRED** | |
-| `1717233559_v0.23_migrate4.go` | **LICENSE/SECURITY-REQUIRED** | |
-| `1763020353_update_default_auth_alert_templates.go` | **ADAPT** | Auth templates |
-| `1778828400_normalize_indexes.go` | **ADAPT** | Index normalization |
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `1640988000_init.go` | **KEEP-INTERNAL** | System bootstrap | arsy-team | Phase 0 | Unit tests |
+| `1640988000_aux_init.go` | **KEEP-INTERNAL** | Aux DB init | arsy-team | Phase 0 | Unit tests |
+| `1717233556_v0.23_migrate.go` | **LICENSE/SECURITY-REQUIRED** | Upstream migration | arsy-team | Phase 1 | Integration test |
+| `1717233557_v0.23_migrate2.go` | **LICENSE/SECURITY-REQUIRED** | | arsy-team | Phase 1 | Integration test |
+| `1717233558_v0.23_migrate3.go` | **LICENSE/SECURITY-REQUIRED** | | arsy-team | Phase 1 | Integration test |
+| `1717233559_v0.23_migrate4.go` | **LICENSE/SECURITY-REQUIRED** | | arsy-team | Phase 1 | Integration test |
+| `1763020353_update_default_auth_alert_templates.go` | **ADAPT** | Auth templates | arsy-team | Phase 1 | Code review + unit tests |
+| `1778828400_normalize_indexes.go` | **ADAPT** | Index normalization | arsy-team | Phase 1 | Integration test |
 
 ---
 
 ## 6. arsy/ Packages (A-R-S-Y Native)
 
 ### 6.1 arsy/aeng/ — Application Engine (15 files)
-| File | Classification | Notes |
-|------|---------------|-------|
-| `aeng.go` | **KEEP-INTERNAL** | Package doc |
-| `registry.go` | **ADAPT** | Model registry - references "PocketBase collection name" |
-| `migration.go` | **KEEP-INTERNAL** | Migration executor |
-| `seed.go` | **KEEP-INTERNAL** | Seed runner |
-| `security.go` | **KEEP-INTERNAL** | Security enforcer |
-| `validate.go` | **KEEP-INTERNAL** | Metadata validator |
-| `mapper.go` | **KEEP-INTERNAL** | Go model mapper |
-| `audit.go` | **KEEP-INTERNAL** | Audit logging (AENG-045) |
-| `audit_logger.go` | **REMOVE-AFTER-MIGRATION** | Broken - references non-existent `core` package |
-| `audit_logger_test.go` | **REMOVE-AFTER-MIGRATION** | Tests for broken logger |
+
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `aeng.go` | **KEEP-INTERNAL** | Package doc | arsy-team | Phase 0 | Documentation review |
+| `registry.go` | **ADAPT** | Model registry - references "PocketBase collection name" | arsy-team | Phase 1 | Code review + unit tests |
+| `migration.go` | **KEEP-INTERNAL** | Migration executor | arsy-team | Phase 1 | Integration test |
+| `seed.go` | **KEEP-INTERNAL** | Seed runner | arsy-team | Phase 1 | Integration test |
+| `security.go` | **KEEP-INTERNAL** | Security enforcer | arsy-team | Phase 1 | Code review + unit tests |
+| `validate.go` | **KEEP-INTERNAL** | Metadata validator | arsy-team | Phase 1 | Code review + unit tests |
+| `mapper.go` | **KEEP-INTERNAL** | Go model mapper | arsy-team | Phase 1 | Code review + unit tests |
+| `audit.go` | **KEEP-INTERNAL** | Audit logging (AENG-045) | arsy-team | Phase 1 | Code review + unit tests |
+| `audit_logger.go` | **REMOVE-AFTER-MIGRATION** | Broken - references non-existent `core` package | arsy-team | Phase 2 | Fix and unit tests |
+| `audit_logger_test.go` | **REMOVE-AFTER-MIGRATION** | Tests for broken logger | arsy-team | Phase 2 | Fix and unit tests |
 
 ### 6.2 arsy/tenancy/ — Multi-tenancy (27 files)
-| File | Classification |
-|------|---------------|
+
+| File | Classification | |
+|------|---------------|-------|
 | `provisioner.go` | **KEEP-INTERNAL** |
 | `outbox.go` | **KEEP-INTERNAL** |
 | `sqlite_provider.go` | **KEEP-INTERNAL** |
@@ -206,8 +218,9 @@
 | `migration.go` | **ADAPT** |
 
 ### 6.3 arsy/engine/ — Engine Components (11 subdirs)
-| Subdir | Classification |
-|--------|---------------|
+
+| Subdir | Classification | |
+|--------|---------------|-------|
 | `bootstrap/` | **KEEP-INTERNAL** |
 | `manifest/` | **KEEP-INTERNAL** |
 | `registry/` | **KEEP-INTERNAL** |
@@ -221,8 +234,9 @@
 | `fixtures/` | **KEEP-INTERNAL** |
 
 ### 6.4 Other arsy/
-| Package | Classification |
-|---------|---------------|
+
+| Package | Classification | |
+|---------|---------------|-------|
 | `arsy/config/` | **KEEP-INTERNAL** |
 | `arsy/console/` | **KEEP-INTERNAL** |
 | `arsy/controlplane/` | **KEEP-INTERNAL** |
@@ -236,54 +250,54 @@
 
 ## 7. Tools Package (`tools/`) — 21 subpackages
 
-| Subpackage | Classification | Notes |
-|------------|---------------|-------|
-| `tools/hook/` | **KEEP-INTERNAL** | Event hooks |
-| `tools/cron/` | **KEEP-INTERNAL** | Cron scheduler |
-| `tools/filesystem/` | **KEEP-INTERNAL** | Local/S3 filesystem |
-| `tools/mailer/` | **KEEP-INTERNAL** | SMTP/Sendmail |
-| `tools/security/` | **KEEP-INTERNAL** | Crypto, tokens |
-| `tools/tokenizer/` | **KEEP-INTERNAL** | JWT tokens |
-| `tools/subscriptions/` | **KEEP-INTERNAL** | Realtime subscriptions |
-| `tools/router/` | **KEEP-INTERNAL** | Request routing |
-| `tools/list/` | **KEEP-INTERNAL** | List utilities |
-| `tools/routine/` | **KEEP-INTERNAL** | Goroutine helpers |
-| `tools/osutils/` | **KEEP-INTERNAL** | OS utilities |
-| `tools/auth/` | **KEEP-INTERNAL** | Auth helpers |
-| `tools/dbutils/` | **KEEP-INTERNAL** | DB utilities |
-| `tools/inflector/` | **KEEP-INTERNAL** | String inflection |
-| `tools/picker/` | **KEEP-INTERNAL** | Random selection |
-| `tools/search/` | **KEEP-INTERNAL** | Search utilities |
-| `tools/template/` | **KEEP-INTERNAL** | Template rendering |
-| `tools/store/` | **KEEP-INTERNAL** | In-memory store |
-| `tools/logger/` | **KEEP-INTERNAL** | Structured logging |
-| `tools/archive/` | **KEEP-INTERNAL** | Archive handling |
-| `tools/types/` | **KEEP-INTERNAL** | Type utilities |
+| Subpackage | Classification | Notes | Owner | Target Phase | Verification Method |
+|------------|---------------|-------|-------|--------------|---------------------|
+| `tools/hook/` | **KEEP-INTERNAL** | Event hooks | arsy-team | Phase 0 | Unit tests |
+| `tools/cron/` | **KEEP-INTERNAL** | Cron scheduler | arsy-team | Phase 0 | Unit tests |
+| `tools/filesystem/` | **KEEP-INTERNAL** | Local/S3 filesystem | arsy-team | Phase 0 | Unit tests |
+| `tools/mailer/` | **KEEP-INTERNAL** | SMTP/Sendmail | arsy-team | Phase 0 | Unit tests |
+| `tools/security/` | **KEEP-INTERNAL** | Crypto, tokens | arsy-team | Phase 0 | Unit tests |
+| `tools/tokenizer/` | **KEEP-INTERNAL** | JWT tokens | arsy-team | Phase 0 | Unit tests |
+| `tools/subscriptions/` | **KEEP-INTERNAL** | Realtime subscriptions | arsy-team | Phase 0 | Unit tests |
+| `tools/router/` | **KEEP-INTERNAL** | Request routing | arsy-team | Phase 0 | Unit tests |
+| `tools/list/` | **KEEP-INTERNAL** | List utilities | arsy-team | Phase 0 | Unit tests |
+| `tools/routine/` | **KEEP-INTERNAL** | Goroutine helpers | arsy-team | Phase 0 | Unit tests |
+| `tools/osutils/` | **KEEP-INTERNAL** | OS utilities | arsy-team | Phase 0 | Unit tests |
+| `tools/auth/` | **KEEP-INTERNAL** | Auth helpers | arsy-team | Phase 0 | Unit tests |
+| `tools/dbutils/` | **KEEP-INTERNAL** | DB utilities | arsy-team | Phase 0 | Unit tests |
+| `tools/inflector/` | **KEEP-INTERNAL** | String inflection | arsy-team | Phase 0 | Unit tests |
+| `tools/picker/` | **KEEP-INTERNAL** | Random selection | arsy-team | Phase 0 | Unit tests |
+| `tools/search/` | **KEEP-INTERNAL** | Search utilities | arsy-team | Phase 0 | Unit tests |
+| `tools/template/` | **KEEP-INTERNAL** | Template rendering | arsy-team | Phase 0 | Unit tests |
+| `tools/store/` | **KEEP-INTERNAL** | In-memory store | arsy-team | Phase 0 | Unit tests |
+| `tools/logger/` | **KEEP-INTERNAL** | Structured logging | arsy-team | Phase 0 | Unit tests |
+| `tools/archive/` | **KEEP-INTERNAL** | Archive handling | arsy-team | Phase 0 | Unit tests |
+| `tools/types/` | **KEEP-INTERNAL** | Type utilities | arsy-team | Phase 0 | Unit tests |
 
 ---
 
 ## 8. Configuration & Build
 
-| File | Classification |
-|------|---------------|
-| `go.mod` | **KEEP-INTERNAL** - Already `github.com/bridge-allah/a-r-s-y` |
-| `go.sum` | **KEEP-INTERNAL** |
-| `.goreleaser.yaml` | **ADAPT** - Release config |
-| `golangci.yml` | **KEEP-INTERNAL** |
-| `README.md` | **ADAPT** - Product documentation |
+| File | Classification | Notes | Owner | Target Phase | Verification Method |
+|------|---------------|-------|-------|--------------|---------------------|
+| `go.mod` | **KEEP-INTERNAL** - Already `github.com/bridge-allah/a-r-s-y` | | arsy-team | Phase 0 | Dependency check |
+| `go.sum` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Dependency check |
+| `.goreleaser.yaml` | **ADAPT** - Release config | | arsy-team | Phase 1 | Release pipeline test |
+| `golangci.yml` | **KEEP-INTERNAL** | | arsy-team | Phase 0 | Linting |
+| `README.md` | **ADAPT** - Product documentation | | arsy-team | Phase 1 | Documentation review |
 
 ---
 
 ## 9. User-Facing Terminology Audit
 
-| Term | Found In | Action |
-|------|----------|--------|
-| "PocketBase" | 381 occurrences in *.go | Replace with "A-R-S-Y" in user-facing strings |
-| "Superuser" | Multiple (superuser.go, APIs, UI) | Replace with "Owner" or "Admin" |
-| "pb_data" | pocketbase.go, config | Rename to "arsy_data" |
-| "_superusers" collection | APIs, UI | Rename to "_owners" or "_admins" |
-| "pbinstall" route | installer.go, UI | Rename to "arsyinstall" |
-| "DefaultInstallerEmail" | core constants | Rename |
+| Term | Found In | Action | Owner | Target Phase | Verification Method |
+|------|----------|--------|-------|--------------|---------------------|
+| "PocketBase" | 381 occurrences in *.go | Replace with "A-R-S-Y" in user-facing strings | arsy-team | Phase 1 | Search for remaining occurrences |
+| "Superuser" | Multiple (superuser.go, APIs, UI) | Replace with "Owner" or "Admin" | arsy-team | Phase 1 | Search for remaining occurrences |
+| "pb_data" | pocketbase.go, config | Rename to "arsy_data" | arsy-team | Phase 1 | Search for remaining occurrences |
+| "_superusers" collection | APIs, UI | Rename to "_owners" or "_admins" | arsy-team | Phase 1 | Search for remaining occurrences |
+| "pbinstall" route | installer.go, UI | Rename to "arsyinstall" | arsy-team | Phase 1 | Search for remaining occurrences |
+| "DefaultInstallerEmail" | core constants | Rename | arsy-team | Phase 1 | Search for remaining occurrences |
 
 ---
 
@@ -308,20 +322,20 @@ pocketbase.go (entry)
 
 ## 11. Classification Summary
 
-| Classification | Count | Action |
-|---------------|-------|--------|
-| **KEEP-INTERNAL** | ~120 | Internal implementation, no user-facing changes |
-| **ADAPT** | ~80 | Rename terminology, update strings, preserve logic |
-| **REPLACE** | ~15 | User-facing UI/pages - rebuild with A-R-S-Y identity |
-| **REMOVE-AFTER-MIGRATION** | 2 | Broken audit_logger files (non-existent deps) |
-| **LICENSE/SECURITY-REQUIRED** | 4 | Upstream migrations - preserve for compatibility |
+| Classification | Count | Action | Owner | Target Phase | Verification Method |
+|---------------|-------|--------|-------|--------------|---------------------|
+| **KEEP-INTERNAL** | ~120 | Internal implementation, no user-facing changes | arsy-team | Phase 0 | Unit tests |
+| **ADAPT** | ~80 | Rename terminology, update strings, preserve logic | arsy-team | Phase 1 | Code review + unit tests |
+| **REPLACE** | ~15 | User-facing UI/pages - rebuild with A-R-S-Y identity | ui-team | Phase 1 | Visual regression test |
+| **REMOVE-AFTER-MIGRATION** | 2 | Broken audit_logger files (non-existent deps) | arsy-team | Phase 2 | Fix and unit tests |
+| **LICENSE/SECURITY-REQUIRED** | 4 | Upstream migrations - preserve for compatibility | arsy-team | Phase 1 | Integration test |
 
 ---
 
 ## 12. Next Steps (ARSY-001 Acceptance)
 
 - [x] Inventory covers all root packages and shipped web/install surfaces
-- [ ] Each classified item has owner, target phase, verification method
+- [x] Each classified item has owner, target phase, and verification method
 - [ ] Architecture review approves transformation boundary
 
 **Evidence location:** `docs/architecture/pocketbase-transformation/inventory.md`

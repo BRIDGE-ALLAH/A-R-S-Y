@@ -1,3 +1,5 @@
+import { isValidIPList } from "./superuserValidation";
+
 export function superuserAccordion(pageData) {
     const info = store({
         isLoading: false,
@@ -32,8 +34,8 @@ export function superuserAccordion(pageData) {
                     (newHash, oldHash) => {
                         if (newHash != oldHash) {
                             loadInfo();
-                        }
-                    },
+                            }
+                        },
                 );
             },
             onunmount: (el) => {
@@ -107,7 +109,14 @@ export function superuserAccordion(pageData) {
 
                         // has an actual change
                         if (oldStr != newStr) {
-                            pageData.formSettings.superuserIPs = newValue;
+                            if (!isValidIPList(newValue)) {
+                                pageData.formSettings.errors.superuserIPs = "Invalid IP address or subnet";
+                            } else {
+                                pageData.formSettings.superuserIPs = newValue;
+                                if (pageData.formSettings.errors.superuserIPs) {
+                                    delete pageData.formSettings.errors.superuserIPs;
+                                }
+                            }
                         }
                     },
                 }),

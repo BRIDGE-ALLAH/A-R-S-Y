@@ -115,9 +115,9 @@ func (api *fileApi) download(e *core.RequestEvent) error {
 		token := e.Request.URL.Query().Get("token")
 		authRecord, _ := e.App.FindAuthRecordByToken(token, core.TokenTypeFile)
 
-		// reset the auth state if it is superuser and it is not whitelisted
+		// reset the auth state if it is superuser/admin and it is not whitelisted
 		// (not critical because file tokens are short-lived but checked nonetheless as an extra precaution)
-		if authRecord != nil && authRecord.IsAdmin() {
+		if authRecord != nil && (authRecord.IsAdmin() || authRecord.IsSuperuser()) {
 			allowedIPs := e.App.Settings().SuperuserIPs
 			if len(allowedIPs) > 0 && !isIPInList(allowedIPs, e.RealIP()) {
 				authRecord = nil

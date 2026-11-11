@@ -665,7 +665,7 @@ func realtimeBroadcastRecord(app core.App, action string, record *core.Record, d
 						// -------------------------------------------
 
 						// enable hidden fields for superuser subscribers
-						if requestInfo.HasAdminAuth() {
+						if requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth() {
 							cleanRecord.Unhide(collection.Fields.FieldNames()...)
 						}
 

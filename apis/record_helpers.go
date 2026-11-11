@@ -43,7 +43,7 @@ func RecordAuthResponse(e *core.RequestEvent, authRecord *core.Record, authMetho
 }
 
 func recordAuthResponse(e *core.RequestEvent, authRecord *core.Record, token string, authMethod string, meta any) error {
-	if authRecord.IsAdmin() {
+	if authRecord.IsAdmin() || authRecord.IsSuperuser() {
 		allowedIPs := e.App.Settings().SuperuserIPs
 		if len(allowedIPs) > 0 && !isIPInList(allowedIPs, e.RealIP()) {
 			return e.ForbiddenError("", errors.New("superuser IP is not whitelisted"))
@@ -381,7 +381,7 @@ func expandFetch(app core.App, originalRequestInfo *core.RequestInfo) core.Expan
 
 	return func(relCollection *core.Collection, relIds []string) ([]*core.Record, error) {
 		records, findErr := app.FindRecordsByIds(relCollection.Id, relIds, func(q *dbx.SelectQuery) error {
-			if requestInfoPtr.Auth != nil && requestInfoPtr.Auth.IsAdmin() {
+			if requestInfoPtr.Auth != nil && (requestInfoPtr.Auth.IsAdmin() || requestInfoPtr.Auth.IsSuperuser()) {
 				return nil // superusers can access everything
 			}
 
@@ -439,7 +439,7 @@ func autoResolveRecordsFlags(app core.App, records []*core.Record, requestInfo *
 		return nil // nothing to resolve
 	}
 
-	if requestInfo.HasAdminAuth() {
+	if requestInfo.HasAdminAuth() || requestInfo.HasSuperuserAuth() {
 		hiddenFields := records[0].Collection().Fields.FieldNames()
 		for _, rec := range records {
 			rec.Unhide(hiddenFields...)

@@ -47,6 +47,31 @@ func (app *BaseApp) registerAdminHooks() {
 		Priority: -99,
 	})
 
+	app.OnRecordDelete(CollectionNameSuperusers).Bind(&hook.Handler[*RecordEvent]{
+		Id: "pbSuperusersRecordDelete",
+		Func: func(e *RecordEvent) error {
+			originalApp := e.App
+			txErr := e.App.RunInTransaction(func(txApp App) error {
+				e.App = txApp
+
+				total, err := e.App.CountRecords(CollectionNameSuperusers)
+				if err != nil {
+					return fmt.Errorf("failed to fetch total superusers count: %w", err)
+				}
+
+				if total == 1 {
+					return router.NewBadRequestError("You can't delete the only existing superuser", nil)
+				}
+
+				return e.Next()
+			})
+			e.App = originalApp
+
+			return txErr
+		},
+		Priority: -99,
+	})
+
 	recordSaveHandler := &hook.Handler[*RecordEvent]{
 		Id: "pbAdminsRecordSaveExec",
 		Func: func(e *RecordEvent) error {
@@ -77,6 +102,17 @@ func (app *BaseApp) registerAdminHooks() {
 	}
 	app.OnRecordCreateExecute(CollectionNameAdmins).Bind(recordSaveHandler)
 	app.OnRecordUpdateExecute(CollectionNameAdmins).Bind(recordSaveHandler)
+
+	superuserSaveHandler := &hook.Handler[*RecordEvent]{
+		Id: "pbSuperusersRecordSaveExec",
+		Func: func(e *RecordEvent) error {
+			e.Record.SetVerified(true) // always mark superusers as verified
+			return e.Next()
+		},
+		Priority: -99,
+	}
+	app.OnRecordCreateExecute(CollectionNameSuperusers).Bind(superuserSaveHandler)
+	app.OnRecordUpdateExecute(CollectionNameSuperusers).Bind(superuserSaveHandler)
 
 	// prevent sending password reset emails to the installer address
 	app.OnMailerRecordPasswordResetSend(CollectionNameAdmins).Bind(&hook.Handler[*MailerRecordEvent]{
